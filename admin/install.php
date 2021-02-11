@@ -33,7 +33,7 @@
 // +--------------------------------------------------------------------------+
 
 require_once '../../../lib-common.php';
-require_once $_CONF['path'].'/plugins/election/autoinstall.php';
+require_once $_CONF['path'].'/plugins/elections/autoinstall.php';
 
 USES_lib_install();
 
@@ -56,7 +56,7 @@ if (!SEC_inGroup('Root')) {
 if (SEC_checkToken()) {
     $action = COM_applyFilter($_GET['action']);
     if ($action == 'install') {
-        if (plugin_install_election()) {
+        if (plugin_install_elections()) {
     		// Redirects to the plugin editor
     		echo COM_refresh($_CONF['site_admin_url'] . '/plugins.php?msg=44');
     		exit;
@@ -65,7 +65,7 @@ if (SEC_checkToken()) {
     		exit;
         }
     } else if ($action == 'uninstall') {
-    	if (plugin_uninstall_election('installed')) {
+    	if (plugin_uninstall_elections('installed')) {
     		/**
     		* Redirects to the plugin editor
     		*/

@@ -1,6 +1,6 @@
 <?php
 /**
- * Global configuration items for the Election plugin.
+ * Global configuration items for the Elections plugin.
  * These are either static items, such as the plugin name and table
  * definitions, or are items that don't lend themselves well to the
  * glFusion configuration system, such as allowed file types.
@@ -22,13 +22,13 @@
 if (!defined ('GVERSION')) {
     die ('This file can not be used on its own.');
 }
-use Election\Config;
-use Election\DB;
+use Elections\Config;
+use Elections\DB;
 
 global $_DB_table_prefix;
 
-Config::set('pi_display_name', 'Election v2');
-Config::set('pi_version', '2.3.1');
+Config::set('pi_display_name', 'Elections');
+Config::set('pi_version', '0.1.0');
 Config::set('gl_version', '1.7.8');
 Config::set('pi_url', 'https://www.glfusion.org');
 
@@ -37,7 +37,3 @@ $_TABLES[DB::key('answers')]    = $_DB_table_prefix . DB::key('answers');
 $_TABLES[DB::key('questions')]  = $_DB_table_prefix . DB::key('questions');
 $_TABLES[DB::key('topics')]     = $_DB_table_prefix . DB::key('topics');
 $_TABLES[DB::key('voters')]     = $_DB_table_prefix . DB::key('voters');
-
-Config::set('allow_votemod', 0);
-
-?>

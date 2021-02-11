@@ -40,7 +40,7 @@ if (!defined ('GVERSION')) {
 spl_autoload_register(function ($class)
 {
     // project-specific namespace prefix
-    $prefix = 'Election\\';
+    $prefix = 'Elections\\';
 
     // does the class use the namespace prefix?
     $len = strlen($prefix);
@@ -65,13 +65,13 @@ spl_autoload_register(function ($class)
         require $file;
     }
 });
-use Election\DB;
-use Election\Config;
-use Election\Election;
-use Election\Voter;
-use Election\Views\Results;
-use Election\Models\Modes;
-use Election\Models\Groups;
+use Elections\DB;
+use Elections\Config;
+use Elections\Election;
+use Elections\Voter;
+use Elections\Views\Results;
+use Elections\Models\Modes;
+use Elections\Models\Groups;
 
 // May later rely on the class autoloader
 require_once __DIR__ . '/' . Config::PI_NAME . '.php';
@@ -108,7 +108,7 @@ if (file_exists($langfile)) {
 * @todo: Change menu text from plugin name to $LANG_ELECTION var
 * @return   mixed   menu entry, or boolean false if disabled / hidden
 */
-function plugin_getmenuitems_election()
+function plugin_getmenuitems_elections()
 {
     global $_CONF, $LANG_ELECTION;
 
@@ -134,14 +134,14 @@ function plugin_getmenuitems_election()
 * does comments.
 *
 */
-function plugin_commentsupport_election()
+function plugin_commentsupport_elections()
 {
     // election will use comments
     return true;
 }
 
 
-function plugin_getcommenturlid_election()
+function plugin_getcommenturlid_elections()
 {
     $retval = array();
     $retval[] = Config::get('url') . '/index.php';
@@ -150,7 +150,7 @@ function plugin_getcommenturlid_election()
 }
 
 /**
- * Election saves a comment
+ * Save a comment.
  *
  * @param   string  $title  comment title
  * @param   string  $comment comment text
@@ -159,7 +159,7 @@ function plugin_getcommenturlid_election()
  * @param   string  $postmode 'html' or 'text'
  * @return  mixed   false for failure, HTML string (redirect?) for success
  */
-function plugin_savecomment_election($title, $comment, $id, $pid, $postmode)
+function plugin_savecomment_elections($title, $comment, $id, $pid, $postmode)
 {
     global $_CONF, $_TABLES, $LANG03, $_USER;
 
@@ -185,7 +185,7 @@ function plugin_savecomment_election($title, $comment, $id, $pid, $postmode)
     return $retval;
 }
 
-function plugin_editcomment_election($cid,$id)
+function plugin_editcomment_elections($cid,$id)
 {
     echo COM_refresh(Config::get('url') . "/index.php?pid=$id");
     exit;
@@ -198,7 +198,7 @@ function plugin_editcomment_election($cid,$id)
  * @param   string  $id     Item id to which $cid belongs
  * @return  mixed   false for failure, HTML string (redirect?) for success
  */
-function plugin_deletecomment_election($cid, $id)
+function plugin_deletecomment_elections($cid, $id)
 {
     global $_CONF, $_USER;
 
@@ -217,7 +217,7 @@ function plugin_deletecomment_election($cid, $id)
 }
 
 
-function plugin_getwhatsnewcomment_election()
+function plugin_getwhatsnewcomment_elections()
 {
     global $_CONF, $_USER;
 
@@ -264,7 +264,7 @@ function plugin_getwhatsnewcomment_election()
 *
 */
 
-function plugin_searchtypes_election()
+function plugin_searchtypes_elections()
 {
     global $LANG_ELECTION;
 
@@ -287,7 +287,7 @@ function plugin_searchtypes_election()
  * @param   integer $perpage   Number of results per page (deprecated)
  * @return  object      SearchCriteria
  */
-function plugin_dopluginsearch_election(
+function plugin_dopluginsearch_elections(
     $query, $dateStart, $dateEnd, $topic, $type, $author, $keyType, $page, $perpage
 ) {
     global $_CONF, $_DB_dbms, $LANG09, $LANG_ELECTION, $_USER;
@@ -340,7 +340,7 @@ function plugin_dopluginsearch_election(
  * @param   integer $author     Get all results by this author (user ID)
  * @return  object      SearchCriteria object
  */
-function plugin_dopluginsearch_comment_election(
+function plugin_dopluginsearch_comment_elections(
     $query, $datestart, $dateend, $topic, $type, $author, $keyType, $page, $perpage
 )
 {
@@ -377,7 +377,7 @@ function plugin_dopluginsearch_comment_election(
 *
 * @param    int     showsitestats   Flag to let us know which stats to get
 */
-function plugin_showstats_election($showsitestats)
+function plugin_showstats_elections($showsitestats)
 {
     global $_CONF, $LANG_ELECTION;
 
@@ -440,7 +440,7 @@ function plugin_showstats_election($showsitestats)
 * @return   array(item text, item count);
 *
 */
-function plugin_statssummary_election()
+function plugin_statssummary_elections()
 {
     global $LANG_ELECTION;
 
@@ -458,15 +458,15 @@ function plugin_statssummary_election()
 *
 * @todo: Change menu text from plugin name to $LANG_ELECTION var
 */
-function plugin_cclabel_election()
+function plugin_cclabel_elections()
 {
     global $LANG_ELECTION;
 
-    if (plugin_ismoderator_election()) {
+    if (plugin_ismoderator_elections()) {
         return array(
             ucfirst(Config::get('pi_name')),
             Config::get('admin_url') . '/index.php',
-            plugin_geticon_election()
+            plugin_geticon_elections()
         );
     }
     return false;
@@ -478,11 +478,11 @@ function plugin_cclabel_election()
 *
 * @todo: Change menu text from plugin name to $LANG_ELECTION var
 */
-function plugin_getadminoption_election()
+function plugin_getadminoption_elections()
 {
     global $_CONF, $LANG_ELECTION;
 
-    if (plugin_ismoderator_election()) {
+    if (plugin_ismoderator_elections()) {
         return array(
             ucfirst(Config::get('pi_name')),
             Config::get('admin_url') . '/index.php',
@@ -498,7 +498,7 @@ function plugin_getadminoption_election()
  * @param   integer $origUID    Original user ID
  * @param   integer $destUID    New user ID
  */
-function plugin_user_move_election($origUID, $destUID)
+function plugin_user_move_elections($origUID, $destUID)
 {
     Election::moveUser($origUID, $destUID);
 }
@@ -511,7 +511,7 @@ function plugin_user_move_election($origUID, $destUID)
 * @param   uid   int   User id of deleted user
 *
 */
-function plugin_user_delete_election($uid)
+function plugin_user_delete_elections($uid)
 {
     global $_TABLES;    // needed for groups and group_assignments
 
@@ -550,7 +550,7 @@ function plugin_user_delete_election($uid)
 * Return the current version of code.
 * Used in the Plugin Editor to show the registered version and code version
 */
-function plugin_chkVersion_election()
+function plugin_chkVersion_elections()
 {
     return Config::get('pi_version');
 }
@@ -562,7 +562,7 @@ function plugin_chkVersion_election()
 * @return   void
 *
 */
-function plugin_enablestatechange_election($enable)
+function plugin_enablestatechange_elections($enable)
 {
     global $_TABLES;        // needed for blocks table
 
@@ -583,7 +583,7 @@ function plugin_enablestatechange_election($enable)
 * @return   string  HTML for the poll(s) to be displayed (or an empty string)
 *
 */
-function phpblock_election()
+function phpblock_elections()
 {
     $retval = '';
     $Election = Election::getOpen(Modes::BLOCK);
@@ -602,7 +602,7 @@ function phpblock_election()
 * @return   string      URL of the icon
 *
 */
-function plugin_geticon_election()
+function plugin_geticon_elections()
 {
     return Config::get('url') . '/images/election.png';
 }
@@ -619,7 +619,7 @@ function plugin_geticon_election()
 * @param   boolean $view   True to view comment (by cid), false to display (by $pid)
 * @return  mixed   results of calling the plugin_displaycomment_ function
 */
-function plugin_displaycomment_election($id, $cid, $title, $order, $format, $page, $view)
+function plugin_displaycomment_elections($id, $cid, $title, $order, $format, $page, $view)
 {
     global $_TABLES, $LANG_ACCESS;
 
@@ -660,7 +660,7 @@ function plugin_displaycomment_election($id, $cid, $title, $order, $format, $pag
 * @param    ref     $template       reference of actual template
 * @return   void
 */
-function plugin_templatesetvars_election($templatename, &$template)
+function plugin_templatesetvars_elections($templatename, &$template)
 {
     global $LANG_ELECTION;
 
@@ -675,7 +675,7 @@ function plugin_templatesetvars_election($templatename, &$template)
  *
  * @return  array   Array of CSS file paths.
  */
-function plugin_getheadercss_election()
+function plugin_getheadercss_elections()
 {
     global $_CONF;
 
@@ -696,7 +696,7 @@ function plugin_getheadercss_election()
 *
 * @return   integer     Number of message to display (true = generic success msg)
 */
-function plugin_upgrade_election()
+function plugin_upgrade_elections()
 {
     require_once __DIR__ . '/upgrade.php';
     return election_upgrade();
@@ -713,7 +713,7 @@ function plugin_upgrade_election()
 *                                         the css class
 *
 */
-function plugin_autotags_election($op, $content = '', $autotag = '')
+function plugin_autotags_elections($op, $content = '', $autotag = '')
 {
     global $_CONF, $_TABLES, $LANG_PO_AUTOTAG;
 
@@ -860,7 +860,7 @@ function plugin_autotags_election($op, $content = '', $autotag = '')
 * @return   mixed               string or array of strings with the information
 *
 */
-function plugin_getiteminfo_election($id, $what, $uid = 0, $options = array())
+function plugin_getiteminfo_elections($id, $what, $uid = 0, $options = array())
 {
     global $_CONF, $_TABLES, $LANG_ELECTION;
 
@@ -1032,7 +1032,7 @@ function plugin_getiteminfo_election($id, $what, $uid = 0, $options = array())
  *
  * @return  boolean     True for admins, False for regular users
  */
-function plugin_ismoderator_election()
+function plugin_ismoderator_elections()
 {
     static $isMod = NULL;
     if ($isMod === NULL) {
@@ -1042,7 +1042,7 @@ function plugin_ismoderator_election()
 }
 
 
-function plugin_getconfigelementhelp_election($type, $option, $doclang = 'english' )
+function plugin_getconfigelementhelp_elections($type, $option, $doclang = 'english' )
 {
     global $_CONF;
 
@@ -1068,7 +1068,7 @@ function plugin_getconfigelementhelp_election($type, $option, $doclang = 'englis
  *
  * @return  array               Array of groups as name=>ID
  */
-function plugin_configmanager_select_def_voting_gid_election()
+function plugin_configmanager_select_def_voting_gid_elections()
 {
     global $_TABLES;
 
@@ -1092,7 +1092,7 @@ function plugin_configmanager_select_def_voting_gid_election()
  *
  * @return  array               Array of groups as name=>ID
  */
-function plugin_configmanager_select_def_results_gid_election()
+function plugin_configmanager_select_def_results_gid_elections()
 {
     global $_TABLES;
 

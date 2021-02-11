@@ -33,8 +33,8 @@
 if (!defined ('GVERSION')) {
     die('This file can not be used on its own!');
 }
-use Election\Config;
-$pi_name = Config::get('pi_name');
+use Elections\Config;
+$pi_name = Config::PI_NAME;
 
 /*
  * Election default settings.
@@ -209,7 +209,7 @@ $electionConfigData = array(
  *
  * @return  boolean     true: success; false: an error occurred
  */
-function plugin_initconfig_election()
+function plugin_initconfig_elections()
 {
     global $_CONF, $electionConfigData;
 

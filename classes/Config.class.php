@@ -1,17 +1,17 @@
 <?php
 /**
- * Class to read and manipulate Election configuration values.
+ * Class to read and manipulate configuration values for Elections.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2020 Lee Garner <lee@leegarner.com>
- * @package     election
- * @version     v3.0.0
- * @since       v3.0.0
+ * @copyright   Copyright (c) 2021 Lee Garner <lee@leegarner.com>
+ * @package     elections
+ * @version     v0.1.0
+ * @since       v0.1.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
  */
-namespace Election;
+namespace Elections;
 
 
 /**
@@ -22,11 +22,11 @@ final class Config
 {
     /** Plugin Name.
      */
-    public const PI_NAME = 'election';
+    public const PI_NAME = 'elections';
 
     /** Key used for DB tables and other places.
      */
-    public const KEY = 'election_';
+    public const KEY = 'elections_';
 
     /** Array of config items (name=>val).
      * @var array */

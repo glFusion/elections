@@ -11,8 +11,8 @@
  *              GNU Public License v2 or later
  * @filesource
  */
-namespace Election;
-use Election\Models\Groups;
+namespace Elections;
+use Elections\Models\Groups;
 
 
 /**

@@ -11,11 +11,11 @@
  *              GNU Public License v2 or later
  * @filesource
  */
-namespace Election\Views;
-use Election\Election;
-use Election\Answer;
-use Election\Config;
-use Election\Models\Modes;
+namespace Elections\Views;
+use Elections\Election;
+use Elections\Answer;
+use Elections\Config;
+use Elections\Models\Modes;
 
 
 /**
@@ -193,8 +193,8 @@ class Results
 
         $poll->set_var(array(
             //'layout_url'    => $_CONF['layout_url'],
-            'poll_topic'    => $filter->filterData($this->Election->getTopic()),
-            'poll_id'   => $this->pid,
+            'topic'     => $filter->filterData($this->Election->getTopic()),
+            'pid'       => $this->pid,
             'num_votes' => COM_numberFormat($this->Election->numVotes()),
             'lang_votes' => $LANG_ELECTION['votes'],
             'admin_url' => Config::get('admin_url') . '/index.php',
@@ -203,7 +203,7 @@ class Results
             'adminView' => $this->Election->hideResults(),
         ) );
 
-        if (Election::hasRights('edit')) {
+        if ($this->displaytype == Modes::NORMAL && Election::hasRights('edit')) {
             $editlink = COM_createLink(
                 $LANG25[27],
                 Config::get('admin_url') . '/index.php?edit=x&amp;pid=' . $this->pid);
@@ -226,7 +226,7 @@ class Results
                 $counter = ($j + 1) . "/$nquestions: " ;
             }
             $Q = $questions[$j];
-            $poll->set_var('poll_question', $counter . $filter->filterData($Q->getQuestion()));
+            $poll->set_var('question', $counter . $filter->filterData($Q->getQuestion()));
             $Answers = Answer::getByQuestion($Q->getQid(), $this->pid);
             $nanswers = count($Answers);
             $q_totalvotes = 0;
@@ -264,10 +264,10 @@ class Results
                 ) );
                 $width = (int) ($percent * 100 );
                 $poll->set_var('bar_width', $width);
-                $poll->parse('poll_votes', 'votes_bar', true);
+                $poll->parse('votes', 'votes_bar', true);
             }
-            $poll->parse('poll_questions', 'question', true);
-            $poll->clear_var('poll_votes');
+            $poll->parse('questions', 'question', true);
+            $poll->clear_var('votes');
         }
 
         if ($this->Election->getCommentcode() >= 0 ) {
@@ -282,14 +282,14 @@ class Results
                 $num_comments,
                 0
             );
-            $poll->set_var('poll_comments_url', $comment_link['link_with_count']);
-            $poll->parse('poll_comments', 'comments', true);
+            $poll->set_var('comments_url', $comment_link['link_with_count']);
+            $poll->parse('comments', 'comments', true);
         } else {
-            $poll->set_var('poll_comments_url', '');
-            $poll->set_var('poll_comments', '');
+            $poll->set_var('comments_url', '');
+            $poll->set_var('comments', '');
         }
 
-        $poll->set_var('lang_polltopics', $LANG_ELECTION['polltopics'] );
+        $poll->set_var('lang_topics', $LANG_ELECTION['topics'] );
         if ($this->isAdmin && $this->displaytype !== Modes::PRINT) {
             $retval .= '<a class="uk-button uk-button-success" target="_blank" href="' .
                 Config::get('admin_url') . '/index.php?presults=x&pid=' .

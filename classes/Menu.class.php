@@ -11,7 +11,7 @@
  *              GNU Public License v2 or later
  * @filesource
  */
-namespace Election;
+namespace Elections;
 
 
 /**
@@ -66,7 +66,7 @@ class Menu
         $retval .= ADMIN_createMenu(
             $menu_arr,
             $LANG25[19],
-            plugin_geticon_election()
+            plugin_geticon_elections()
         );
 
         return $retval;

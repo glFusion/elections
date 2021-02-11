@@ -9,8 +9,8 @@
  * @author      Trinity Bays      - trinity93 AT gmail DOT com>                 |
  * @author      Lee Garner <lee@leegarner.com>
  * @copyright   Copyright (c) 2009-2020 The Above Authors
- * @package     election
- * @version     v3.0.0
+ * @package     elections
+ * @version     v0.1.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -19,7 +19,7 @@
 if (!defined ('GVERSION')) {
     die ('This file can not be used on its own.');
 }
-use Election\DB;
+use Elections\DB;
 
 $_SQL[DB::key('answers')] = "CREATE TABLE " . DB::table('answers') . " (
   pid varchar(128) NOT NULL default '',
@@ -75,5 +75,3 @@ $_SQL[DB::key('voters')] = "CREATE TABLE " . DB::table('voters') . " (
   KEY `pollid` (`pid`)
 ) ENGINE=MyISAM
 ";
-
-?>

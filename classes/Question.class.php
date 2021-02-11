@@ -11,7 +11,7 @@
  *              GNU Public License v2 or later
  * @filesource
  */
-namespace Election;
+namespace Elections;
 
 
 /**

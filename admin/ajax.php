@@ -18,7 +18,7 @@ require_once '../../../lib-common.php';
 // This is for administrators only.  It's called by Javascript,
 // so don't try to display a message
 //COM_errorLog(print_r($_POST,true));
-if (!plugin_ismoderator_election()) {
+if (!plugin_ismoderator_elections()) {
     COM_accessLog("User {$_USER['username']} tried to illegally access the shop admin ajax function.");
     $retval = array(
         'status' => false,
@@ -31,7 +31,7 @@ if (!plugin_ismoderator_election()) {
     echo json_encode($retval);
     exit;
 }
-use Election\Election;
+use Elections\Election;
 
 if (isset($_POST['action'])) {
     $action = $_POST['action'];

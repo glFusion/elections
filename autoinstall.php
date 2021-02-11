@@ -42,8 +42,8 @@ global $_DB_dbms;
 
 require_once __DIR__ . '/functions.inc';
 require_once __DIR__ . '/sql/mysql_install.php';
-use Election\DB;
-use Election\Config;
+use Elections\DB;
+use Elections\Config;
 
 $ucPI_NAME = ucfirst(Config::PI_NAME);
 
@@ -129,7 +129,7 @@ $INSTALL_plugin[Config::PI_NAME] = array(
 * @return   boolean True if successful False otherwise
 *
 */
-function plugin_install_election()
+function plugin_install_elections()
 {
     global $INSTALL_plugin;
 
@@ -148,13 +148,13 @@ function plugin_install_election()
 * @return   boolean     true = proceed with install, false = an error occured
 *
 */
-function plugin_load_configuration_election()
+function plugin_load_configuration_elections()
 {
     global $_CONF;
 
     require_once __DIR__ . '/install_defaults.php';
 
-    return plugin_initconfig_election();
+    return plugin_initconfig_elections();
 }
 
 
@@ -170,7 +170,7 @@ function plugin_load_configuration_election()
 * foreseen by the core code (interactions with other plugins for example)
 *
 */
-function plugin_autouninstall_election()
+function plugin_autouninstall_elections()
 {
     $out = array (
         /* give the name of the tables, without $_TABLES[] */

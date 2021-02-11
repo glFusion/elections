@@ -141,6 +141,17 @@
                         {res_grp_dropdown}
                     </div>
                 </div>
+                <div class="uk-form-row">
+                    <label class="uk-form-label">{lang_voteaccess}</label>
+                    <div class="uk-form-controls">
+                        <select name="voteaccess">
+                            <option value="0" {voteaccess_0}>{lang_noaccess}</option>
+                            <option value="1" {voteaccess_1}>{lang_view}</option>
+                            <!--<option value="2" {voteaccess_0}>{lang_noaccess}</option>-->
+                        </select>
+                    </div>
+                </div>
+
             </li>
         </ul>
     </div>

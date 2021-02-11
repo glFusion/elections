@@ -41,14 +41,14 @@ require_once '../../../lib-common.php';
 require_once '../../auth.inc.php';
 
 USES_lib_admin();
-use Election\Config;
-use Election\Menu;
-use Election\Election;
-use Election\Views\Results;
+use Elections\Config;
+use Elections\Menu;
+use Elections\Election;
+use Elections\Views\Results;
 
 $display = '';
 
-if (!plugin_ismoderator_election()) {
+if (!plugin_ismoderator_elections()) {
     COM_accessLog ("User {$_USER['username']} tried to access the election administration screen.");
     COM_404();
     exit;
@@ -86,75 +86,75 @@ $page = '';
 $title = $LANG25[18];
 
 switch ($action) {
-    case 'lv' :
-        $title = $LANG25[5];
-        $page .= Election::getInstance($pid)->listVotes();
-        break;
+case 'lv' :
+    $title = $LANG25[5];
+    $page .= Election::getInstance($pid)->listVotes();
+    break;
 
-    case 'edit':
-        $page = Menu::Admin();
-        $page .= Election::getInstance($pid)->editElection();
-        break;
+case 'edit':
+    $page = Menu::Admin();
+    $page .= Election::getInstance($pid)->editElection();
+    break;
 
-    case 'save':
-        if (SEC_checktoken()) {
-            if (!empty ($pid)) {
-                $msg = Election::getInstance($_POST['old_pid'])->Save($_POST);
-                if (!empty($msg)) {
-                    COM_setMsg($msg);
-                }
-                COM_refresh(Config::get('admin_url') . '/index.php');
-            } else {
-                $title = $LANG25[5];
-                $page .= COM_startBlock(
-                    $LANG21[32],
-                    '',
-                    COM_getBlockTemplate('_msg_block', 'header')
-                );
-                $page .= $LANG25[17];
-                $page .= COM_endBlock(COM_getBlockTemplate('_msg_block', 'footer'));
-                $page .= ELECTION_edit ();
+case 'save':
+    if (SEC_checktoken()) {
+        if (!empty ($pid)) {
+            $msg = Election::getInstance($_POST['old_pid'])->Save($_POST);
+            if (!empty($msg)) {
+                COM_setMsg($msg);
             }
+            COM_refresh(Config::get('admin_url') . '/index.php');
         } else {
-            COM_accessLog("User {$_USER['username']} tried to save election $pid and failed CSRF checks.");
-            $page =  COM_refresh($_CONF['site_admin_url'] . '/index.php');
+            $title = $LANG25[5];
+            $page .= COM_startBlock(
+                $LANG21[32],
+                '',
+                COM_getBlockTemplate('_msg_block', 'header')
+            );
+            $page .= $LANG25[17];
+            $page .= COM_endBlock(COM_getBlockTemplate('_msg_block', 'footer'));
+            $page .= ELECTION_edit ();
         }
-        break;
+    } else {
+        COM_accessLog("User {$_USER['username']} tried to save election $pid and failed CSRF checks.");
+        $page =  COM_refresh($_CONF['site_admin_url'] . '/index.php');
+    }
+    break;
 
-    case 'results':
-        $page = Menu::Admin();
-        $page .= (new Results($pid))->withAdmin(true)->Render();
-        break;
+case 'results':
+    $page = Menu::Admin();
+    $page .= (new Results($pid))->withAdmin(true)->Render();
+    break;
 
-    case 'presults':
-        echo (new Results($pid))->Print();
-        exit;
-        break;
+case 'presults':
+    echo (new Results($pid))->Print();
+    exit;
+    break;
 
-    case 'resetelection':
-        Election::deleteVotes($pid);
-        COM_refresh(Config::get('admin_url') . '/index.php');
-        break;
+case 'resetelection':
+    Election::deleteVotes($pid);
+    COM_refresh(Config::get('admin_url') . '/index.php');
+    break;
 
-    case 'delete':
-        if (empty($pid)) {
-            COM_errorLog ('Ignored possibly manipulated request to delete a election.');
-            $page .= COM_refresh(Config::get('admin_url') . '/index.php');
-        } elseif (SEC_checktoken()) {
-            $page .= Election::deleteElection($pid);
-        } else {
-            COM_accessLog("User {$_USER['username']} tried to illegally delete election $pid and failed CSRF checks.");
-            echo COM_refresh($_CONF['site_admin_url'] . '/index.php');
-        }
-        break;
+case 'delete':
+    if (empty($pid)) {
+        COM_errorLog ('Ignored possibly manipulated request to delete a election.');
+        $page .= COM_refresh(Config::get('admin_url') . '/index.php');
+    } elseif (SEC_checktoken()) {
+        $page .= Election::deleteElection($pid);
+    } else {
+        COM_accessLog("User {$_USER['username']} tried to illegally delete election $pid and failed CSRF checks.");
+        echo COM_refresh($_CONF['site_admin_url'] . '/index.php');
+    }
+    break;
 
-    case 'listelections':
-    default:
-        $title = $LANG25[18];
-        $page .= ($msg > 0) ? COM_showMessage ($msg, Config::PI_NAME) : '';
-        $page = Menu::Admin('listelections');
-        $page .= Election::adminList();
-        break;
+case 'listelections':
+default:
+    $title = $LANG25[18];
+    $page .= ($msg > 0) ? COM_showMessage ($msg, Config::PI_NAME) : '';
+    $page = Menu::Admin('listelections');
+    $page .= Election::adminList();
+    break;
 }
 
 $display .= COM_siteHeader('menu', $title);

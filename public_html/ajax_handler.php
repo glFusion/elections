@@ -41,10 +41,10 @@ if (!in_array('election', $_PLUGINS)) {
     die();
 }
 use \glFusion\Cache\Cache;
-use Election\Election;
-use Election\Voter;
-use Election\Answer;
-use Election\Views\Results;
+use Elections\Election;
+use Elections\Voter;
+use Elections\Answer;
+use Elections\Views\Results;
 
 $retval = array();
 

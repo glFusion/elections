@@ -19,7 +19,7 @@
 if (!defined ('GVERSION')) {
     die ('This file cannot be used on its own.');
 }
-use Election\Config;
+use Elections\Config;
 global $LANG32;
 
 $LANG_ELECTION = array(
@@ -78,6 +78,9 @@ $LANG_ELECTION = array(
 'msg_yourkeyis' => 'Your private access key is:',
 'copy_clipboard' => 'Copy to clipboard',
 'copy_clipboard_success' => 'Your private key was copied to your clipboard.',
+'allow_votemod' => 'Voter access to their cast votes',
+'view_vote' => 'View Vote',
+'noaccess' => 'No Access',
 );
 
 ###############################################################################
@@ -164,6 +167,7 @@ $LANG_confignames[Config::PI_NAME] = array(
     'displayblocks' => 'Display glFusion Blocks',
     'def_voting_gid' => 'Default group allowed to vote',
     'def_results_gid' => 'Default group allowed to view results',
+    'allow_votemod' => 'Voter access to their cast votes',
 );
 
 $LANG_configsubgroups[Config::PI_NAME] = array(
@@ -180,9 +184,9 @@ $LANG_configSelect[Config::PI_NAME] = array(
     1 => array(true=>'True', false=>'False'),
     2 => array('submitorder'=>'As Submitted', 'voteorder'=>'By Votes'),
     3 => array(
-        'No Access' => 0,
-        'View Vote' => 1,
-        //'Edit Vote' => 2,
+        0 => 'No Access',
+        1 => 'View Vote',
+        //2 => 'Edit Vote',
     ),
     9 => array('item'=>'Forward to Election', 'list'=>'Display Admin List', 'plugin'=>'Display Public List', 'home'=>'Display Home', 'admin'=>'Display Admin'),
     12 => array(0=>'No access', 2=>'Read-Only', 3=>'Read-Write'),

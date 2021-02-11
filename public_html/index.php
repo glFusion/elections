@@ -35,10 +35,11 @@
 // +--------------------------------------------------------------------------+
 
 require_once '../lib-common.php';
-use Election\Election;
-use Election\Menu;
-use Election\Config;
-use Election\Views\Results;
+use Elections\Election;
+use Elections\Voter;
+use Elections\Menu;
+use Elections\Config;
+use Elections\Views\Results;
 
 if (!in_array(Config::get('pi_name'), $_PLUGINS)) {
     COM_404();
@@ -155,13 +156,13 @@ case 'results':
     break;
 
 case 'showvote':
-    $Voter = Election\Voter::getInstance($_POST['votekey']);
+    $Voter = Voter::getInstance($_POST['votekey']);
     $data = $Voter->decodeData();
     if (
         $data !== false && 
         $Voter->getPid() == $pid    // verify right election is selected
     ) {
-        $Election = Election\Election::getInstance($Voter->getPid());
+        $Election = Election::getInstance($Voter->getPid());
         $page .= '<div class="uk-alert uk-alert-danger">' .
             sprintf(
                 $LANG_ELECTION['viewing_vote'],

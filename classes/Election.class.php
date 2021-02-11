@@ -11,11 +11,11 @@
  *              GNU Public License v2 or later
  * @filesource
  */
-namespace Election;
-use Election\Models\Dates;
-use Election\Models\Groups;
-use Election\Models\Modes;
-use Election\Views\Results;
+namespace Elections;
+use Elections\Models\Dates;
+use Elections\Models\Groups;
+use Elections\Models\Modes;
+use Elections\Views\Results;
 
 
 /**
@@ -107,7 +107,7 @@ class Election
     /** Modifications allowed by the voter after voting.
      * 0 = None, 1 = View Vote, 2 = Change Vote
      * @var integer */
-    private $mod_allowed = 1;
+    private $mod_allowed = 0;
 
     /** Number of votes cast.
      * @var integer */
@@ -150,6 +150,7 @@ class Election
             $this->results_gid = Config::get('def_results_gid');
             $this->setID(COM_makeSid());
             $this->setOwner();
+            $this->mod_allowed = (int)Config::get('allow_votemod');
         }
         $this->_Questions = Question::getByElection($this->pid);
     }
@@ -336,7 +337,9 @@ class Election
     {
         static $can_view = NULL;
         if ($can_view === NULL) {
-            if (
+            if (SEC_inGroup('Root')) {
+                $can_view = true;
+            } elseif (
                 $this->isNew() ||
                 !SEC_inGroup($this->results_gid) ||
                 ($this->isOpen() && $this->hideresults)
@@ -604,6 +607,7 @@ class Election
         $this->setOwner($A['owner_id']);
         $this->voting_gid = (int)$A['group_id'];
         $this->results_gid = (int)$A['results_gid'];
+        $this->mod_allowed = (int)$A['voteaccess'];
         if ($fromdb) {
             if (isset($A['vote_count'])) {
                 $this->_vote_count = (int)$A['vote_count'];
@@ -755,10 +759,15 @@ class Election
             'lang_cancel' => $LANG_ADMIN['cancel'],
             'lang_datepicker' => $LANG_ELECTION['datepicker'],
             'lang_timepicker' => $LANG_ELECTION['timepicker'],
+            'lang_view' => $LANG_ELECTION['view_vote'],
+            'lang_noaccess' => $LANG_ELECTION['noaccess'],
+            'lang_voteaccess' => $LANG_ELECTION['allow_votemod'],
+            'voteaccess_' . $this->mod_allowed => 'selected="selected"',
         ) );
 
         $T->set_block('editor','questiontab','qt');
         $maxQ = Config::get('maxquestions');
+
         for ($j = 0; $j < $maxQ; $j++) {
             $display_id = $j+1;
             if ($j > 0) {
@@ -870,13 +879,14 @@ class Election
             date = '" . $this->Date->toMySQL(true) . "',
             opens = '" . $this->Opens->toMySQL(true) . "',
             closes = '" . $this->Closes->toMySQL(true) . "',
-            display = '" . (int)$this->inblock . "',
-            is_open = '" . (int)$this->is_open . "',
-            hideresults = '" . (int)$this->hideresults . "',
-            commentcode = '" . (int)$this->commentcode . "',
-            owner_id = '" . (int)$this->owner_id . "',
-            group_id = '" . (int)$this->voting_gid . "',
-            results_gid = '" . (int)$this->results_gid . "'";
+            display = " . (int)$this->inblock . ",
+            is_open = " . (int)$this->is_open . ",
+            hideresults = " . (int)$this->hideresults . ",
+            commentcode = " . (int)$this->commentcode . ",
+            owner_id = " . (int)$this->owner_id . ",
+            group_id = " . (int)$this->voting_gid . ",
+            results_gid = " . (int)$this->results_gid . ",
+            voteaccess = " . (int)$this->mod_allowed;
         $sql = $sql1 . $sql2 . $sql3;
         //echo $sql;die;
         DB_query($sql, 1);
@@ -1480,7 +1490,7 @@ class Election
                     'lang_copyclipboard' => $LANG_ELECTION['copy_clipboard'],
                     'lang_copy_success' => $LANG_ELECTION['copy_clipboard_success'],
                     'prv_key' => $Voter->getId() . ':' . $Voter->getPrvKey(),
-                    'mod_allowed' => Config::get('allow_votemod'),
+                    'mod_allowed' => $this->mod_allowed,
                 ) );
                 $T->parse('output', 'msg');
                 $msg = $T->finish($T->get_var('output'));
@@ -1572,7 +1582,7 @@ class Election
             $A = DB_fetchArray($res, false);
             $count = (int)$A['count'];
         }
-        if (plugin_ismoderator_election()) {
+        if (plugin_ismoderator_elections()) {
             $retval .= '<div class="floatright"><a class="uk-button uk-button-small uk-button-danger" href="' .
                 Config::get('admin_url') . '/index.php">Admin</a></div>' . LB;
         }
@@ -1708,7 +1718,7 @@ class Election
         $retval .= ADMIN_createMenu(
             $menu_arr,
             $LANG25[19],
-            plugin_geticon_election()
+            plugin_geticon_elections()
         );
 
         $header_arr = array(
