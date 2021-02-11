@@ -1,0 +1,157 @@
+{# begin {templatelocation} #}
+<form id="electioneditor" class="uk-form uk-form-horizontal" action="{action_url}" method="post">
+    <input type="hidden" name="{sectoken_name}" value="{sectoken}">
+    <input type="hidden" value="{old_pid}" name="old_pid">
+
+    <ul class="uk-tab" data-uk-tab="{connect:'#pe-form'}">
+        <li><a href="#">{$LANG_ELECTION[general]}</a></li>
+        <li><a href="#">{$LANG_ELECTION[questions]}</a></li>
+        <li><a href="#">{$LANG_ELECTION[permissions]}</a></li>
+    </ul>
+
+    <div class="uk-panel uk-panel-box uk-margin">
+        <div class="uk-form-row">
+            <label class="uk-form-label" for="pid">{lang_electionid}</label>
+            <div class="uk-form-controls">
+                <input class="uk-form-width-medium required" type="text" id="pid" name="pid" value="{id}"> <span class="uk-text-small">{lang_donotusespaces}</span>
+          </div>
+        </div>
+        <div class="uk-form-row">
+            <label class="uk-form-label" for="topic">{lang_topic}</label>
+            <div class="uk-form-controls">
+                <input type="text" id="topic" name="topic" value="{topic}" class="uk-form-width-large required" maxlength="255">
+            </div>
+        </div>
+    </div>
+
+    <div class="uk-panel uk-panel-box uk-margin-bottom">
+        <ul id="pe-form" class="uk-switcher uk-margin">
+            {# General Panel #}
+            <li>
+                <div class="uk-form-row">
+                    <label class="uk-form-label" for="description">{lang_description}</label>
+                    <div class="uk-form-controls">
+                        <textarea id="description" name="description" class="uk-form-width-large" rows="5" columns="100">{description}</textarea>
+                    </div>
+                </div>
+                <div class="uk-form-row">
+                    <label class="uk-form-label" for="commentcode">{lang_mode}</label>
+                    <div class="uk-form-controls">
+                        <select name="commentcode" id="commentcode">
+                            {comment_options}
+                        </select>
+                    </div>
+                </div>
+                <div class="uk-form-row">
+                    <label class="uk-form-label" for="mainpage">{lang_appearsonhomepage}</label>
+                    <div class="uk-form-controls">
+                        <input type="checkbox" id="mainpage" name="display" value="1" {display} />
+                    </div>
+                </div>
+                <div class="uk-form-row">
+                    <label class="uk-form-label" for="open">{lang_openforvoting}</label>
+                    <div class="uk-form-controls">
+                        <input type="checkbox" id="open" value="1" name="is_open" {open} />
+                    </div>
+                </div>
+
+                <div class="uk-form-row">
+                    <label class="uk-form-label">{lang_opens}</label>
+                    <div class="uk-form-controls">
+                        <div class="uk-form-icon">
+                            <i class="uk-icon-calendar"></i>
+                            <input type="text" id="opens_dt" name="opens_date" value="{opens_date}" size="12" maxlength="12"
+                                data-uk-datepicker="{format:'YYYY-MM-DD'}" title="{lang_datepicker}"
+                                placeholder="{min_date}"
+                                data-uk-tooltip />
+                        </div>
+                        <div class="uk-form-icon">
+                            <i class="uk-icon-clock-o"></i>
+                            <input type="text" id="opens_time" name="opens_time" value="{opens_time}" size="12" maxlength="12"
+                                data-uk-timepicker title="{lang_timepicker}" placeholder="{min_time}"
+                                data-uk-tooltip />
+                        </div>
+                    </div>
+                </div>
+                <div class="uk-form-row">
+                    <label class="uk-form-label">{lang_closes}</label>
+                    <div class="uk-form-controls">
+                        <div class="uk-form-icon">
+                            <i class="uk-icon-calendar"></i>
+                            <input type="text" id="closes_dt" name="closes_date" value="{closes_date}" size="12" maxlength="12"
+                                data-uk-datepicker="{format:'YYYY-MM-DD'}" title="{lang_datepicker}"
+                                placeholder="{max_date}"
+                                data-uk-tooltip />
+                        </div>
+                        <div class="uk-form-icon">
+                            <i class="uk-icon-clock-o"></i>
+                            <input type="text" id="closes_time" name="closes_time" value="{closes_time}" size="12" maxlength="12"
+                                data-uk-timepicker title="{lang_timepicker}" placeholder="{max_time}"
+                                data-uk-tooltip />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="uk-form-row">
+                    <label class="uk-form-label" for="hideresults">{lang_hideresults}</label>
+                    <div class="uk-form-controls">
+                        <input type="checkbox" id="hideresults" name="hideresults" value="1" {hideresults}> <span class="uk-text-small">{hideresults_explain}</span>
+                    </div>
+                </div>
+            </li>
+
+            {# Questions Panel #}
+            <li>
+                <ul class="uk-tab" data-uk-tab="{connect:'#question-tabs'}">
+<!-- BEGIN questiontab -->
+                    <li><a href="#">{!if !hasdata}<span class="uk-text-muted">{!endif}{question_tab}{!if !hasdata}</span>{!endif}</a></li>
+<!-- END questiontab -->
+                </ul>
+
+                <div class="uk-form-row uk-margin">
+                    <div class="uk-form-controls">
+                        <span class="uk-text-bold">{lang_answersvotes}</span>
+                  </div>
+                </div>
+
+                <ul id="question-tabs" class="uk-switcher uk-margin">
+                    {question_list}
+                </ul>
+            </li>
+
+            {# Permissions Panel #}
+            <li>
+                <div class="uk-text-bold uk-text-large">{lang_accessrights}</div>
+
+                <div class="uk-form-row">
+                    <label class="uk-form-label">{lang_owner}</label>
+                    <div class="uk-form-controls">
+                        {owner_name}<input type="hidden" name="owner_id" value="{owner_id}">
+                    </div>
+                </div>
+                <div class="uk-form-row">
+                    <label class="uk-form-label" for="group">{lang_voting_group}</label>
+                    <div class="uk-form-controls">
+                        {group_dropdown}
+                    </div>
+                </div>
+                <div class="uk-form-row">
+                    <label class="uk-form-label">{lang_results_group}</label>
+                    <div class="uk-form-controls">
+                        {res_grp_dropdown}
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <button class="uk-button uk-button-primary" type="submit" name="save" value="{lang_save}">{lang_save}</button>
+{!if delete_button}
+    <button class="uk-button uk-button-danger" type="submit" name="delete" value="{lang_delete}" onclick="return confirm('{lang_delete_confirm}');">{lang_delete}</button>
+{!endif}
+    <button class="uk-button cancel" type="submit" name="cancel" value="{lang_cancel}">{lang_cancel}</button>
+</form>
+<script>
+  $("#electioneditor").validate();
+</script>
+{# end {templatelocation} #}

@@ -1,0 +1,21 @@
+{# begin {templatelocation} #}
+<div class="uk-grid uk-margin-remove" style="padding-bottom:10px;">
+    <div class="uk-width-small-1-4">
+        {answer_text}
+    </div>
+    <div class="uk-width-small-3-4">
+{!if winner}
+        <div class="uk-progress uk-progress-success">
+{!else}
+        <div class="uk-progress">
+{!endif}
+            <div class="uk-progress-bar" style="width: {bar_width}%;">{answer_percent}%</div>
+        </div>
+{!if remark_text}
+        <div class="uk-text-left uk-margin-small">
+            {remark_text}
+        </div>
+{!endif}
+    </div>
+</div>
+{# end {templatelocation} #}

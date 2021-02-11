@@ -1,0 +1,86 @@
+/* start public_html/polls/style.css */
+.poll-block-last {
+  margin-bottom:5px;
+  padding-bottom:5px;
+}
+
+.poll-topic {
+  font-weight:bold;
+  margin-bottom:10px;
+}
+
+.poll-autotag-message {
+  font-weight:bold;
+  padding-top:5px;
+  padding-bottom:5px;
+}
+
+.poll-autotag {
+  padding: 5px;
+  margin: 0 auto;
+
+}
+
+.poll-autotag-left{
+  border: .2em dotted black;
+  padding: 5px;
+  margin-right: auto;
+}
+
+.poll-questions {
+  margin-bottom:5px;
+}
+
+.poll-questions ul {
+  list-style:none;
+  padding:0px;
+  margin:0px;
+}
+.poll-questions ul li {
+    list-style:none;
+    padding:0px;
+    margin:0;
+}
+.poll-questions ul,
+.poll-questions td {
+  font-size:0.85em;
+}
+.poll-question {
+  padding:0px;
+  margin:0px;
+}
+.poll-questions {
+  padding:2px;
+  background-color: #DDDDDD;
+  margin:2px;
+}
+.block-box-right table,
+.block-box-left table{
+  padding:0px;
+  margin:0px;
+  vertical-align:top;
+}
+.block-box-right .poll-question-table th,
+.block-box-left .poll-question-table th{
+  font-size:1.2em;
+  font-weight:normal;
+}
+
+.block-box-right .poll_topic,
+.block-box-left .poll_topic{
+  font-weight:bold;
+}
+
+.block-box-right .poll_answer_text,
+.block-box-left  .poll_answer_text{
+  text-align:left;
+}
+
+.block-box-right .poll_answer_percent,
+.block-box-left .poll_answer_percent{
+  text-align:right;
+}
+div#polls_block h3 {
+    color: inherit;
+}
+/* end public_html/polls/style.css */

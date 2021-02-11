@@ -1,0 +1,20 @@
+{# begin {templatelocation} #}
+<p>{lang_votesaved}</p>
+{!if mod_allowed}
+<p>
+    {lang_yourkeyis} <b>{prv_key}</b>
+    <a class="cpybtn" title="{lang_copy_to_clipboard}" data-clipboard-text="{prv_key}">
+        <i class="uk-icon-clipboard uk-icon-hover"></i>
+    </a>
+</p>
+<p>{lang_copykey}</p>
+<script src="{site_url}/javascript/addons/clipboard/clipboard.min.js"></script>
+<script>
+var clipboard = new Clipboard('.cpybtn');
+clipboard.on('success', function(e) {
+    e.clearSelection();
+    UIkit.notify('{lang_copy_success}',{timeout: 300});
+});
+</script>
+{!endif}
+{# end {templatelocation} #}

@@ -1,0 +1,8 @@
+{# begin {templatelocation} #}
+<ul class="uk-grid uk-grid-width-1-2 uk-margin" data-uk-grid-match>
+	<li class="answer_text uk-width-1-2">{answer_text}</li>
+	<li class="answer_percent uk-width-1-2">{answer_percent}% </li>
+</ul>
+<hr>
+{# end {templatelocation} #}
+

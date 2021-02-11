@@ -1,0 +1,44 @@
+<script>
+/**
+*   Toggle field for Shop products
+*
+*   @param  object  cbox    Checkbox
+*   @param  string  id      Sitemap ID, e.g. plugin name
+*   @param  string  type    Type of sitemap (XML or HTML)
+*/
+var {pi_name}_toggle = function(cbox, id, type, component) {
+    oldval = cbox.checked ? 0 : 1;
+    var dataS = {
+        "action" : "toggle",
+        "id": id,
+        "type": type,
+        "oldval": oldval,
+        "component": component,
+    };
+    data = $.param(dataS);
+    $.ajax({
+        type: "POST",
+        dataType: "json",
+        url: "{ajax_url}",
+        data: data,
+        success: function(result) {
+            try {
+                cbox.checked = result.newval == 1 ? true : false;
+                if (result.title != null) {
+                    cbox.title = result.title;
+                }
+                $.UIkit.notify("<i class='uk-icon-check'></i>&nbsp;" + result.statusMessage, {timeout: 1000,pos:'top-center'});
+            }
+            catch(err) {
+                alert(result.statusMessage);
+            }
+        },
+        error: function(err, x, r) {
+            console.log(err);
+            console.log(x);
+            console.log(r);
+        }
+    });
+    return false;
+};
+</script>

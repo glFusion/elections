@@ -1,0 +1,156 @@
+<!doctype html>
+<html class="uk-height-1-1">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="apple-touch-icon-precomposed" href="../../layout/cms/images/apple-touch-icon.png">
+		<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/css/uikit.almost-flat.min.css">
+		<meta name="robots" content="noindex,nofollow" />
+		<title>glFusion Election Configuration</title>
+		<style>
+			html{background:#f9f9f9}.tm-dropdown,.tm-navbar{background:#325482!important}.uk-form label{font-weight:700}.tm-navbar{border-radius:0!important;padding:1px 0 6px!important;border:none!important}.tm-navbar-brand{color:#eee!important}.tm-navbar-brand a{text-shadow:none;color:#fff}.tm-navbar-brand a:hover{color:#fff;text-decoration:none}.tm-navbar-brand-oc a{text-shadow:none;color:#fff}.tm-navbar-brand-oc a:hover{color:#ababab;text-decoration:none}.tm-navbar-nav>li>a{border:none;border-radius:3px!important;font-size:15px!important;height:40px!important;margin:0!important}.tm-dropdown{color:#000;border-radius:0!important;border:0!important}.tm-nav-navbar>li>a{color:#fff!important}.tm-navbar::after,.tm-navbar::before{margin-top:7px!important}.tm-navbar-nav>li.uk-open>a,.tm-navbar-nav>li:hover>a,.tm-navbar-nav>li>a:focus{color:#fff;outline:0;background:#35B3EE!important}.tm-navbar-nav>li>a{color:#fff!important;text-shadow:none!important}.tm-navbar-toggle{color:#ccc!important;text-shadow:none!important}.tm-navbar-toggle:focus,.tm-navbar-toggle:hover{color:#fff!important}.tm-footer{background:#252525;border-top:1px solid #232425;margin-bottom:0;bottom:0;padding:10px;color:#fff}.tm-wrapper{min-height:100%;margin:0 auto -51px!important}.tm-push,footer{height:51px}.uk-navbar-content > a {color:#fff !important;}
+		</style>
+	</head>
+	<body class="uk-height-1-1">
+		<div class="tm-wrapper">
+			<nav class="uk-navbar uk-navbar-attached tm-navbar uk-margin-bottom">
+				<div class="uk-navbar-brand tm-navbar-brand">
+					glFusion Election Configuration
+				</div>
+				<div class="uk-navbar-flip uk-hidden-small">
+					<div class="uk-navbar-content tm-navbar-content" style="text-shadow:none;">
+						<a href="https://www.glfusion.org/wiki/">glFusion Wiki</a>
+					</div>
+				</div>
+				<div class="uk-navbar-brand tm-navbar-brand uk-navbar-center">
+					<a href="index.html">Index</a>
+				</div>
+			</nav>
+
+			<div class="uk-container uk-container-center uk-margin-bottom">
+
+				<h1>Election Plugin</h1>
+
+				<p>
+					How do the elections work?
+				</p>
+
+				<p>
+					In order to prevent manipulation of elections (or at least make it harder),
+					glFusion does two things when you vote:
+				</p>
+
+				<ol>
+					<li>It stores a cookie</li>
+					<li>It stores your IP address</li>
+				</ol>
+
+				<p>
+					Both the cookie and the IP are valid for a certain amount of time (see
+					below) and during that time, you can't vote again on the same election.
+				</p>
+
+				<p>
+					The amount of time your cookie and IP are stored can be changed in the <span class="wikilink1">elections plugin configuration</span>.
+				</p>
+
+				<ul>
+					<li>Voter Cookie Valid for&hellip;</li>
+					<li>Voter IP Address Valid for&hellip;</li>
+				</ul>
+
+				<p>
+					Both times are in seconds, i.e. the cookie is valid for 24 hours and
+					the IP is stored for a week.
+				</p>
+
+				<p>
+					In setups where more than one person uses the same computer or the same
+					IP address, you can set one (or both) of them to 1.
+				</p>
+
+
+				<p>
+					Please keep in mind that any election can be manipulated, so you shouldn't
+					take the results too seriously.
+				</p>
+
+
+				<h2>Election Configuration Options</h2>
+
+				<dl id="desc_electionsloginrequired">
+					<dt>Election Login Required</dt>
+					<dd>When set to True, only registered users can access the list of recent elections. Please note that Login Required in glFusion's main configuration takes precedence over this setting. So when that is set to True, anonymous users can not access the Election section even when <em>Election Login Required</em> is set to False.</dd>
+				</dl>
+
+				<dl id="desc_hideelectionsmenu">
+					<dt>Hide Election Menu Entry</dt>
+					<dd>Whether to hide the &ldquo;Election&rdquo; entry from glFusion's menu bar (when set to True) or to show it (when set to False).</dd>
+				</dl>
+
+				<dl id="desc_maxquestions">
+					<dt>Max. Questions per Election</dt>
+					<dd>Maximum number of questions in a election.</dd>
+				</dl>
+
+				<dl id="desc_maxanswers">
+					<dt>Max. Options per Question</dt>
+					<dd>Maximum number of options per question.</dd>
+				</dl>
+
+				<dl id="desc_answerorder">
+					<dt>Sort Results</dt>
+					<dd>Sort answers by the number of results ('By Votes') or keep the order in which they were entered ('As Submitted').</dd>
+				</dl>
+
+				<dl id="desc_electioncookietime">
+					<dt>Voter Cookie Valid For</dt>
+					<dd>Number of seconds to set a election answer cookie to time out on.</dd>
+				</dl>
+
+				<dl id="desc_electionaddresstime">
+					<dt>Voter IP Address Valid For</dt>
+					<dd>Number of seconds to set a election answer IP address to time out on.</dd>
+				</dl>
+
+				<dl id="desc_delete_elections">
+					<dt>Delete Election with Owner</dt>
+					<dd>Defines what to do when a user is deleted that is the owner of a election. When set to <strong>False</strong>, all elections owned by the deleted user will be assigned to a user of the &ldquo;Root&rdquo; group (i.e. the site admin). When set to <strong>True</strong>, the elections are deleted, including all the comments posted on that election.</dd>
+				</dl>
+
+				<dl id="desc_aftersave">
+					<dt>After Saving Election</dt>
+					<dd>Which page to go to after a election has been saved: <br/>* 'item': display the election <br/>* 'list': show admin's list of elections (default) <br/>* 'plugin': display the public list of elections <br/>* 'home': display the site's homepage <br/>* 'admin': go to the &ldquo;Admin Home&rdquo; page, (i.e. Command &amp; Control)</dd>
+				</dl>
+
+				<dl id="desc_default_permissions_0">
+					<dt>Election Default Permissions[0]</dt>
+					<dd>The default Owner permissions for the Election editor. The settings here will determine what permissions are checked (Read only, or Read/Write), or unchecked (No access) by default in the Owner box of the Permissions panel in the Election editor. Options are No access, Read only, or Read/Write.</dd>
+				</dl>
+
+				<dl id="desc_default_permissions_1">
+					<dt>Election Default Permissions[1]</dt>
+					<dd>The default Group permissions for the Election editor. The settings here will determine what permissions are checked (Read only, or Read/Write), or unchecked (No access) by default in the Group box of the Permissions panel in the Election editor. Options are No access, Read only, or Read/Write.</dd>
+				</dl>
+
+				<dl id="desc_default_permissions_2">
+					<dt>Election Default Permissions[2]</dt>
+					<dd>The default Member permissions for the Election editor. The settings here will determine what permissions are checked (Read only, or Read/Write), or unchecked (No access) by default in the Member box of the Permissions panel in the Election editor. Options are No access, Read only, or Read/Write. </dd>
+				</dl>
+
+				<dl id="desc_default_permissions_3">
+					<dt>Election Default Permissions[3]</dt>
+					<dd>The default Anonymous permissions for the Election editor. The settings here will determine what permissions are checked (Read only, or Read/Write), or unchecked (No access) by default in the Anonymous box of the Permissions panel in the Election editor. Options are No access, Read only, or Read/Write.</dd>
+				</dl>
+
+			</div>
+			<div class="tm-push"></div>
+		</div>
+		<footer class="tm-footer uk-width-1-1 uk-text-center uk-margin-bottom-remove">
+			<div class="uk-hidden-small" style="padding-top:5px;"></div>
+			<div>
+				<a href="https://www.glfusion.org" target="_blank">glFusion</a> is free software released under the <a href="http://www.gnu.org/licenses/gpl-2.0.txt" target="_blank">GNU/GPL v2.0 License.</a>
+			</div>
+		</footer>
+	</body>
+</html>

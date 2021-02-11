@@ -1,0 +1,27 @@
+{# begin {templatelocation} #}
+{!if edit_url}
+    <span class="uk-align-right"><a href="{edit_url}" class="uk-aling-right uk-icon uk-icon-edit tm-meta-icon"></a></span>
+{!endif}
+{!if url}
+    <a class="uk-align-right" href="{url}">{$LANG_POLLS['back_to_list']}</a>
+{!endif}
+{!if topic}
+    <h3>{topic}</h3>
+{!endif}
+{!if isOpen}
+{!if adminView}
+    <div class="uk-alert uk-alert-danger">
+{!else}
+    <div class="uk-alert">
+{!endif}
+        {$LANG_POLLS['msg_results_open']}
+    </div>
+{!endif}
+{!if description}
+  <div class="uk-panel uk-panel-box">{description}</div>
+{!endif}
+{questions}
+<div class="uk-panel uk-text-small uk-text-truncate uk-margin-bottom">
+	{notification} <a href="{admin_url}">{lang_topics}</a> | {num_votes} {lang_votes} {comments}
+</div>
+{# end {templatelocation} #}
