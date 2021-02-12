@@ -69,13 +69,17 @@ class Answer
      * @param   integer $q_id       Question ID
      * @return  array       Array of Answer objects
      */
-    public static function getByQuestion($q_id, $pid)
+    public static function getByQuestion($q_id, $pid, $rnd=false)
     {
         $q_id = (int)$q_id;
         $retval = array();
         $sql = "SELECT * FROM " . DB::table('answers') . "
-            WHERE qid = '{$q_id}' AND pid = '" . DB_escapeString($pid) . "'
-            ORDER BY aid ASC";
+            WHERE qid = '{$q_id}' AND pid = '" . DB_escapeString($pid) . "' ";
+        if ($rnd) {
+            $sql .= 'ORDER BY RAND()';
+        } else {
+            $sql .= 'ORDER BY aid ASC';
+        }
         $res = DB_query($sql);
         if ($res) {
             while ($A = DB_fetchArray($res, false)) {
