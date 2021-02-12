@@ -89,7 +89,7 @@ function ELECTION_saveVote_AJAX($pid, $aid)
     $Election = Election::getInstance($pid);
     if (!$Election->canVote()) {
         $retval['statusMessage'] = 'This poll is not available for voting';
-        $retval['html'] = $Election::listElection();
+        $retval['html'] = $Election::listElections();
     } elseif ($Election->alreadyVoted()) {
         $retval['statusMessage'] = 'You have already voted on this poll';
         $retval['html'] = (new Results($pid))->Render();

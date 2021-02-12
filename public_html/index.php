@@ -151,7 +151,7 @@ case 'results':
             ->withCommentOrder($order)
             ->Render();
     } else {
-        $page .= Election::listElection();
+        $page .= Election::listElections();
     }
     break;
 
@@ -201,7 +201,7 @@ default:
         }
     } else {
         $title = $LANG_ELECTION['electiontitle'];
-        $page .= Election::listElection();
+        $page .= Election::listElections();
     }
     break;
 }

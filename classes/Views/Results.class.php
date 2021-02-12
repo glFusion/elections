@@ -177,7 +177,7 @@ class Results
                 }
                 $msg .= $LANG_ELECTION['pollhidden'];
                 $retval = COM_showMessageText($msg,'', true,'error');
-                $retval .= Election::listElection();
+                $retval .= Election::listElections();
                 return $retval;
             }
         }

@@ -1543,7 +1543,7 @@ class Election
      *
      * @return   string          HTML for election listing
      */
-    public static function listElection()
+    public static function listElections()
     {
         global $_CONF, $_USER,
            $LANG25, $LANG_LOGIN, $LANG_ELECTION;
