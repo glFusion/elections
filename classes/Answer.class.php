@@ -67,6 +67,8 @@ class Answer
      * Get all the answers for a given question.
      *
      * @param   integer $q_id       Question ID
+     * @param   string  $pid        Election ID
+     * @param   boolean $rnd        True to get in random order
      * @return  array       Array of Answer objects
      */
     public static function getByQuestion($q_id, $pid, $rnd=false)
@@ -80,6 +82,30 @@ class Answer
         } else {
             $sql .= 'ORDER BY aid ASC';
         }
+        $res = DB_query($sql);
+        if ($res) {
+            while ($A = DB_fetchArray($res, false)) {
+                $retval[] = new self($A);
+            }
+        }
+        return $retval;
+    }
+
+
+    /**
+     * Get all the answers for a given question, ordered by score.
+     *
+     * @param   integer $q_id       Question ID
+     * @param   string  $pid        Election ID
+     * @return  array       Array of Answer objects
+     */
+    public static function getByScore($q_id, $pid)
+    {
+        $q_id = (int)$q_id;
+        $retval = array();
+        $sql = "SELECT * FROM " . DB::table('answers') . "
+            WHERE qid = '{$q_id}' AND pid = '" . DB_escapeString($pid) . "'
+            ORDER BY votes DESC";
         $res = DB_query($sql);
         if ($res) {
             while ($A = DB_fetchArray($res, false)) {

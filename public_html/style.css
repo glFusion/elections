@@ -89,4 +89,7 @@ div#election_block h3 {
 .elections_answers input {
     margin-right:1em;
 }
+.elections_winnertext {
+    font-weight:bold;
+}
 /* end public_html/election/style.css */

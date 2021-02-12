@@ -587,7 +587,7 @@ function phpblock_elections()
 */
 function plugin_geticon_elections()
 {
-    return Config::get('url') . '/images/election.png';
+    return Config::get('url') . '/images/elections.png';
 }
 
 /**
