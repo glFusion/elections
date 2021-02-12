@@ -1280,6 +1280,8 @@ class Election
                 $election->set_var('topic', $filterS->filterData($this->topic));
                 $election->set_var('lang_question', $LANG25[31].':');
             }
+            // create a random number to ID fields if multiple blocks showing
+            $random = rand(0,100);
             $election->set_var(array(
                 'id' => $this->pid,
                 'old_pid' => $this->old_pid,
@@ -1367,8 +1369,11 @@ class Election
                     if ($this->mod_allowed < 2 && $this->_access_key != '') {
                         $election->set_var('radio_disabled', 'disabled="disabled"');
                     }
-                    $election->set_var('answer_id', $Answer->getAid());
-                    $election->set_var('answer_text', $filterS->filterData($Answer->getAnswer()));
+                    $election->set_var(array(
+                        'answer_id' =>$Answer->getAid(),
+                        'answer_text' => $filterS->filterData($Answer->getAnswer()),
+                        'rnd' => $random,
+                    ) );
                     $election->parse('answers', 'panswer', true);
                 }
                 $election->parse('questions', 'pquestions', true);

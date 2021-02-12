@@ -83,4 +83,10 @@
 div#election_block h3 {
     color: inherit;
 }
+.elections_answers li:not(:first-child) {
+    margin-top:.25em;
+}
+.elections_answers input {
+    margin-right:1em;
+}
 /* end public_html/election/style.css */
