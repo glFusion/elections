@@ -45,6 +45,7 @@ use Elections\Election;
 use Elections\Voter;
 use Elections\Answer;
 use Elections\Views\Results;
+use Elections\MO;
 
 $retval = array();
 
@@ -71,7 +72,8 @@ if ( $pid == '' || $aid == 0 ) {
     ) {
         $retval = ELECTION_saveVote_AJAX($pid,$aid);
     } else {
-        $eMsg = $LANG_ELECTION['answer_all'] . ' "' . $Election->getTopic() . '"';
+        $eMsg = MO::_('Please answer all remaining questions') .
+            ' "' . $Election->getTopic() . '"';
         $retval['statusMessage'] = $eMsg;
     }
 }
@@ -83,21 +85,22 @@ echo json_encode($return);
 
 function ELECTION_saveVote_AJAX($pid, $aid)
 {
-    global $_USER, $LANG_ELECTION;
+    global $_USER;
 
     $retval = array('html' => '','statusMessage' => '');
     $Election = Election::getInstance($pid);
     if (!$Election->canVote()) {
         $retval['statusMessage'] = 'This poll is not available for voting';
-        $retval['html'] = $Election::listElection();
+        $retval['html'] = Election::listElections();
     } elseif ($Election->alreadyVoted()) {
         $retval['statusMessage'] = 'You have already voted on this poll';
         $retval['html'] = (new Results($pid))->Render();
     } else {
         if ((new Election($pid))->saveVote($aid)) {
-            $eMsg = $LANG_ELECTION['savedvotemsg'] . ' "' . $Election->getTopic() . '"';
+            $eMsg = MO::_('Your vote has been recorded.') .
+                ' "' . $Election->getTopic() . '"';
         } else {
-            $eMsg = "There was an error recording your vote";
+            $eMsg = MO::_('There was an error recording your vote');
         }
         $retval['statusMessage'] = $eMsg;
         $retval['html'] = (new Results($pid))->Render();

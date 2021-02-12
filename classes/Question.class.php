@@ -4,7 +4,7 @@
  *
  * @author      Lee Garner <lee@leegarner.com>
  * @copyright   Copyright (c) 2020 Lee Garner <lee@leegarner.com>
- * @package     election
+ * @package     elections
  * @version     v3.0.0
  * @since       v3.0.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
@@ -16,7 +16,7 @@ namespace Elections;
 
 /**
  * Base class for poll questions.
- * @package election
+ * @package elections
  */
 class Question
 {

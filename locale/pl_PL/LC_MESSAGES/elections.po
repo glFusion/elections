@@ -1,0 +1,617 @@
+# Polish translation for the Polls plugin.
+# Copyright (C) 2020
+# This file is distributed under the same license as the Polls package.
+# Lee Garner <lee@leegarner.com>
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-02-11 15:15-0800\n"
+"PO-Revision-Date: 2020-10-05 09:56-0700\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: pl_PL\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
+"|| n%100>=20) ? 1 : 2);\n"
+"X-Generator: Poedit 2.0.6\n"
+
+#: classes/Menu.class.php:38 classes/Election.class.php:1724
+#: classes/Election.class.php:1725
+msgid "List All"
+msgstr ""
+
+#: classes/Menu.class.php:43 classes/Election.class.php:1728
+#: classes/Election.class.php:1729
+msgid "Create"
+msgstr ""
+
+#: classes/Menu.class.php:47 classes/Election.class.php:1732
+#: classes/Election.class.php:1733
+msgid "Admin Home"
+msgstr ""
+
+#: classes/Menu.class.php:62
+msgid "Elections Administration"
+msgstr ""
+
+#: classes/Election.class.php:653 admin/index.php:91 admin/index.php:109
+#, fuzzy
+msgid "Edit Election"
+msgstr "Opis"
+
+#: classes/Election.class.php:668 classes/Election.class.php:766
+#: admin/ajax.php:26
+msgid "Access Denied"
+msgstr ""
+
+#: classes/Election.class.php:670
+msgid "You are trying to access a poll that you do not have rights to."
+msgstr ""
+
+#: classes/Election.class.php:671
+msgid "This attempt has been logged."
+msgstr ""
+
+#: classes/Election.class.php:673
+msgid "Please go back to the poll administration screen."
+msgstr ""
+
+#: classes/Election.class.php:681 classes/Election.class.php:688
+#: classes/Election.class.php:1032 classes/Election.class.php:1225
+msgid "Delete"
+msgstr ""
+
+#: classes/Election.class.php:720
+#, fuzzy
+msgid "Election ID"
+msgstr "Opis"
+
+#: classes/Election.class.php:723
+msgid "Do not use spaces."
+msgstr ""
+
+#: classes/Election.class.php:724 classes/Election.class.php:984
+#: classes/Election.class.php:1291 classes/Election.class.php:1398
+#: classes/Election.class.php:1556
+msgid "Topic"
+msgstr ""
+
+#: classes/Election.class.php:726
+msgid "Mode"
+msgstr ""
+
+#: classes/Election.class.php:728
+#, fuzzy
+msgid "Description"
+msgstr "Opis"
+
+#: classes/Election.class.php:730
+msgid "Appears on Election Block"
+msgstr ""
+
+#: classes/Election.class.php:731
+msgid "Open for Voting"
+msgstr ""
+
+#: classes/Election.class.php:732
+msgid "Hide results while open?"
+msgstr ""
+
+#: classes/Election.class.php:733
+msgid ""
+"While the poll is open, only the owner and administrators can see the "
+"results."
+msgstr ""
+
+#: classes/Election.class.php:734
+msgid "The topic will be only displayed if there is more than 1 question."
+msgstr ""
+
+#: classes/Election.class.php:739 classes/Election.class.php:1007
+msgid "Opens"
+msgstr ""
+
+#: classes/Election.class.php:740 classes/Election.class.php:1013
+msgid "Closes"
+msgstr ""
+
+#: classes/Election.class.php:750
+msgid "Access Rights"
+msgstr ""
+
+#: classes/Election.class.php:751
+msgid "Owner"
+msgstr ""
+
+#: classes/Election.class.php:756
+msgid "Allowed to Vote"
+msgstr ""
+
+#: classes/Election.class.php:757
+#, fuzzy
+msgid "Allowed to View Results"
+msgstr "Domyślna grupa może wyświetlać wyniki"
+
+#: classes/Election.class.php:760
+msgid "Answers / Votes / Remark"
+msgstr ""
+
+#: classes/Election.class.php:761
+msgid "Save"
+msgstr ""
+
+#: classes/Election.class.php:762
+msgid "Cancel"
+msgstr ""
+
+#: classes/Election.class.php:763
+msgid "Date Picker"
+msgstr ""
+
+#: classes/Election.class.php:764
+msgid "Time Picker"
+msgstr ""
+
+#: classes/Election.class.php:765
+msgid "View your vote"
+msgstr ""
+
+#: classes/Election.class.php:767
+msgid "After-voting access for voters"
+msgstr ""
+
+#: classes/Election.class.php:769
+msgid "General"
+msgstr ""
+
+#: classes/Election.class.php:770
+msgid "Questions"
+msgstr ""
+
+#: classes/Election.class.php:771
+#, fuzzy
+msgid "Permissions"
+msgstr "Uprawnienia domyślne"
+
+#: classes/Election.class.php:772 classes/Election.class.php:1303
+#: classes/Views/Results.class.php:205
+msgid "Back to Listing"
+msgstr ""
+
+#: classes/Election.class.php:786 classes/Election.class.php:800
+#: classes/Election.class.php:1293 classes/Views/Results.class.php:233
+#, fuzzy
+msgid "Question"
+msgstr "Opis"
+
+#: classes/Election.class.php:801
+msgid "Save and Add"
+msgstr ""
+
+#: classes/Election.class.php:862
+msgid "A name is required."
+msgstr ""
+
+#: classes/Election.class.php:977 classes/Election.class.php:1349
+#: classes/Views/Results.class.php:211 classes/Views/Results.class.php:220
+msgid "Edit"
+msgstr ""
+
+#: classes/Election.class.php:989 classes/Election.class.php:1561
+msgid "Vote Count"
+msgstr ""
+
+#: classes/Election.class.php:995 classes/Election.class.php:1149
+#: classes/Election.class.php:1340
+#, fuzzy
+msgid "Results"
+msgstr "Sortuj wyniki"
+
+#: classes/Election.class.php:1001
+msgid "Date"
+msgstr ""
+
+#: classes/Election.class.php:1019
+msgid "Status"
+msgstr ""
+
+#: classes/Election.class.php:1026
+msgid "Reset"
+msgstr ""
+
+#: classes/Election.class.php:1046
+msgid ""
+"To modify or delete an election, click on the edit icon of the election."
+msgstr ""
+
+#: classes/Election.class.php:1047
+msgid "To create a new election, click on \"Create New\" above."
+msgstr ""
+
+#: classes/Election.class.php:1144 classes/Election.class.php:1169
+#: classes/Election.class.php:1310
+#, fuzzy
+msgid "Vote"
+msgstr "Głosy"
+
+#: classes/Election.class.php:1164
+msgid "Closed"
+msgstr ""
+
+#: classes/Election.class.php:1166
+msgid "Open"
+msgstr ""
+
+#: classes/Election.class.php:1187
+msgid "Yes"
+msgstr ""
+
+#: classes/Election.class.php:1189
+#, fuzzy
+msgid "No"
+msgstr "Żaden"
+
+#: classes/Election.class.php:1219
+msgid "Are you sure you want to delete all of the results for this election?"
+msgstr ""
+
+#: classes/Election.class.php:1227
+msgid "Are you sure you want to delete this Poll?"
+msgstr ""
+
+#: classes/Election.class.php:1228
+msgid ""
+"Are you absolutely sure you want to delete this Poll?  All questions, "
+"answers and comments that are associated with this Poll will also be "
+"permanently deleted from the database."
+msgstr ""
+
+#: classes/Election.class.php:1318
+msgid "Start Voting"
+msgstr ""
+
+#: classes/Election.class.php:1322 classes/Views/Results.class.php:200
+#: functions.inc:408 functions.inc:388
+msgid "Votes"
+msgstr "Głosy"
+
+#: classes/Election.class.php:1366
+#, php-format
+msgid "This poll has %d more question"
+msgid_plural "This poll has %d more questions"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: classes/Election.class.php:1405 classes/Views/Results.class.php:280
+#: classes/Views/Results.class.php:284
+msgid "Comments"
+msgstr ""
+
+#: classes/Election.class.php:1481 classes/Views/Results.class.php:177
+#: public_html/index.php:132
+#, fuzzy
+msgid "Your vote has already been recorded."
+msgstr "Już głosowałeś."
+
+#: classes/Election.class.php:1508 public_html/ajax_handler.php:100
+msgid "Your vote has been recorded."
+msgstr ""
+
+#: classes/Election.class.php:1509
+msgid "Copy your key to a safe location if you wish to verify your vote later."
+msgstr ""
+
+#: classes/Election.class.php:1510
+msgid "Your private key is"
+msgstr ""
+
+#: classes/Election.class.php:1511
+msgid "Copy to clipboard"
+msgstr ""
+
+#: classes/Election.class.php:1512
+msgid "Your private key was copied to your clipboard."
+msgstr ""
+
+#: classes/Election.class.php:1522
+msgid "There was an error recording your vote, please try again."
+msgstr ""
+
+#: classes/Election.class.php:1567
+msgid "Created"
+msgstr ""
+
+#: classes/Election.class.php:1573
+msgid "Message"
+msgstr ""
+
+#: classes/Election.class.php:1586 public_html/index.php:209
+msgid "Title"
+msgstr ""
+
+#: classes/Election.class.php:1644
+#, fuzzy
+msgid ""
+"It appears that there are no polls on this site or no one has ever voted."
+msgstr ""
+"Wygląda na to, że na tej stronie nie ma ankiet lub nikt nigdy nie głosował."
+
+#: classes/Election.class.php:1743 classes/Election.class.php:1744
+msgid "To modify or delete a poll, click on the edit icon of the election."
+msgstr ""
+
+#: classes/Election.class.php:1744 classes/Election.class.php:1745
+msgid "To create a new poll, click on \"Create\" above."
+msgstr ""
+
+#: classes/Election.class.php:1750 classes/Views/Results.class.php:363
+#: classes/Election.class.php:1751 classes/Views/Results.class.php:367
+msgid "User Name"
+msgstr ""
+
+#: classes/Election.class.php:1755 classes/Views/Results.class.php:368
+#: classes/Election.class.php:1756 classes/Views/Results.class.php:372
+msgid "IP Address"
+msgstr ""
+
+#: classes/Election.class.php:1760 classes/Views/Results.class.php:373
+#: classes/Election.class.php:1761 classes/Views/Results.class.php:377
+msgid "Date Voted"
+msgstr ""
+
+#: classes/Views/Results.class.php:179
+msgid "Election results will be available only after the election has closed."
+msgstr ""
+
+#: classes/Views/Results.class.php:206
+msgid "Early results, election is open"
+msgstr ""
+
+#: classes/Views/Results.class.php:295 classes/Views/Results.class.php:299
+msgid "Topics"
+msgstr ""
+
+#: public_html/ajax_handler.php:75 public_html/index.php:193
+msgid "Please answer all remaining questions"
+msgstr ""
+
+#: public_html/ajax_handler.php:103
+msgid "There was an error recording your vote"
+msgstr ""
+
+#: public_html/index.php:59 functions.inc:124 functions.inc:104
+#, fuzzy
+msgid "Elections"
+msgstr "Opis"
+
+#: public_html/index.php:142
+msgid "Please answer all remaining questions."
+msgstr ""
+
+#: public_html/index.php:173
+#, php-format
+msgid "You are viewing the vote that you previously cast on %1$s at %2$s."
+msgstr ""
+
+#: public_html/index.php:195
+msgid "Results were not saved."
+msgstr ""
+
+#: public_html/index.php:205
+msgid ""
+"Voting for this election is unavailable. Either you've already voted, the "
+"election has been removed or you do not have sufficient permissions."
+msgstr ""
+
+#: admin/ajax.php:68
+msgid "Item(s) have been updated"
+msgstr ""
+
+#: admin/ajax.php:68
+msgid "Item(s) are unchanged"
+msgstr ""
+
+#: admin/index.php:87 admin/index.php:154
+msgid "Election Administration"
+msgstr ""
+
+#: admin/index.php:111
+msgid "Invalid security token"
+msgstr ""
+
+#: admin/index.php:115
+msgid "Please enter an Election ID."
+msgstr ""
+
+#: functions.inc:185 functions.inc:165
+msgid "Preview"
+msgstr ""
+
+#: functions.inc:368 functions.inc:348
+msgid "Comment"
+msgstr ""
+
+#: functions.inc:403 functions.inc:383
+msgid "Election Topic"
+msgstr "Temat ankiety"
+
+#: functions.inc:417 functions.inc:434 functions.inc:397 functions.inc:414
+msgid "Top 10 Elections"
+msgstr "Dziesięć najlepszych ankiet"
+
+#: functions.inc:438 functions.inc:418
+#, fuzzy
+msgid ""
+"It appears that there are no elections on this site or no one has ever voted."
+msgstr ""
+"Wygląda na to, że na tej stronie nie ma ankiet lub nikt nigdy nie głosował."
+
+#: functions.inc:459 functions.inc:439
+#, fuzzy
+msgid "Elections in the system"
+msgstr "Ankiety (odpowiedzi) w systemie"
+
+#: functions.inc:730 functions.inc:710
+msgid ""
+"HTML: renders a voting block for a Election on this site.  usage: "
+"[election_vote:<i>election_id</i>"
+msgstr ""
+
+#: functions.inc:733 functions.inc:713
+msgid ""
+"HTML: renders the results of a Election on this site.  usage: "
+"[election_result:<i>election_id</i>]"
+msgstr ""
+
+#: functions.inc:736 functions.inc:716
+msgid ""
+"Link: to a Election on this site.  link_text defaults to the Election "
+"topic.  usage: [election:<i>election_id</i> {link_text}]"
+msgstr ""
+
+#: language/lang_config.php:20
+msgid "Polls Configuration"
+msgstr "Administracja ankietami"
+
+#: language/lang_config.php:24
+msgid "Hide Polls Menu Entry"
+msgstr "Ukryj wpis w menu ankiet"
+
+#: language/lang_config.php:25
+msgid "Max. Questions per Poll"
+msgstr "Maks. Pytania w ankiecie"
+
+#: language/lang_config.php:26
+msgid "Max. Options per Question"
+msgstr "Maks. Opcje na pytanie"
+
+#: language/lang_config.php:27
+msgid "Sort Results"
+msgstr "Sortuj wyniki"
+
+#: language/lang_config.php:28
+msgid "Voter Cookie Valid Duration"
+msgstr "Voter Cookie Valid Duration"
+
+#: language/lang_config.php:29
+msgid "Voter IP Address Valid Duration"
+msgstr "Adres IP wyborcy Ważny czas trwania"
+
+#: language/lang_config.php:30
+msgid "Delete Polls with Owner"
+msgstr "Usuń ankiety z właścicielem"
+
+#: language/lang_config.php:31
+msgid "After Saving Poll"
+msgstr "Po zapisaniu ankiety"
+
+#: language/lang_config.php:32
+msgid "Poll Default Permissions"
+msgstr "Domyślne uprawnienia ankiety"
+
+#: language/lang_config.php:33
+msgid "Display glFusion Blocks"
+msgstr "Wyświetl bloki glFusion"
+
+#: language/lang_config.php:34
+msgid "Default group allowed to vote"
+msgstr "Grupa domyślna może głosować"
+
+#: language/lang_config.php:35
+msgid "Default group allowed to view results"
+msgstr "Domyślna grupa może wyświetlać wyniki"
+
+#: language/lang_config.php:39
+msgid "Main Settings"
+msgstr "Ustawienia główne"
+
+#: language/lang_config.php:43
+msgid "General Polls Settings"
+msgstr "Ogólne ustawienia ankiet"
+
+#: language/lang_config.php:44
+msgid "Default Permissions"
+msgstr "Uprawnienia domyślne"
+
+#: language/lang_config.php:49 language/lang_config.php:53
+msgid "True"
+msgstr "Prawdziwe"
+
+#: language/lang_config.php:50 language/lang_config.php:54
+msgid "False"
+msgstr "Fałszywy"
+
+#: language/lang_config.php:57
+msgid "As Submitted"
+msgstr "Jak przesłano"
+
+#: language/lang_config.php:58
+msgid "By Votes"
+msgstr "Według głosów"
+
+#: language/lang_config.php:61
+msgid "Forward to Poll"
+msgstr "Przekaż do ankiety"
+
+#: language/lang_config.php:62
+msgid "Display Admin List"
+msgstr "Wyświetl listę administratorów"
+
+#: language/lang_config.php:63
+msgid "Display Public List"
+msgstr "Wyświetl listę publiczną"
+
+#: language/lang_config.php:64
+msgid "Display Home"
+msgstr "Wyświetl stronę główną"
+
+#: language/lang_config.php:65
+msgid "Display Admin"
+msgstr "Display Admin"
+
+#: language/lang_config.php:68
+msgid "No access"
+msgstr "Brak dostępu"
+
+#: language/lang_config.php:69
+msgid "Read-Only"
+msgstr "Tylko czytać"
+
+#: language/lang_config.php:70
+msgid "Read-Write"
+msgstr "Do odczytu i zapisu"
+
+#: language/lang_config.php:73
+msgid "Left Blocks"
+msgstr "Lewe bloki"
+
+#: language/lang_config.php:74
+msgid "Right Blocks"
+msgstr "Właściwe bloki"
+
+#: language/lang_config.php:75
+msgid "Left & Right Blocks"
+msgstr "Bloki lewy i prawy"
+
+#: language/lang_config.php:76
+msgid "None"
+msgstr "Żaden"
+
+#: classes/Election.class.php:733
+msgid ""
+"While the election is open, only the owner and administrators can see the "
+"results."
+msgstr ""
+
+#: classes/Election.class.php:1684
+msgid "Your election has been successfully deleted."
+msgstr ""
+
+#: public_html/index.php:182
+msgid "An invalid access key was entered."
+msgstr ""

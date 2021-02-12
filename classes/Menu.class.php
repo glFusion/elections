@@ -3,10 +3,10 @@
  * Class to provide admin and user-facing menus.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2020 Lee Garner <lee@leegarner.com>
- * @package     election
- * @version     v2.2.4
- * @since       v2.2.4
+ * @copyright   Copyright (c) 2021 Lee Garner <lee@leegarner.com>
+ * @package     elections
+ * @version     v0.1.0
+ * @since       v0.1.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -16,7 +16,7 @@ namespace Elections;
 
 /**
  * Class to provide admin and user-facing menus.
- * @package election
+ * @package elections
  */
 class Menu
 {
@@ -28,23 +28,23 @@ class Menu
      */
     public static function Admin($view='')
     {
-        global $_CONF, $LANG25, $LANG_ADMIN;
+        global $_CONF;
         USES_lib_admin();
 
         $retval = '';
         $menu_arr = array (
             array(
                 'url' => Config::get('admin_url') . '/index.php',
-                'text' => $LANG_ADMIN['list_all'],
+                'text' => MO::_('List All'),
                 'active'=> $view == 'listall' ? true : false,
             ),
             array(
                 'url' => Config::get('admin_url') . '/index.php?edit=x',
-                'text' => $LANG_ADMIN['create_new'],
+                'text' => MO::_('Create'),
             ),
             array(
                 'url' => $_CONF['site_admin_url'],
-                'text' => $LANG_ADMIN['admin_home']
+                'text' => MO::_('Admin Home'),
             ),
         );
 
@@ -59,13 +59,13 @@ class Menu
         $retval .= $T->finish($T->get_var('output'));
 
         $retval .= COM_startBlock(
-            $LANG25[18] . ' ver. ' . Config::get('pi_version'),
+            MO::_('Elections Administration') . ' ver. ' . Config::get('pi_version'),
             '',
             COM_getBlockTemplate('_admin_block', 'header')
         );
         $retval .= ADMIN_createMenu(
             $menu_arr,
-            $LANG25[19],
+            '',
             plugin_geticon_elections()
         );
 

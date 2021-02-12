@@ -40,6 +40,7 @@ use Elections\Voter;
 use Elections\Menu;
 use Elections\Config;
 use Elections\Views\Results;
+use Elections\MO;
 
 if (!in_array(Config::get('pi_name'), $_PLUGINS)) {
     COM_404();
@@ -55,7 +56,7 @@ if (!in_array(Config::get('pi_name'), $_PLUGINS)) {
 
 $display = '';
 $page = '';
-$title = $LANG_ELECTION['electiontitle'];
+$title = MO::_('Elections');
 
 $filter = sanitizer::getInstance();
 $filter->setPostmode('text');
@@ -128,7 +129,7 @@ case 'votebutton':
     // Get the answer array and check that the number is right, and the user hasn't voted
     $aid = (isset($_POST['aid']) && is_array($_POST['aid'])) ? $_POST['aid'] : array();
     if ($Election->alreadyVoted()) {
-        COM_setMsg($LANG_ELECTION['alreadyvoted'], 'error', true);
+        COM_setMsg(MO::_('Your vote has already been recorded.'), 'error', true);
         COM_refresh(Config::get('url') . '/index.php');
     } else {
         if (count($aid) == $Election->numQuestions()) {
@@ -138,7 +139,11 @@ case 'votebutton':
                 COM_refresh(Config::get('url') . '/index.php');
             }
         } else {
-            $page .= COM_showMessageText($LANG_ELECTION['answer_all'], '', true, 'error');
+            $page .= COM_showMessageText(MO::_('Please answer all remaining questions.'),
+                '',
+                true,
+                'error'
+            );
             $page .= $Election->withSelections($aid)->Render();
         }
     }
@@ -151,7 +156,7 @@ case 'results':
             ->withCommentOrder($order)
             ->Render();
     } else {
-        $page .= Election::listElection();
+        $page .= Election::listElections();
     }
     break;
 
@@ -165,7 +170,7 @@ case 'showvote':
         $Election = Election::getInstance($Voter->getPid());
         $page .= '<div class="uk-alert uk-alert-danger">' .
             sprintf(
-                $LANG_ELECTION['viewing_vote'],
+                MO::_('You are viewing the vote that you previously cast on %1$s at %2$s.'),
                 $Voter->getDate($_CONF['dateonly']),
                 $Voter->getDate($_CONF['timeonly'])
             ) . '</div>';
@@ -174,7 +179,7 @@ case 'showvote':
                       ->withSelections($data)
                       ->Render();
     } else {
-        COM_setMsg($PLG_elections_MESSAGE21, 'error');
+        COM_setMsg(MO::_('An invalid access key was entered.'), 'error');
         COM_refresh(Config::get('url') . '/index.php');
     }
     break;
@@ -185,8 +190,9 @@ default:
             $page .= COM_showMessage($msg, Config::get('pi_name'));
         }
         if (isset($_POST['aid'])) {
-            $eMsg = $LANG_ELECTION['answer_all'] . ' "' . $filter->filterData($Election->getTopic()) . '"';
-            $page .= COM_showMessageText($eMsg,$LANG_ELECTION['not_saved'],true,'error');
+            $eMsg = MO::_('Please answer all remaining questions') .
+                ' "' . $filter->filterData($Election->getTopic()) . '"';
+            $page .= COM_showMessageText($eMsg, MO::_('Results were not saved.'), true, 'error');
         }
         if (!$Election->isOpen() && $Election->canViewResults()) {
             $page .= (new Results($Election->getID()))
@@ -196,12 +202,12 @@ default:
         } elseif ($Election->canVote()) {
             $page .= $Election->Render();
         } else {
-            COM_setMsg($LANG_ELECTION['deny_msg'], 'error', true);
+            COM_setMsg(MO::_("Voting for this election is unavailable. Either you've already voted, the election has been removed or you do not have sufficient permissions."),'error', true);
             COM_refresh(Config::get('url') . '/index.php');
         }
     } else {
-        $title = $LANG_ELECTION['electiontitle'];
-        $page .= Election::listElection();
+        $title = MO::_('Title');
+        $page .= Election::listElections();
     }
     break;
 }

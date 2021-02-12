@@ -4,7 +4,7 @@
  *
  * @author      Lee Garner <lee@leegarner.com>
  * @copyright   Copyright (c) 2020-2021 Lee Garner <lee@leegarner.com>
- * @package     election
+ * @package     elections
  * @version     v3.0.0
  * @since       v3.0.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
@@ -20,7 +20,7 @@ use Elections\Views\Results;
 
 /**
  * Class for a single election.
- * @package election
+ * @package elections
  */
 class Election
 {
@@ -316,8 +316,9 @@ class Election
     {
         global $_CONF;
 
-        if (
-            !$this->is_open ||
+        if (!$this->is_open) {
+            return 0;
+        } elseif (
             $this->Opens->toMySQL(true) > $_CONF['_now']->toMySQL(true) ||
             $this->Closes->toMySQL(true) < $_CONF['_now']->toMySQL(true)
         ) {
@@ -647,11 +648,10 @@ class Election
      */
     public function editElection($type = 'edit')
     {
-        global $_CONF, $_GROUPS, $_USER, $LANG25, $LANG_ACCESS,
-           $LANG_ADMIN, $MESSAGE, $LANG_ELECTION;
+        global $_CONF, $_GROUPS, $_USER, $MESSAGE;
 
         $retval = COM_startBlock(
-            $LANG25[5], '',
+            MO::_('Edit Election'),
             COM_getBlockTemplate ('_admin_block', 'header')
         );
 
@@ -666,22 +666,27 @@ class Election
             // Get permissions for election
             if (!self::hasRights('edit')) {
                 // User doesn't have write access...bail
-                $retval .= COM_startBlock ($LANG25[21], '',
+                $retval .= COM_startBlock (MO::_('Access Denied'), '',
                                COM_getBlockTemplate ('_msg_block', 'header'));
-                $retval .= $LANG25[22];
+                $retval .= MO::_('You are trying to access a poll that you do not have rights to.') .
+                    MO::_('This attempt has been logged.') .
+                    COM_createLink(
+                        MO::_('Please go back to the poll administration screen.'),
+                        Config::get('admin_url')
+                    );
                 $retval .= COM_endBlock (COM_getBlockTemplate ('_msg_block', 'footer'));
                 COM_accessLog("User {$_USER['username']} tried to illegally submit or edit election $pid.");
                 return $retval;
             }
             if (!empty($this->owner_id)) {
-                $delbutton = '<input type="submit" value="' . $LANG_ADMIN['delete']
+                $delbutton = '<input type="submit" value="' . MO::_('Delete')
                     . '" name="delete"%s>';
                 $jsconfirm = ' onclick="return confirm(\'' . $MESSAGE[76] . '\');"';
                 $T->set_var(array(
                     'delete_option' => sprintf($delbutton, $jsconfirm),
                     'delete_option_no_confirmation' => sprintf ($delbutton, ''),
                     'delete_button' => true,
-                    'lang_delete'   => $LANG_ADMIN['delete'],
+                    'lang_delete'   => MO::_('Delete'),
                     'lang_delete_confirm' => $MESSAGE[76]
                 ) );
             }
@@ -713,28 +718,27 @@ class Election
         $ownername = COM_getDisplayName($this->owner_id);
         $T->set_var(array(
             'action_url' => Config::get('admin_url') . '/index.php',
-            'lang_electionid' => $LANG25[6],
+            'lang_electionid' => MO::_('Election ID'),
             'id' => $this->pid,
             'old_pid' => $this->old_pid,
-            'lang_donotusespaces' => $LANG25[7],
-            'lang_topic' => $LANG25[9],
+            'lang_donotusespaces' => MO::_('Do not use spaces.'),
+            'lang_topic' => MO::_('Topic'),
             'topic' => htmlspecialchars ($this->topic),
-            'lang_mode' => $LANG25[1],
+            'lang_mode' => MO::_('Mode'),
             'description' => $this->dscp,
-            'lang_description' => $LANG_ELECTION['description'],
+            'lang_description' => MO::_('Description'),
             'comment_options' => COM_optionList(DB::table('commentcodes'),'code,name',$this->commentcode),
-            'lang_appearsonhomepage' => $LANG25[8],
-            'lang_openforvoting' => $LANG_ELECTION['open'],
-            'lang_hideresults' => $LANG25[37],
-            //'lang_login_required' => $LANG25[43],
-            'hideresults_explain' => $LANG25[38],
-            'topic_info' => $LANG25[39],
+            'lang_appearsonhomepage' => MO::_('Appears on Election Block'),
+            'lang_openforvoting' => MO::_('Open for Voting'),
+            'lang_hideresults' => MO::_('Hide results while open?'),
+            'hideresults_explain' => MO::_('While the election is open, only the owner and administrators can see the results.'),
+            'topic_info' => MO::_('The topic will be only displayed if there is more than 1 question.'),
             'display' => $this->inblock ? 'checked="checked"' : '',
             'open' => $this->is_open ? 'checked="checked"' : '',
             //'login_req_chk' => $this->login_required ? 'checked="checked"' : '',
             'hideresults' => $this->hideresults ? 'checked="checked"' : '',
-            'lang_opens' => $LANG_ELECTION['opens'],
-            'lang_closes' => $LANG_ELECTION['closes'],
+            'lang_opens' => MO::_('Opens'),
+            'lang_closes' => MO::_('Closes'),
             'opens_date' => $open_date,
             'opens_time' => $open_time,
             'closes_date' => $close_date,
@@ -744,25 +748,29 @@ class Election
             'min_time' => Dates::MIN_TIME,
             'max_time' => Dates::MAX_TIME,
             // user access info
-            'lang_accessrights' => $LANG_ACCESS['accessrights'],
-            'lang_owner' => $LANG_ACCESS['owner'],
+            'lang_accessrights' => MO::_('Access Rights'),
+            'lang_owner' => MO::_('Owner'),
             'owner_username' => DB_getItem(DB::table('users'), 'username', "uid = {$this->owner_id}"),
             'owner_name' => $ownername,
             'owner' => $ownername,
             'owner_id' => $this->owner_id,
-            'lang_voting_group' => $LANG_ELECTION['voting_group'],
-            'lang_results_group' => $LANG_ELECTION['results_group'],
+            'lang_voting_group' => MO::_('Allowed to Vote'),
+            'lang_results_group' => MO::_('Allowed to View Results'),
             'group_dropdown' => SEC_getGroupDropdown($this->voting_gid, 3),
             'res_grp_dropdown' => SEC_getGroupDropdown($this->results_gid, 3, 'results_gid'),
-            'lang_answersvotes' => $LANG25[10],
-            'lang_save' => $LANG_ADMIN['save'],
-            'lang_cancel' => $LANG_ADMIN['cancel'],
-            'lang_datepicker' => $LANG_ELECTION['datepicker'],
-            'lang_timepicker' => $LANG_ELECTION['timepicker'],
-            'lang_view' => $LANG_ELECTION['view_vote'],
-            'lang_noaccess' => $LANG_ELECTION['noaccess'],
-            'lang_voteaccess' => $LANG_ELECTION['allow_votemod'],
+            'lang_answersvotes' => MO::_('Answers / Votes / Remark'),
+            'lang_save' => MO::_('Save'),
+            'lang_cancel' => MO::_('Cancel'),
+            'lang_datepicker' => MO::_('Date Picker'),
+            'lang_timepicker' => MO::_('Time Picker'),
+            'lang_view' => MO::_('View your vote'),
+            'lang_noaccess' => MO::_('Access Denied'),
+            'lang_voteaccess' => MO::_('After-voting access for voters'),
             'voteaccess_' . $this->mod_allowed => 'selected="selected"',
+            'lang_general' => MO::_('General'),
+            'lang_questions' => MO::_('Questions'),
+            'lang_permissions' => MO::_('Permissions'),
+            'lang_back' => MO::_('Back to Listing'),
         ) );
 
         $T->set_block('editor','questiontab','qt');
@@ -776,7 +784,7 @@ class Election
                 $T->set_var('style', '');
             }
 
-            $T->set_var('question_tab', $LANG25[31] . " $display_id");
+            $T->set_var('question_tab', MO::_('Question') . " $display_id");
             $T->set_var('question_id', $j);
             if (isset($Questions[$j])) {
                 $T->set_var(array(
@@ -790,8 +798,8 @@ class Election
                 $T->unset_var('hasdata');
                 $T->unset_var('question_text');
             }
-            $T->set_var('lang_question', $LANG25[31] . " $display_id");
-            $T->set_var('lang_saveaddnew', $LANG25[32]);
+            $T->set_var('lang_question', MO::_('Question') . " $display_id");
+            $T->set_var('lang_saveaddnew', MO::_('Save and Add'));
 
             $T->parse('qt','questiontab',true);
 
@@ -838,7 +846,7 @@ class Election
      */
     function Save($A = '')
     {
-        global $LANG_ELECTION, $_CONF;
+        global $_CONF;
 
         if (is_array($A)) {
             if (isset($A['old_pid'])) {
@@ -852,7 +860,7 @@ class Election
 
         $frm_name = $this->topic;
         if (empty($frm_name)) {
-            return $LANG_ELECTION['err_name_required'];
+            return MO::_('A name is required.');
         }
 
         // If saving a new record or changing the ID of an existing one,
@@ -960,69 +968,69 @@ class Election
      */
     public static function adminList()
     {
-        global $_CONF, $_IMAGE_TYPE, $LANG_ADMIN, $LANG25, $LANG_ACCESS, $LANG_ELECTION;
+        global $_CONF;
 
         $retval = '';
 
         // writing the actual list
         $header_arr = array(      # display 'text' and use table field 'field'
             array(
-                'text' => $LANG_ADMIN['edit'],
+                'text' => MO::_('Edit'),
                 'field' => 'edit',
                 'sort' => false,
                 'align' => 'center',
                 'width' => '25px',
             ),
             array(
-                'text' => $LANG25[9],
+                'text' => MO::_('Topic'),
                 'field' => 'topic',
                 'sort' => true,
             ),
             array(
-                'text' => $LANG25[20],
+                'text' => MO::_('Vote Count'),
                 'field' => 'vote_count',
                 'sort' => true,
                 'align' => 'center',
             ),
             array(
-                'text' => $LANG_ELECTION['results'],
+                'text' => MO::_('Results'),
                 'field' => 'results',
                 'sort' => false,
                 'align' => 'center',
             ),
             array(
-                'text' => $LANG25[3],
+                'text' => MO::_('Date'),
                 'field' => 'unixdate',
                 'sort' => true,
                 'align' => 'center',
             ),
             array(
-                'text' => $LANG_ELECTION['opens'],
+                'text' => MO::_('Opens'),
                 'field' => 'opens',
                 'sort' => true,
                 'align' => 'center',
             ),
             array(
-                'text' => $LANG_ELECTION['closes'],
+                'text' => MO::_('Closes'),
                 'field' => 'closes',
                 'sort' => true,
                 'align' => 'center',
             ),
             array(
-                'text' => $LANG_ELECTION['open'],
+                'text' => MO::_('Status'),
                 'field' => 'is_open',
                 'sort' => true,
                 'align' => 'center',
                 'width' => '35px',
             ),
             array(
-                'text' => $LANG_ADMIN['reset'],
+                'text' => MO::_('Reset'),
                 'field' => 'reset',
                 'sort' => false,
                 'align' => 'center',
             ),
             array(
-                'text' => $LANG_ADMIN['delete'],
+                'text' => MO::_('Delete'),
                 'field' => 'delete',
                 'sort' => false,
                 'align' => 'center',
@@ -1036,7 +1044,8 @@ class Election
 
         $text_arr = array(
             'has_extras'   => true,
-            'instructions' => $LANG25[19],
+            'instructions' => MO::_('To modify or delete an election, click on the edit icon of the election.') .
+                MO::_('To create a new election, click on "Create New" above.'),
             'form_url'     => Config::get('admin_url') . '/index.php',
         );
 
@@ -1078,7 +1087,7 @@ class Election
      */
     public static function getListField($fieldname, $fieldvalue, $A, $icon_arr, $extras)
     {
-        global $_CONF, $LANG25, $LANG_ACCESS, $LANG_ADMIN, $LANG_ELECTION, $_USER;
+        global $_CONF, $_USER;
 
         $retval = '';
 
@@ -1116,13 +1125,18 @@ class Election
                     $retval,
                     Config::get('url') . "/index.php?pid={$A['pid']}"
                 );
-            } elseif (SEC_inGroup($A['results_gid'])) {
-                if (!$A['hideresults']) {
+            } elseif (
+                (
+                    $A['closes'] < $extras['_now'] ||
+                    !$A['is_open'] ||
+                    !$A['hideresults']
+                ) &&
+                SEC_inGroup($A['results_gid'])
+            ) {
                     $retval = COM_createLink(
                         $retval,
                         Config::get('url') . "/index.php?results=x&pid={$A['pid']}"
                     );
-                }
             }
             break;
         case 'user_action':
@@ -1133,12 +1147,12 @@ class Election
                 SEC_inGroup($A['group_id'])
             ) {
                 $retval = COM_createLink(
-                    $LANG_ELECTION['vote'],
+                    MO::_('Vote'),
                     Config::get('url') . "/index.php?pid={$A['pid']}"
                 );
             } elseif (SEC_inGroup($A['results_gid'])) {
                 $retval = COM_createLink(
-                    $LANG_ELECTION['results'],
+                    MO::_('Results'),
                     Config::get('url') . "/index.php?results=x&pid={$A['pid']}"
                 );
             }
@@ -1149,17 +1163,16 @@ class Election
                 $retval .= '<input type="hidden" name="pid" value="' . $A['pid'] . '" />';
                 $retval .= '<button type="submit" style="float:right;" class="uk-button uk-button-mini uk-button-primary" name="showvote">';
                 $retval .= 'Show Vote</button></form>';
-//                $retval = $LANG_ELECTION['s_alreadyvoted'];
             } elseif (
                 $A['closes'] < $extras['_now'] &&
                 $A['opens'] < $extras['_now']
             ) {
-                $retval = $LANG_ELECTION['closed'];
+                $retval = MO::_('Closed');
             } else {
-                $retval = $LANG_ELECTION['open'];
+                $retval = MO::_('Open');
                 $retval .= '&nbsp;<a href="' . Config::get('url') . '/index.php?pid=' .
                     $A['pid'] . '" style="float:right;" class="uk-button uk-button-mini uk-button-success">' .
-                    $LANG_ELECTION['vote'] . '</button>';
+                    MO::_('Vote') . '</button>';
             }
             break;
         case 'is_open':
@@ -1177,9 +1190,9 @@ class Election
             break;
         case 'display':
             if ($A['display'] == 1) {
-                $retval = $LANG25[25];
+                $retval = MO::_('Yes');
             } else {
-                $retval = $LANG25[26];
+                $retval = MO::_('No');
             }
             break;
         case 'voters':
@@ -1208,13 +1221,18 @@ class Election
                 '<i class="uk-icon-refresh uk-text-danger"></i>',
                 Config::get('admin_url') . "/index.php?resetelection&pid={$A['pid']}",
                 array(
-                    'onclick' => "return confirm('{$LANG_ELECTION['confirm_reset']}?');",
+                    'onclick' => "return confirm('" .
+                    MO::_('Are you sure you want to delete all of the results for this election?') .
+                    "');",
                 )
             );
             break;
         case 'delete':
-            $attr['title'] = $LANG_ADMIN['delete'];
-            $attr['onclick'] = "return doubleconfirm('" . $LANG25[41] . "','" . $LANG25[42] . "');";
+            $attr['title'] = MO::_('Delete');
+            $attr['onclick'] = "return doubleconfirm('" .
+                MO::_('Are you sure you want to delete this Poll?') . "','" .
+                MO::_('Are you absolutely sure you want to delete this Poll?  All questions, answers and comments that are associated with this Poll will also be permanently deleted from the database.') .
+                "');";
             $retval = COM_createLink(
                 '<i class="uk-icon-remove uk-text-danger"></i>',
                 Config::get('admin_url') . '/index.php'
@@ -1237,7 +1255,7 @@ class Election
      */
     public function Render()
     {
-        global $_CONF, $LANG_ELECTION, $LANG01, $_USER, $LANG25, $_IMAGE_TYPE;
+        global $_CONF, $_USER;
 
         $filterS = new \sanitizer();
         $filterS->setPostmode('text');
@@ -1245,7 +1263,7 @@ class Election
         $retval = '';
 
         // If the current user can't vote, decide what to do or display
-        if (!$this->canVote()) {
+        if (!$this->canVote() && empty($this->_access_key)) {
             if ($this->canViewResults()) {
                 if ($this->disp_type == Modes::NORMAL) {
                     // not in a block or autotag, just refresh to the results page
@@ -1276,9 +1294,9 @@ class Election
                 'comments' => 'comments.thtml',
             ) );
             if ($nquestions > 1) {
-                $election->set_var('lang_topic', $LANG25[34]);
+                $election->set_var('lang_topic', MO::_('Topic'));
                 $election->set_var('topic', $filterS->filterData($this->topic));
-                $election->set_var('lang_question', $LANG25[31].':');
+                $election->set_var('lang_question', MO::_('Question'));
             }
             $election->set_var(array(
                 'id' => $this->pid,
@@ -1288,14 +1306,14 @@ class Election
                 'ajax_url' => Config::get('url') . '/ajax_handler.php',
                 'url' => Config::get('url') . '/index.php',
                 'description' => $this->disp_type != Modes::BLOCK ? $this->dscp : '',
-                'lang_back_to_list' => $LANG_ELECTION['back_to_list'],
+                'lang_back' => MO::_('Back to Listing'),
                 'can_submit' => $this->mod_allowed == 2 || $this->_access_key == '',
                 'vote_id' => COM_encrypt($this->_vote_id),
             ) );
                                                 
             if ($nquestions == 1 || $this->disp_showall) {
                 // Only one question (block) or showing all (main form)
-                $election->set_var('lang_vote', $LANG_ELECTION['vote']);
+                $election->set_var('lang_vote', MO::_('Vote'));
                 $election->set_var('showall',true);
                 if ($this->disp_type == Modes::AUTOTAG) {
                     $election->set_var('autotag', true);
@@ -1303,11 +1321,11 @@ class Election
                     $election->unset_var('autotag');
                 }
             } else {
-                $election->set_var('lang_vote', $LANG_ELECTION['start_election']);
+                $election->set_var('lang_vote', MO::_('Start Voting'));
                 $election->unset_var('showall');
                 $election->unset_var('autotag');
             }
-            $election->set_var('lang_votes', $LANG_ELECTION['votes']);
+            $election->set_var('lang_votes', MO::_('Votes'));
 
             $results = '';
             if (
@@ -1324,15 +1342,17 @@ class Election
                     )
                 )
             ) {
-                $results = COM_createLink($LANG_ELECTION['results'],
+                $results = COM_createLink(
+                    MO::_('Results'),
                     Config::get('url') . '/index.php?pid=' . $this->pid
-                    . '&amp;aid=-1');
+                        . '&amp;aid=-1'
+                );
             }
             $election->set_var('results', $results);
 
             if (self::hasRights('edit')) {
                 $editlink = COM_createLink(
-                    $LANG25[27],
+                    MO::_('Edit'),
                     Config::get('admin_url') . '/index.php?edit=x&amp;pid=' . $this->pid
                 );
                 $election->set_var('edit_link', $editlink);
@@ -1347,10 +1367,17 @@ class Election
                 $notification = "";
                 if (!$this->disp_showall) {
                     $nquestions--;
-                    $notification = $LANG25[35] . " $nquestions " . $LANG25[36];
+                    $notification = sprintf(
+                        MO::_n(
+                            'This poll has %d more question',
+                            'This poll has %d more questions',
+                            $nquestions
+                        ),
+                        $nquestions
+                    );
                     $nquestions = 1;
                 } else {
-                    $election->set_var('lang_question_number', " ". ($j+1).":");
+                    $election->set_var('lang_question_number', ($j+1));
                 }
                 $answers = $Q->getAnswers();
                 $nanswers = count($answers);
@@ -1374,14 +1401,14 @@ class Election
                 $election->parse('questions', 'pquestions', true);
                 $election->clear_var('answers');
             }
-            $election->set_var('lang_topics', $LANG_ELECTION['topics']);
+            $election->set_var('lang_topics', MO::_('Topic'));
             $election->set_var('notification', $notification);
             if ($this->commentcode >= 0 ) {
                 USES_lib_comment();
 
                 $num_comments = CMT_getCount(Config::PI_NAME, $this->pid);
                 $election->set_var('num_comments',COM_numberFormat($num_comments));
-                $election->set_var('lang_comments', $LANG01[3]);
+                $election->set_var('lang_comments', MO::_('Comments'));
 
                 $comment_link = CMT_getCommentLinkWithCount(
                     Config::PI_NAME,
@@ -1451,13 +1478,13 @@ class Election
      */
     public function saveVote($aid)
     {
-        global $_USER, $LANG_ELECTION;
+        global $_USER;
 
         $retval = '';
 
         if ($this->alreadyVoted()) {
             if (!COM_isAjax()) {
-                COM_setMsg($LANG_ELECTION['alreadyvoted']);
+                COM_setMsg(MO::_('Your vote has already been recorded.'));
             }
             return false;
         }
@@ -1484,11 +1511,11 @@ class Election
                 $T = new \Template(__DIR__ . '/../templates/');
                 $T->set_file('msg', 'votesaved.thtml');
                 $T->set_var(array(
-                    'lang_votesaved' => $LANG_ELECTION['savedvotemsg'],
-                    'lang_copykey' => $LANG_ELECTION['msg_copykey'],
-                    'lang_yourkeyis' => $LANG_ELECTION['msg_yourkeyis'],
-                    'lang_copyclipboard' => $LANG_ELECTION['copy_clipboard'],
-                    'lang_copy_success' => $LANG_ELECTION['copy_clipboard_success'],
+                    'lang_votesaved' => MO::_('Your vote has been recorded.'),
+                    'lang_copykey' => MO::_('Copy your key to a safe location if you wish to verify your vote later.'),
+                    'lang_yourkeyis' => MO::_('Your private key is'),
+                    'lang_copyclipboard' => MO::_('Copy to clipboard'),
+                    'lang_copy_success' => MO::_('Your private key was copied to your clipboard.'),
                     'prv_key' => $Voter->getId() . ':' . $Voter->getPrvKey(),
                     'mod_allowed' => $this->mod_allowed,
                 ) );
@@ -1498,7 +1525,7 @@ class Election
             }
             return true;
         } else {
-            COM_setMsg($LANG_ELECTION['msg_errorsaving'], 'error');
+            COM_setMsg(MO::_('There was an error recording your vote, please try again.'), 'error');
             return false;
         }
     }
@@ -1522,10 +1549,9 @@ class Election
      *
      * @return   string          HTML for election listing
      */
-    public static function listElection()
+    public static function listElections()
     {
-        global $_CONF, $_USER,
-           $LANG25, $LANG_LOGIN, $LANG_ELECTION;
+        global $_CONF, $_USER;
 
         $retval = '';
 
@@ -1533,24 +1559,24 @@ class Election
 
         $header_arr = array(
             array(
-                'text' => $LANG25[9],
+                'text' => MO::_('Topic'),
                 'field' => 'topic',
                 'sort' => true,
             ),
             array(
-                'text' => $LANG25[20],
+                'text' => MO::_('Vote Count'),
                 'field' => 'vote_count',
                 'sort' => true,
                 'align' => 'center',
             ),
             array(
-                'text' => $LANG25[3],
+                'text' => MO::_('Created'),
                 'field' => 'unixdate',
                 'sort' => true,
                 'align' => 'center',
             ),
             array(
-                'text' => $LANG_ELECTION['message'],
+                'text' => MO::_('Message'),
                 'field' => 'status',
                 'sort' => true,
                 'align' => 'center',
@@ -1563,7 +1589,7 @@ class Election
         );
         $text_arr = array(
             'has_menu' =>  false,
-            'title' => $LANG_ELECTION['electiontitle'],
+            'title' => MO::_('Title'),
             'instructions' => "",
             'icon' => '', 'form_url' => '',
         );
@@ -1586,14 +1612,15 @@ class Election
             $retval .= '<div class="floatright"><a class="uk-button uk-button-small uk-button-danger" href="' .
                 Config::get('admin_url') . '/index.php">Admin</a></div>' . LB;
         }
-        /*
+        
         $sql = "SELECT p.*, UNIX_TIMESTAMP(p.date) AS unixdate,
                 (SELECT COUNT(v.id) FROM " . DB::table('voters') . " v WHERE v.pid = p.pid) AS vote_count
                 FROM " . DB::table('topics') . " AS p
-                WHERE is_open = 1 AND ('$sql_now' BETWEEN opens AND closes " .
+                WHERE (is_open = 1 AND '$sql_now' BETWEEN opens AND closes " .
                 SEC_buildAccessSql('AND', 'group_id') .
-                ") OR (closes < '$sql_now' " . SEC_buildAccessSql('AND', 'results_gid') . ')';
+                ") OR ((is_open=0 OR closes < '$sql_now') " . SEC_buildAccessSql('AND', 'results_gid') . ')';
         $res = DB_query($sql);
+        $count = DB_numRows($res);
         $data_arr = array();
         while ($A = DB_fetchArray($res, false)) {
             $A['has_voted'] = Voter::hasVoted($A['pid'], $A['group_id']);
@@ -1601,26 +1628,11 @@ class Election
         }
         $retval .= ADMIN_simpleList(
             array(__CLASS__, 'getListField'), $header_arr, $text_arr, $data_arr, '', '', $extras
-        );*/
-        $query_arr = array(
-            'table' => DB::key('topics'),
-            'sql' => "SELECT p.*, UNIX_TIMESTAMP(p.date) AS unixdate,
-                (SELECT COUNT(v.id) FROM " . DB::table('voters') . " v WHERE v.pid = p.pid) AS vote_count
-                FROM " . DB::table('topics') . " p",
-            'query_fields' => array('topic'),
-            'default_filter' => "WHERE is_open = 1 AND ('$sql_now' BETWEEN opens AND closes " .
-                SEC_buildAccessSql('AND', 'group_id') .
-                ") OR (closes < '$sql_now' " . SEC_buildAccessSql('AND', 'results_gid') . ')',
-            'query' => '',
-            'query_limit' => 0,
-        );
-        $retval .= ADMIN_list(
-            Config::PI_NAME . '_' . __FUNCTION__,
-            array(__CLASS__, 'getListField'),
-            $header_arr, $text_arr, $query_arr, $defsort_arr, '', $extras
         );
         if ($count == 0) {
-            $retval .= '<div class="uk-alert uk-alert-danger">' . $LANG_ELECTION['stats_none'] . '</div>';
+            $retval .= '<div class="uk-alert uk-alert-danger">' .
+                MO::_('It appears that there are no polls on this site or no one has ever voted.') .
+                '</div>';
         }
         return $retval;
     }
@@ -1659,7 +1671,8 @@ class Election
             PLG_itemDeleted($pid, Config::PI_NAME);
             if (!$force) {
                 // Don't redirect if this is done as part of user account deletion
-                COM_refresh(Config::get('admin_url') . '/index.php?msg=20');
+                COM_setMsg(MO::_('Your election has been successfully deleted.'));
+                COM_refresh(Config::get('admin_url') . '/index.php');
             }
         } else {
             if (!$force) {
@@ -1693,47 +1706,49 @@ class Election
      */
     public function listVotes()
     {
-        global $_CONF, $_IMAGE_TYPE, $LANG_ADMIN, $LANG_ELECTION, $LANG25, $LANG_ACCESS;
+        global $_CONF;
 
         $retval = '';
-        $menu_arr = array (
+        /*$menu_arr = array (
             array(
                 'url' => Config::get('admin_url') . '/index.php',
-                'text' => $LANG_ADMIN['list_all'],
+                'text' => MO::_('List All'),
             ),
             array(
                 'url' => Config::get('admin_url') . '/index.php?edit=x',
-                'text' => $LANG_ADMIN['create_new'],
+                'text' => MO::_('Create'),
             ),
             array(
                 'url' => $_CONF['site_admin_url'],
-                'text' => $LANG_ADMIN['admin_home']),
-        );
+                'text' => MO::_('Admin Home'),
+            ),
+        );*/
 
         $retval .= COM_startBlock(
             'Election Votes for ' . $this->pid, '',
             COM_getBlockTemplate('_admin_block', 'header')
         );
 
-        $retval .= ADMIN_createMenu(
+        /*$retval .= ADMIN_createMenu(
             $menu_arr,
-            $LANG25[19],
+            MO::_('To modify or delete a poll, click on the edit icon of the election.') . ' ' .
+            MO::_('To create a new poll, click on "Create" above.'),
             plugin_geticon_elections()
-        );
+        );*/
 
         $header_arr = array(
             array(
-                'text' => $LANG_ELECTION['username'],
+                'text' => MO::_('User Name'),
                 'field' => 'username',
                 'sort' => true,
             ),
             array(
-                'text' => $LANG_ELECTION['ipaddress'],
+                'text' => MO::_('IP Address'),
                 'field' => 'ipaddress',
                 'sort' => true,
             ),
             array(
-                'text' => $LANG_ELECTION['date_voted'],
+                'text' => MO::_('Date Voted'),
                 'field' => 'unixdate',
                 'sort' => true,
             ),
@@ -1745,7 +1760,7 @@ class Election
         );
         $text_arr = array(
             'has_extras'   => true,
-            'instructions' => $LANG25[19],
+            'instructions' => '',
             'form_url'     => Config::get('admin_url') . '/index.php?lv=x&amp;pid='.urlencode($this->pid),
         );
 

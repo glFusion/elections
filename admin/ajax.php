@@ -14,6 +14,7 @@
 
 /** Include required glFusion common functions */
 require_once '../../../lib-common.php';
+use Elections\MO;
 
 // This is for administrators only.  It's called by Javascript,
 // so don't try to display a message
@@ -22,7 +23,7 @@ if (!plugin_ismoderator_elections()) {
     COM_accessLog("User {$_USER['username']} tried to illegally access the shop admin ajax function.");
     $retval = array(
         'status' => false,
-        'statusMessage' => $LANG_SHOP['access_denied'],
+        'statusMessage' => MO::_('Access Denied'),
     );
     header('Content-Type: application/json');
     header("Cache-Control: no-cache, must-revalidate");
@@ -64,7 +65,7 @@ case 'toggle':
         'component' => $_POST['component'],
         'newval'    => $newval,
         'statusMessage' => $newval != $_POST['oldval'] ?
-            $LANG_POLLS['msg_updated'] : $LANG_POLLS['msg_nochange'],
+            MO::_('Item(s) have been updated') : MO::_('Item(s) are unchanged');
         'title' => $title,
     );
 }

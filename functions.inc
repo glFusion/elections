@@ -65,6 +65,7 @@ spl_autoload_register(function ($class)
         require $file;
     }
 });
+use Polls\MO;
 use Elections\DB;
 use Elections\Config;
 use Elections\Election;
@@ -76,25 +77,7 @@ use Elections\Models\Groups;
 // May later rely on the class autoloader
 require_once __DIR__ . '/' . Config::PI_NAME . '.php';
 
-/*
-* load the language file(s), including custom strings if any
-*/
-$langfile = __DIR__ . '/language/' . $_CONF['language'] . '.php';
-$custfile = __DIR__ . '/language/custom/' . $_CONF['language'] . '.php';
-
-if (file_exists($langfile)) {
-    include_once $langfile;
-    if (file_exists($custfile)) {
-        include_once $custfile;
-    }
-} else {
-    $langfile = __DIR__ . '/language/english_utf-8.php';
-    $custfile = __DIR__ . '/language/custom/english_utf-8.php';
-    include_once $langfile;
-    if (file_exists($custfile)) {
-        include_once $custfile;
-    }
-}
+require_once __DIR__ . '/language/lang_config.php';
 
 // +---------------------------------------------------------------------------+
 // | glFusion Plugin API Implementations                                       |
@@ -105,12 +88,11 @@ if (file_exists($langfile)) {
 * NOTE: this MUST return the url/value pairs in the following format
 * $<arrayname>[<label>] = <url>
 *
-* @todo: Change menu text from plugin name to $LANG_ELECTION var
 * @return   mixed   menu entry, or boolean false if disabled / hidden
 */
 function plugin_getmenuitems_elections()
 {
-    global $_CONF, $LANG_ELECTION;
+    global $_CONF;
 
     if (
         Config::get('hidemenu') == 1 ||
@@ -121,7 +103,7 @@ function plugin_getmenuitems_elections()
         return false;
     }
     return array(
-        $LANG_ELECTION['election'] . ' <i class="uk-icon-check-square"></i>' => Config::get('url') . '/index.php',
+        MO::_('Elections') . ' <i class="uk-icon-check-square"></i>' => Config::get('url') . '/index.php',
     );
 }
 
@@ -161,7 +143,7 @@ function plugin_getcommenturlid_elections()
  */
 function plugin_savecomment_elections($title, $comment, $id, $pid, $postmode)
 {
-    global $_CONF, $_TABLES, $LANG03, $_USER;
+    global $_CONF, $_TABLES, $_USER;
 
     $retval = '';
 
@@ -176,8 +158,15 @@ function plugin_savecomment_elections($title, $comment, $id, $pid, $postmode)
 
     $ret = CMT_saveComment ($title, $comment, $id, $pid, Config::PI_NAME, $postmode);
     if ($ret > 0) {
-        $retval .= CMT_commentForm ($title, $comment, $id, $pid, Config::PI_NAME,
-                                   $LANG03[14], $postmode);
+        $retval .= CMT_commentForm(
+            $title,
+            $comment,
+            $id,
+            $pid,
+            Config::PI_NAME,
+            MO::_('Preview'),
+            $postmode
+        );
     } else { // success
         $retval = COM_refresh(Config::get('url') . "/index.php?pid=$id");
     }
@@ -266,8 +255,6 @@ function plugin_getwhatsnewcomment_elections()
 
 function plugin_searchtypes_elections()
 {
-    global $LANG_ELECTION;
-
     return array(Config::get('pi_name') => ucfirst(Config::get('pi_name')));
 }
 
@@ -290,7 +277,7 @@ function plugin_searchtypes_elections()
 function plugin_dopluginsearch_elections(
     $query, $dateStart, $dateEnd, $topic, $type, $author, $keyType, $page, $perpage
 ) {
-    global $_CONF, $_DB_dbms, $LANG09, $LANG_ELECTION, $_USER;
+    global $_CONF, $_DB_dbms, $_USER;
 
     // Make sure the query is SQL safe
     $query = trim(DB_escapeString($query));
@@ -344,7 +331,7 @@ function plugin_dopluginsearch_comment_elections(
     $query, $datestart, $dateend, $topic, $type, $author, $keyType, $page, $perpage
 )
 {
-    global $_USER, $_CONF, $LANG09, $_TABLES;
+    global $_USER, $_CONF, $_TABLES;
 
     $query = trim(DB_escapeString(htmlspecialchars($query)));
     $pi_name = Config::get('pi_name');
@@ -360,7 +347,7 @@ function plugin_dopluginsearch_comment_elections(
         $sql .= " AND (c.uid = '$author') ";
     }
 
-    $search_c = new SearchCriteria('comments', 'Election > '.$LANG09[66]);
+    $search_c = new SearchCriteria('comments', 'Election > ' . MO::_('Comment'));
     $columns = array('comment','c.title');
     $sql .= $search_c->getDateRangeSQL('AND', 'UNIX_TIMESTAMP(c.date)', $datestart, $dateend);
     list($sql,$ftsql) = $search_c->buildSearchSQL($keyType, $query, $columns, $sql);
@@ -379,9 +366,9 @@ function plugin_dopluginsearch_comment_elections(
 */
 function plugin_showstats_elections($showsitestats)
 {
-    global $_CONF, $LANG_ELECTION;
+    global $_CONF;
 
-    require_once ($_CONF['path_system'] . 'lib-admin.php');
+    USES_lib_admin();
 
     $retval = '';
 
@@ -395,12 +382,12 @@ function plugin_showstats_elections($showsitestats)
     if ($nrows > 0) {
         $header_arr = array(
             array(
-                'text'         => $LANG_ELECTION['stats_topics'],
+                'text'         => MO::_('Election Topic'),
                 'field'        => 'pid',
                 'header_class' => 'stats-header-title',
             ),
             array(
-                'text'         => $LANG_ELECTION['stats_votes'],
+                'text'         => MO::_('Votes'),
                 'field'        => 'voters',
                 'header_class' => 'stats-header-count',
                 'field_class'  => 'stats-list-count',
@@ -409,7 +396,7 @@ function plugin_showstats_elections($showsitestats)
         $data_arr = array();
         $text_arr = array(
             'has_menu' => false,
-            'title'    => $LANG_ELECTION['stats_top10'],
+            'title'    => MO::_('Top 10 Elections'),
         );
 
         $filter = new sanitizer();
@@ -425,8 +412,12 @@ function plugin_showstats_elections($showsitestats)
         }
         $retval .= ADMIN_simpleList ('', $header_arr, $text_arr, $data_arr);
     } else {
-        $retval .= COM_startBlock ($LANG_ELECTION['stats_top10'],'',COM_getBlockTemplate('_admin_block', 'header'));
-        $retval .= $LANG_ELECTION['stats_none'];
+        $retval .= COM_startBlock(
+            MO::_('Top 10 Elections'),
+            '',
+            COM_getBlockTemplate('_admin_block', 'header')
+        );
+        $retval .= MO::_('It appears that there are no elections on this site or no one has ever voted.');
         $retval .= COM_endBlock (COM_getBlockTemplate('_admin_block', 'footer'));
     }
 
@@ -442,26 +433,20 @@ function plugin_showstats_elections($showsitestats)
 */
 function plugin_statssummary_elections()
 {
-    global $LANG_ELECTION;
-
     list($total_election, $total_answers) = ELECTION_countElectionAndVotes ();
 
     $item_count = COM_numberFormat ($total_election)
                 . ' (' . COM_numberFormat ($total_answers) . ')';
 
-    return array ($LANG_ELECTION['stats_summary'], $item_count);
+    return array(MO::_('Elections in the system'), $item_count);
 }
 
 
 /**
 * This will put an option for election in the command and control block.
-*
-* @todo: Change menu text from plugin name to $LANG_ELECTION var
 */
 function plugin_cclabel_elections()
 {
-    global $LANG_ELECTION;
-
     if (plugin_ismoderator_elections()) {
         return array(
             ucfirst(Config::get('pi_name')),
@@ -475,12 +460,10 @@ function plugin_cclabel_elections()
 
 /**
 * Returns the administrative option for this plugin.
-*
-* @todo: Change menu text from plugin name to $LANG_ELECTION var
 */
 function plugin_getadminoption_elections()
 {
-    global $_CONF, $LANG_ELECTION;
+    global $_CONF;
 
     if (plugin_ismoderator_elections()) {
         return array(
@@ -621,7 +604,7 @@ function plugin_geticon_elections()
 */
 function plugin_displaycomment_elections($id, $cid, $title, $order, $format, $page, $view)
 {
-    global $_TABLES, $LANG_ACCESS;
+    global $_TABLES;
 
     $retval = '';
 
@@ -655,15 +638,12 @@ function plugin_displaycomment_elections($id, $cid, $title, $order, $format, $pa
 * template variables, e.g. 'election_xxx' and 'lang_election_xxx'.
 * 'button_election' is an exception, as such a variable existed for header.thtml
 *
-* @todo: Change menu text from plugin name to $LANG_ELECTION var
 * @param    string  $templatename   name of template, e.g. 'header'
 * @param    ref     $template       reference of actual template
 * @return   void
 */
 function plugin_templatesetvars_elections($templatename, &$template)
 {
-    global $LANG_ELECTION;
-
     if ($templatename == 'header') {
         $template->set_var ('button_election', ucfirst(Config::get('pi_name')));
     }
@@ -715,7 +695,7 @@ function plugin_upgrade_elections()
 */
 function plugin_autotags_elections($op, $content = '', $autotag = '')
 {
-    global $_CONF, $_TABLES, $LANG_PO_AUTOTAG;
+    global $_CONF, $_TABLES;
 
     $skip = 0;
     $pi_name = Config::get('pi_name');
@@ -729,13 +709,13 @@ function plugin_autotags_elections($op, $content = '', $autotag = '')
     } elseif ( $op == 'desc' ) {
         switch($content) {
         case Config::KEY . '_vote':
-            return $LANG_PO_AUTOTAG['desc_poll_vote'];
+            return MO::_('HTML: renders a voting block for a Election on this site.  usage: [election_vote:<i>election_id</i>');
             break;
         case Config::KEY . '_result' :
-            return $LANG_PO_AUTOTAG['desc_poll_result'];
+            return MO::_('HTML: renders the results of a Election on this site.  usage: [election_result:<i>election_id</i>]');
             break;
         case Config::KEY:
-            return $LANG_PO_AUTOTAG['desc_poll'];
+            return MO::_('Link: to a Election on this site.  link_text defaults to the Election topic.  usage: [election:<i>election_id</i> {link_text}]');
             break;
         default :
             return '';
@@ -862,7 +842,7 @@ function plugin_autotags_elections($op, $content = '', $autotag = '')
 */
 function plugin_getiteminfo_elections($id, $what, $uid = 0, $options = array())
 {
-    global $_CONF, $_TABLES, $LANG_ELECTION;
+    global $_CONF, $_TABLES;
 
     $properties = explode(',', $what);
     $fields = array();

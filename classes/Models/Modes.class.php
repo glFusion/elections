@@ -3,10 +3,10 @@
  * Define display mode constants
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2020 Lee Garner <lee@leegarner.com>
- * @package     election
- * @version     v3.0.0
- * @since       v3.0.0
+ * @copyright   Copyright (c) 2021 Lee Garner <lee@leegarner.com>
+ * @package     elections
+ * @version     v0.1.0
+ * @since       v0.1.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -16,7 +16,7 @@ namespace Elections\Models;
 
 /**
  * Constants for display modes (block, autotag, normal, etc.)
- * @package election
+ * @package elections
  */
 class Modes
 {

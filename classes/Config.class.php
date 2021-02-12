@@ -16,7 +16,7 @@ namespace Elections;
 
 /**
  * Class to get plugin configuration data.
- * @package election
+ * @package elections
  */
 final class Config
 {

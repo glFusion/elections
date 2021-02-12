@@ -4,7 +4,7 @@
  *
  * @author      Lee Garner <lee@leegarner.com>
  * @copyright   Copyright (c) 2020 Lee Garner <lee@leegarner.com>
- * @package     polls
+ * @package     elections
  * @version     v3.0.0
  * @since       v3.0.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
@@ -16,11 +16,12 @@ use Elections\Election;
 use Elections\Answer;
 use Elections\Config;
 use Elections\Models\Modes;
+use Elections\MO;
 
 
 /**
  * Class for a single poll.
- * @package polls
+ * @package elections
  */
 class Results
 {
@@ -146,7 +147,7 @@ class Results
     public function Render()
     {
         global $_CONF, $_TABLES, $_USER, $_IMAGE_TYPE,
-           $LANG01, $LANG_ELECTION, $_COM_VERBOSE, $LANG25;
+           $_COM_VERBOSE;
 
         $retval = '';
         $filter = new \sanitizer();
@@ -159,7 +160,7 @@ class Results
 
         if (
             $this->Election->hideResults() &&
-            !$this->Election->isOpen()
+            $this->Election->isOpen()
         ) {
             if (
                 $this->displaytype == Modes::NORMAL
@@ -173,11 +174,11 @@ class Results
                 // Normal mode, show a message if not an owner or admin
                 $msg = '';
                 if ($this->Election->alreadyVoted()) {
-                    $msg .= $LANG_ELECTION['alreadyvoted'] . '<br />';
+                    $msg .= MO::_('Your vote has already been recorded.') . '<br />';
                 }
-                $msg .= $LANG_ELECTION['pollhidden'];
+                $msg .= MO::_('Election results will be available only after the election has closed.');
                 $retval = COM_showMessageText($msg,'', true,'error');
-                $retval .= Election::listElection();
+                $retval .= Election::listElections();
                 return $retval;
             }
         }
@@ -196,16 +197,19 @@ class Results
             'topic'     => $filter->filterData($this->Election->getTopic()),
             'pid'       => $this->pid,
             'num_votes' => COM_numberFormat($this->Election->numVotes()),
-            'lang_votes' => $LANG_ELECTION['votes'],
+            'lang_votes' => MO::_('Votes'),
             'admin_url' => Config::get('admin_url') . '/index.php',
             'polls_url' => $this->isAdmin ? '' : Config::get('url') . '/index.php',
             'isOpen' => $this->Election->isOpen(),
             'adminView' => $this->Election->hideResults(),
+            'lang_back' => MO::_('Back to Listing'),
+            'lang_is_open' => MO::_('Early results, election is open'),
+            'url' => Config::get('url') . '/index.php',
         ) );
 
         if ($this->displaytype == Modes::NORMAL && Election::hasRights('edit')) {
             $editlink = COM_createLink(
-                $LANG25[27],
+                MO::_('Edit'),
                 Config::get('admin_url') . '/index.php?edit=x&amp;pid=' . $this->pid);
             $poll->set_var(array(
                 'edit_link' => $editlink,
@@ -214,7 +218,7 @@ class Results
                     '<i class="uk-icon-edit tooltip"></i>',
                     Config::get('admin_url') . '/index.php?edit=x&amp;pid=' . $this->pid,
                     array(
-                        'title' => $LANG25[27],
+                        'title' => MO::_('Edit'),
                     )
                 ),
             ) );
@@ -226,7 +230,11 @@ class Results
                 $counter = ($j + 1) . "/$nquestions: " ;
             }
             $Q = $questions[$j];
-            $poll->set_var('question', $counter . $filter->filterData($Q->getQuestion()));
+            $poll->set_var(array(
+                'lang_question' => MO::_('Question'),
+                'lang_question_number' => $counter,
+                'question' =>$filter->filterData($Q->getQuestion())
+            ) );
             $Answers = Answer::getByQuestion($Q->getQid(), $this->pid);
             $nanswers = count($Answers);
             $q_totalvotes = 0;
@@ -274,7 +282,7 @@ class Results
             USES_lib_comments();
             $num_comments = CMT_getCount(Config::PI_NAME, $this->pid);
             $poll->set_var('num_comments',COM_numberFormat($num_comments));
-            $poll->set_var('lang_comments', $LANG01[3]);
+            $poll->set_var('lang_comments', MO::_('Comments'));
             $comment_link = CMT_getCommentLinkWithCount(
                 Config::PI_NAME,
                 $this->pid,
@@ -289,7 +297,7 @@ class Results
             $poll->set_var('comments', '');
         }
 
-        $poll->set_var('lang_topics', $LANG_ELECTION['topics'] );
+        $poll->set_var('lang_topics', MO::_('Topics'));
         if ($this->isAdmin && $this->displaytype !== Modes::PRINT) {
             $retval .= '<a class="uk-button uk-button-success" target="_blank" href="' .
                 Config::get('admin_url') . '/index.php?presults=x&pid=' .
@@ -352,22 +360,22 @@ class Results
      */
     public function listVotes()
     {
-        global $_CONF, $_TABLES, $_IMAGE_TYPE, $LANG_ADMIN, $LANG_ELECTION, $LANG25, $LANG_ACCESS;
+        global $_CONF, $_TABLES, $_IMAGE_TYPE;
 
         $retval = '';
         $header_arr = array(
             array(
-                'text' => $LANG_ELECTION['username'],
+                'text' => MO::_('User Name'),
                 'field' => 'username',
                 'sort' => true,
             ),
             array(
-                'text' => $LANG_ELECTION['ipaddress'],
+                'text' => MO::_('IP Address'),
                 'field' => 'ipaddress',
                 'sort' => true,
             ),
             array(
-                'text' => $LANG_ELECTION['date_voted'],
+                'text' => MO::_('Date Voted'),
                 'field' => 'date_voted',
                 'sort' => true,
             ),
@@ -379,7 +387,7 @@ class Results
         );
         $text_arr = array(
             'has_extras'   => true,
-            'instructions' => $LANG25[19],
+            'instructions' => '',
             'form_url'     => Config::get('admin_url') . '/index.php?lv=x&amp;pid='.urlencode($this->pid),
         );
 
