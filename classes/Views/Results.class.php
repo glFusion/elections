@@ -236,7 +236,7 @@ class Results
                 'lang_question_number' => $counter,
                 'question' =>$filter->filterData($Q->getQuestion())
             ) );
-            $Answers = Answer::getByQuestion($Q->getQid(), $this->pid);
+            $Answers = Answer::getByScore($Q->getQid(), $this->pid);
             $nanswers = count($Answers);
             $q_totalvotes = 0;
             $max_votes = -1;
