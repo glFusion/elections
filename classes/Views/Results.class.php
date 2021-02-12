@@ -201,6 +201,9 @@ class Results
             'polls_url' => $this->isAdmin ? '' : Config::get('url') . '/index.php',
             'isOpen' => $this->Election->isOpen(),
             'adminView' => $this->Election->hideResults(),
+            'lang_back' => $LANG_ELECTION['back_to_list'],
+            'lang_is_open' => $LANG_ELECTION['msg_results_open'],
+            'url' => Config::get('url') . '/index.php',
         ) );
 
         if ($this->displaytype == Modes::NORMAL && Election::hasRights('edit')) {

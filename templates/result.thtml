@@ -3,7 +3,7 @@
     <span class="uk-align-right"><a href="{edit_url}" class="uk-aling-right uk-icon uk-icon-edit tm-meta-icon"></a></span>
 {!endif}
 {!if url}
-    <a class="uk-align-right" href="{url}">{$LANG_POLLS['back_to_list']}</a>
+    <a class="uk-align-right" href="{url}">{lang_back}</a>
 {!endif}
 {!if topic}
     <h3>{topic}</h3>
@@ -14,7 +14,7 @@
 {!else}
     <div class="uk-alert">
 {!endif}
-        {$LANG_POLLS['msg_results_open']}
+        {lang_is_open}
     </div>
 {!endif}
 {!if description}
