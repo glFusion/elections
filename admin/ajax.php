@@ -4,9 +4,9 @@
  *
  * @author      Lee Garner <lee@leegarner.com>
  * @copyright   Copyright (c) 2020 Lee Garner <lee@leegarner.com>
- * @package     election
- * @version     v1.1.0
- * @since       v0.7.0
+ * @package     elections
+ * @version     v0.1.0
+ * @since       v0.1.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -18,7 +18,6 @@ use Elections\MO;
 
 // This is for administrators only.  It's called by Javascript,
 // so don't try to display a message
-//COM_errorLog(print_r($_POST,true));
 if (!plugin_ismoderator_elections()) {
     COM_accessLog("User {$_USER['username']} tried to illegally access the shop admin ajax function.");
     $retval = array(
@@ -41,11 +40,12 @@ if (isset($_POST['action'])) {
 } else {
     $action = '';
 }
+
 $title = NULL;      // title attribute to be set
 switch ($action) {
 case 'toggle':
     switch ($_POST['component']) {
-    case 'poll':
+    case 'election':
         switch ($_POST['type']) {
         case 'is_open':
             $newval = Election::toggleEnabled($_POST['oldval'], $_POST['id']);
@@ -75,9 +75,5 @@ header('Content-Type: application/json');
 header("Cache-Control: no-cache, must-revalidate");
 //A date in the past
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
-//COM_errorLog(var_export($retval,true));
-
 echo json_encode($retval);
 exit;
-
-?>

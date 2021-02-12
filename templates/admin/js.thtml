@@ -1,11 +1,12 @@
 <script>
 /**
-*   Toggle field for Shop products
-*
-*   @param  object  cbox    Checkbox
-*   @param  string  id      Sitemap ID, e.g. plugin name
-*   @param  string  type    Type of sitemap (XML or HTML)
-*/
+ * Toggle field for Elections.
+ *
+ * @param  object  cbox    Checkbox
+ * @param  string  id      Element ID
+ * @param  string  type    Field name
+ * @param  string  component   Element type, e.g. "election"
+ */
 var {pi_name}_toggle = function(cbox, id, type, component) {
     oldval = cbox.checked ? 0 : 1;
     var dataS = {
