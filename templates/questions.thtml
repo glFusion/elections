@@ -1,7 +1,7 @@
 {# begin {templatelocation} #}
 <div class="uk-panel-box uk-panel-box-primary uk-margin">
     <h3>{lang_question} {lang_question_number}: {question}</h3>
-    <ul class="uk-list">
+    <ul class="uk-list elections_answers">
         {answers}
     </ul>
 </div>
