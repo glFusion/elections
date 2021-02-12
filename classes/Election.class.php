@@ -117,6 +117,10 @@ class Election
      * @var boolean */
     private $rnd_answers = 0;
 
+    /** Declare a winner, or just use as a poll?
+     * @var boolean */
+    private $decl_winner = 1;
+
     /** Number of votes cast.
      * @var integer */
     private $_vote_count = 0;
@@ -531,6 +535,18 @@ class Election
 
 
     /**
+     * See if this election declares a winner.
+     * May be false if used for information only.
+     *
+     * @return  boolean     1 if a winner is declared, False if not
+     */
+    public function declaresWinner()
+    {
+        return $this->decl_winner ? 1 : 0;
+    }
+
+
+    /**
      * Set the opening date, minimum date by default.
      *
      * @param   string  $dt     Datetime string
@@ -611,6 +627,7 @@ class Election
         $this->is_open = isset($A['is_open']) && $A['is_open'] ? 1 : 0;
         $this->rnd_questions = isset($A['rnd_questions']) && $A['rnd_questions'] ? 1 : 0;
         $this->rnd_answers = isset($A['rnd_answers']) && $A['rnd_answers'] ? 1 : 0;
+        $this->decl_winner = isset($A['decl_winner']) && $A['decl_winner'] ? 1 : 0;
         //$this->login_required = isset($A['login_required']) && $A['login_required'] ? 1 : 0;
         $this->hideresults = isset($A['hideresults']) && $A['hideresults'] ? 1 : 0;
         $this->commentcode = (int)$A['commentcode'];
@@ -777,6 +794,8 @@ class Election
             'rnda_chk' => $this->rnd_answers ? 'checked="checked"' : '',
             'lang_rnd_q' => $LANG_ELECTION['rnd_questions'],
             'lang_rnd_a' => $LANG_ELECTION['rnd_answers'],
+            'lang_decl_winner' => $LANG_ELECTION['declares_winner'],
+            'decl_chk' => $this->decl_winner ? 'checked="checked"' : '',
         ) );
 
         $T->set_block('editor','questiontab','qt');
@@ -902,7 +921,8 @@ class Election
             results_gid = " . (int)$this->results_gid . ",
             voteaccess = " . (int)$this->mod_allowed . ",
             rnd_questions = " . (int)$this->rnd_questions . ",
-            rnd_answers = " . (int)$this->rnd_answers;
+            rnd_answers = " . (int)$this->rnd_answers . ",
+            decl_winner = " . (int)$this->decl_winner;
         $sql = $sql1 . $sql2 . $sql3;
         //echo $sql;die;
         DB_query($sql, 1);
@@ -1122,9 +1142,9 @@ class Election
         case 'topic':
             $retval = htmlspecialchars($fieldvalue);
             $voted = Voter::hasVoted($A['pid'], $A['group_id']);
+            $closed = ($A['closes'] < $extras['_now']) || $A['is_open'] == 0;
             if (
-                $A['closes'] > $extras['_now'] &&
-                $A['is_open'] &&
+                !$closed &&
                 !$voted &&
                 SEC_inGroup($A['group_id'])
             ) {
@@ -1132,13 +1152,14 @@ class Election
                     $retval,
                     Config::get('url') . "/index.php?pid={$A['pid']}"
                 );
-            } elseif (SEC_inGroup($A['results_gid'])) {
-                if (!$A['hideresults']) {
-                    $retval = COM_createLink(
-                        $retval,
-                        Config::get('url') . "/index.php?results=x&pid={$A['pid']}"
-                    );
-                }
+            } elseif (
+                SEC_inGroup($A['results_gid']) &&
+                ($closed || !$A['hideresults'])
+            ) {
+                $retval = COM_createLink(
+                    $retval,
+                    Config::get('url') . "/index.php?results=x&pid={$A['pid']}"
+                );
             }
             break;
         case 'user_action':
@@ -1595,8 +1616,12 @@ class Election
         );
         $sql_now = $_CONF['_now']->toMySQL(true);
         $filter = "WHERE is_open = 1 AND ('$sql_now' BETWEEN opens AND closes " .
-            SEC_buildAccessSql('AND', 'group_id') .
-            ") OR (closes < '$sql_now' " . SEC_buildAccessSql('AND', 'results_gid') . ')';
+            SEC_buildAccessSql('AND', 'group_id') . ") OR (
+                (hideresults = 0 OR is_open = 0 OR closes < '$sql_now') " .
+                    SEC_buildAccessSql('AND', 'results_gid') .
+                    ')';
+        $sql = "SELECT COUNT(*) AS count FROM " . DB::table('topics') . ' ' . $filter;
+        //echo $sql;die;
         $count = 0;
         $res = DB_query("SELECT COUNT(*) AS count FROM " . DB::table('topics') . ' ' . $filter);
         if ($res) {
@@ -1607,13 +1632,13 @@ class Election
             $retval .= '<div class="floatright"><a class="uk-button uk-button-small uk-button-danger" href="' .
                 Config::get('admin_url') . '/index.php">Admin</a></div>' . LB;
         }
-        /*
         $sql = "SELECT p.*, UNIX_TIMESTAMP(p.date) AS unixdate,
                 (SELECT COUNT(v.id) FROM " . DB::table('voters') . " v WHERE v.pid = p.pid) AS vote_count
-                FROM " . DB::table('topics') . " AS p
-                WHERE is_open = 1 AND ('$sql_now' BETWEEN opens AND closes " .
+                FROM " . DB::table('topics') . " AS p " . $filter;
+                /*WHERE is_open = 1 AND ('$sql_now' BETWEEN opens AND closes " .
                 SEC_buildAccessSql('AND', 'group_id') .
-                ") OR (closes < '$sql_now' " . SEC_buildAccessSql('AND', 'results_gid') . ')';
+                ") OR (closes < '$sql_now' " . SEC_buildAccessSql('AND', 'results_gid') . ')';*/
+        //echo $sql;die;
         $res = DB_query($sql);
         $data_arr = array();
         while ($A = DB_fetchArray($res, false)) {
@@ -1622,8 +1647,8 @@ class Election
         }
         $retval .= ADMIN_simpleList(
             array(__CLASS__, 'getListField'), $header_arr, $text_arr, $data_arr, '', '', $extras
-        );*/
-        $query_arr = array(
+        );
+        /*$query_arr = array(
             'table' => DB::key('topics'),
             'sql' => "SELECT p.*, UNIX_TIMESTAMP(p.date) AS unixdate,
                 (SELECT COUNT(v.id) FROM " . DB::table('voters') . " v WHERE v.pid = p.pid) AS vote_count
@@ -1639,7 +1664,7 @@ class Election
             Config::PI_NAME . '_' . __FUNCTION__,
             array(__CLASS__, 'getListField'),
             $header_arr, $text_arr, $query_arr, $defsort_arr, '', $extras
-        );
+        );*/
         if ($count == 0) {
             $retval .= '<div class="uk-alert uk-alert-danger">' . $LANG_ELECTION['stats_none'] . '</div>';
         }

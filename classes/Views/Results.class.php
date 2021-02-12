@@ -256,6 +256,7 @@ class Results
                 } else {
                     $percent = $A->getVotes() / $q_totalvotes;
                 }
+                $winner = ($this->Election->declaresWinner()) && ($A->getVotes() == $max_votes);
                 $poll->set_var(array(
                     'cssida' =>  1,
                     'cssidb' =>  2,
@@ -265,7 +266,7 @@ class Results
                     'answer_odd' => (($i - 1) % 2),
                     'answer_num' => COM_numberFormat($A->getVotes()),
                     'answer_percent' => sprintf('%.2f', $percent * 100),
-                    'winner' => $A->getVotes() == $max_votes,
+                    'winner' => $winner,
                 ) );
                 $width = (int) ($percent * 100 );
                 $poll->set_var('bar_width', $width);

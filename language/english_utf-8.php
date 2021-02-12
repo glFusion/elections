@@ -83,6 +83,7 @@ $LANG_ELECTION = array(
 'noaccess' => 'No Access',
 'rnd_questions' => 'Randomize question order?',
 'rnd_answers' => 'Randomize answer order?',
+'declares_winner' => 'Declares a Winner?',
 );
 
 ###############################################################################
