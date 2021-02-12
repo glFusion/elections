@@ -204,6 +204,7 @@ class Results
             'lang_back' => $LANG_ELECTION['back_to_list'],
             'lang_is_open' => $LANG_ELECTION['msg_results_open'],
             'url' => Config::get('url') . '/index.php',
+            'lang_question' => $LANG25[31],
         ) );
 
         if ($this->displaytype == Modes::NORMAL && Election::hasRights('edit')) {
@@ -226,11 +227,12 @@ class Results
         $nquestions = count($questions);
         for ($j = 0; $j < $nquestions; $j++) {
             if ($nquestions >= 1) {
-                $counter = ($j + 1) . "/$nquestions: " ;
+                $counter = ($j + 1) . "/$nquestions" ;
             }
             $Q = $questions[$j];
-            $poll->set_var('question', $counter . $filter->filterData($Q->getQuestion()));
-            $Answers = Answer::getByQuestion($Q->getQid(), $this->pid);
+            $poll->set_var('question_number', $counter);
+            $poll->set_var('question', $filter->filterData($Q->getQuestion()));
+            $Answers = Answer::getByScore($Q->getQid(), $this->pid);
             $nanswers = count($Answers);
             $q_totalvotes = 0;
             $max_votes = -1;

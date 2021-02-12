@@ -1,7 +1,12 @@
 {# begin {templatelocation} #}
 <div class="uk-grid uk-margin-remove" style="padding-bottom:10px;">
+{!if winner}
+    <div class="uk-width-small-1-4 elections_winnertext">
+        <i class="uk-icon uk-icon-arrow-right uk-text-success"></i>&nbsp;{answer_text}
+{!else}
     <div class="uk-width-small-1-4">
         {answer_text}
+{!endif}
     </div>
     <div class="uk-width-small-3-4">
 {!if winner}
