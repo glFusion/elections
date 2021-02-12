@@ -32,6 +32,10 @@ class Question
      * @var string */
     private $question = '';
 
+    /** Flag indicating if answers should be randomized.
+     * @var boolean */
+    private $rnd_answers = false;
+
     /** Flage to delete the question.
      * Used if the poll is edited and a question is removed.
      * @var boolean */
@@ -51,15 +55,16 @@ class Question
      *
      * @param   array   $A      Optional data record
      */
-    public function __construct($A=NULL)
+    public function __construct($A=NULL, $rnd_a=false)
     {
         global $_USER;
 
         if (is_array($A)) {
             $this->setVars($A, true);
         }
+        $this->rnd_answers = $rnd_a ? true : false;
         if ($this->qid > -1 && !empty($this->pid)) {
-            $this->Answers = Answer::getByQuestion($this->qid, $this->pid);
+            $this->Answers = Answer::getByQuestion($this->qid, $this->pid, $this->rnd_answers);
         }
     }
 
@@ -86,17 +91,23 @@ class Question
      * Get all the questions that appear on a given poll.
      *
      * @param   string  $pid    Election ID
+     * @param   boolean $rnd_q  True to randomize question order
+     * @param   boolean $rnd_a  True to randomize answer order
      * @return  array       Array of Question objects
      */
-    public static function getByElection($pid)
+    public static function getByElection($pid, $rnd_q=false, $rnd_a=false)
     {
         $retval = array();
         $sql = "SELECT * FROM " . DB::table('questions') . "
-            WHERE pid = '" . DB_escapeString($pid) . "'
-            ORDER BY pid,qid ASC";
+            WHERE pid = '" . DB_escapeString($pid) . "'";
+        if ($rnd_q) {
+            $sql .= ' ORDER BY RAND()';
+        } else {
+            $sql .= ' ORDER BY pid,qid ASC';
+        }
         $res = DB_query($sql, 1);
         while ($A = DB_fetchArray($res, false)) {
-            $retval[] = new self($A);
+            $retval[] = new self($A, $rnd_a);
         }
         return $retval;
      }

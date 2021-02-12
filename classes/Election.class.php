@@ -109,6 +109,14 @@ class Election
      * @var integer */
     private $mod_allowed = 0;
 
+    /** Randomize questions as displayed?
+     * @var boolean */
+    private $rnd_questions = 0;
+
+    /** Randomize answers as displayed?
+     * @var boolean */
+    private $rnd_answers = 0;
+
     /** Number of votes cast.
      * @var integer */
     private $_vote_count = 0;
@@ -601,6 +609,8 @@ class Election
         $this->dscp = $A['description'];
         $this->inblock = isset($A['display']) && $A['display'] ? 1 : 0;
         $this->is_open = isset($A['is_open']) && $A['is_open'] ? 1 : 0;
+        $this->rnd_questions = isset($A['rnd_questions']) && $A['rnd_questions'] ? 1 : 0;
+        $this->rnd_answers = isset($A['rnd_answers']) && $A['rnd_answers'] ? 1 : 0;
         //$this->login_required = isset($A['login_required']) && $A['login_required'] ? 1 : 0;
         $this->hideresults = isset($A['hideresults']) && $A['hideresults'] ? 1 : 0;
         $this->commentcode = (int)$A['commentcode'];
@@ -763,6 +773,10 @@ class Election
             'lang_noaccess' => $LANG_ELECTION['noaccess'],
             'lang_voteaccess' => $LANG_ELECTION['allow_votemod'],
             'voteaccess_' . $this->mod_allowed => 'selected="selected"',
+            'rndq_chk' => $this->rnd_questions ? 'checked="checked"' : '',
+            'rnda_chk' => $this->rnd_answers ? 'checked="checked"' : '',
+            'lang_rnd_q' => $LANG_ELECTION['rnd_questions'],
+            'lang_rnd_a' => $LANG_ELECTION['rnd_answers'],
         ) );
 
         $T->set_block('editor','questiontab','qt');
@@ -886,7 +900,9 @@ class Election
             owner_id = " . (int)$this->owner_id . ",
             group_id = " . (int)$this->voting_gid . ",
             results_gid = " . (int)$this->results_gid . ",
-            voteaccess = " . (int)$this->mod_allowed;
+            voteaccess = " . (int)$this->mod_allowed . ",
+            rnd_questions = " . (int)$this->rnd_questions . ",
+            rnd_answers = " . (int)$this->rnd_answers;
         $sql = $sql1 . $sql2 . $sql3;
         //echo $sql;die;
         DB_query($sql, 1);
@@ -1265,7 +1281,7 @@ class Election
             }
         }
 
-        $Questions = Question::getByElection($this->pid);
+        $Questions = Question::getByElection($this->pid, $this->rnd_questions, $this->rnd_answers);
         $nquestions = count($Questions);
         if ($nquestions > 0) {
             $election = new \Template(__DIR__ . '/../templates/');
@@ -1278,7 +1294,7 @@ class Election
             if ($nquestions > 1) {
                 $election->set_var('lang_topic', $LANG25[34]);
                 $election->set_var('topic', $filterS->filterData($this->topic));
-                $election->set_var('lang_question', $LANG25[31].':');
+                $election->set_var('lang_question', $LANG25[31]);
             }
             // create a random number to ID fields if multiple blocks showing
             $random = rand(0,100);
@@ -1352,9 +1368,9 @@ class Election
                     $notification = $LANG25[35] . " $nquestions " . $LANG25[36];
                     $nquestions = 1;
                 } else {
-                    $election->set_var('lang_question_number', " ". ($j+1).":");
+                    $election->set_var('lang_question_number', " ". ($j+1));
                 }
-                $answers = $Q->getAnswers();
+                $answers = $Q->getAnswers($this->rnd_answers);
                 $nanswers = count($answers);
                 for ($i = 0; $i < $nanswers; $i++) {
                     $Answer = $answers[$i];

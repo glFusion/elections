@@ -42,6 +42,21 @@
                         </select>
                     </div>
                 </div>
+
+                <div class="uk-form-row">
+                    <label class="uk-form-label" for="rnd_q">{lang_rnd_q}</label>
+                    <div class="uk-form-controls">
+                        <input type="checkbox" id="rnd_q" name="rnd_questions" value="1" {rndq_chk} />
+                    </div>
+                </div>
+
+                <div class="uk-form-row">
+                    <label class="uk-form-label" for="rnd_a">{lang_rnd_a}</label>
+                    <div class="uk-form-controls">
+                        <input type="checkbox" id="rnd_a" name="rnd_answers" value="1" {rnda_chk} />
+                    </div>
+                </div>
+
                 <div class="uk-form-row">
                     <label class="uk-form-label" for="mainpage">{lang_appearsonhomepage}</label>
                     <div class="uk-form-controls">

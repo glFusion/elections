@@ -54,6 +54,8 @@ $_SQL[DB::key('topics')] = "CREATE TABLE " . DB::table('topics') . " (
   `owner_id` mediumint(8) unsigned NOT NULL DEFAULT '1',
   `group_id` mediumint(8) unsigned NOT NULL DEFAULT '1',
   `results_gid` mediumint(8) unsigned NOT NULL DEFAULT '1',
+  `rnd_questions` tinyint(1) NOT NULL DEFAULT '0',
+  `rnd_answers` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`pid`),
   KEY `questions_qid` (`pid`),
   KEY `questions_date` (`date`),
