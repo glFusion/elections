@@ -159,7 +159,7 @@ case 'showvote':
     $Voter = Voter::getInstance($_POST['votekey']);
     $data = $Voter->decodeData();
     if (
-        $data !== false && 
+        $data !== false &&
         $Voter->getPid() == $pid    // verify right election is selected
     ) {
         $Election = Election::getInstance($Voter->getPid());

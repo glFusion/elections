@@ -46,7 +46,7 @@ case 'toggle':
     switch ($_POST['component']) {
     case 'election':
         switch ($_POST['type']) {
-        case 'is_open':
+        case 'status':
             $newval = Election::toggleEnabled($_POST['oldval'], $_POST['id']);
             break;
          default:

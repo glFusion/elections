@@ -50,7 +50,7 @@ class Election
 
     /** Is the election open to submissions?
      * @var boolean */
-    private $is_open = 1;
+    private $status = 0;
 
     /** Opening date/time.
      * @var object */
@@ -214,7 +214,7 @@ class Election
         $sql = "SELECT p.*, 
             (SELECT count(v.id) FROM " . DB::table('voters') . " v
                 WHERE v.pid = p.pid) as vote_count FROM " . DB::table('topics') . " p
-            WHERE is_open = 1 $in_block
+            WHERE status = 0 $in_block
             AND '" . $_CONF['_now']->toMySQL(true) . "' BETWEEN opens AND closes " .
             SEC_buildAccessSql('AND', 'group_id') .
             " ORDER BY pid ASC";
@@ -329,7 +329,7 @@ class Election
         global $_CONF;
 
         if (
-            !$this->is_open ||
+            $this->status > 0 ||
             $this->Opens->toMySQL(true) > $_CONF['_now']->toMySQL(true) ||
             $this->Closes->toMySQL(true) < $_CONF['_now']->toMySQL(true)
         ) {
@@ -624,7 +624,7 @@ class Election
         $this->topic = $A['topic'];
         $this->dscp = $A['description'];
         $this->inblock = isset($A['display']) && $A['display'] ? 1 : 0;
-        $this->is_open = isset($A['is_open']) && $A['is_open'] ? 1 : 0;
+        $this->status = (int)$A['status'];
         $this->rnd_questions = isset($A['rnd_questions']) && $A['rnd_questions'] ? 1 : 0;
         $this->rnd_answers = isset($A['rnd_answers']) && $A['rnd_answers'] ? 1 : 0;
         $this->decl_winner = isset($A['decl_winner']) && $A['decl_winner'] ? 1 : 0;
@@ -751,14 +751,17 @@ class Election
             'lang_description' => $LANG_ELECTION['description'],
             'comment_options' => COM_optionList(DB::table('commentcodes'),'code,name',$this->commentcode),
             'lang_appearsonhomepage' => $LANG25[8],
-            'lang_openforvoting' => $LANG_ELECTION['open'],
+            'lang_status' => $LANG_ELECTION['status'],
+            'lang_open' => $LANG_ELECTION['open'],
+            'lang_closed' => $LANG_ELECTION['closed'],
+            'lang_archived' => $LANG_ELECTION['archived'],
+            'open_'.$this->status => 'selected="selected"',
+
             'lang_hideresults' => $LANG25[37],
             //'lang_login_required' => $LANG25[43],
             'hideresults_explain' => $LANG25[38],
             'topic_info' => $LANG25[39],
             'display' => $this->inblock ? 'checked="checked"' : '',
-            'open' => $this->is_open ? 'checked="checked"' : '',
-            //'login_req_chk' => $this->login_required ? 'checked="checked"' : '',
             'hideresults' => $this->hideresults ? 'checked="checked"' : '',
             'lang_opens' => $LANG_ELECTION['opens'],
             'lang_closes' => $LANG_ELECTION['closes'],
@@ -913,7 +916,7 @@ class Election
             opens = '" . $this->Opens->toMySQL(true) . "',
             closes = '" . $this->Closes->toMySQL(true) . "',
             display = " . (int)$this->inblock . ",
-            is_open = " . (int)$this->is_open . ",
+            status = " . (int)$this->status . ",
             hideresults = " . (int)$this->hideresults . ",
             commentcode = " . (int)$this->commentcode . ",
             owner_id = " . (int)$this->owner_id . ",
@@ -1046,7 +1049,7 @@ class Election
             ),
             array(
                 'text' => $LANG_ELECTION['open'],
-                'field' => 'is_open',
+                'field' => 'status',
                 'sort' => true,
                 'align' => 'center',
                 'width' => '35px',
@@ -1142,7 +1145,7 @@ class Election
         case 'topic':
             $retval = htmlspecialchars($fieldvalue);
             $voted = Voter::hasVoted($A['pid'], $A['group_id']);
-            $closed = ($A['closes'] < $extras['_now']) || $A['is_open'] == 0;
+            $closed = ($A['closes'] < $extras['_now']) || $A['status'] > 0;
             if (
                 !$closed &&
                 !$voted &&
@@ -1162,10 +1165,10 @@ class Election
                 );
             }
             break;
-        case 'user_action':
+        /*case 'user_action':
             if (
                 $A['closes'] < $extras['_now'] &&
-                $A['is_open'] &&
+                $A['status'] &&
                 !Voter::hasVoted($A['pid']) &&
                 SEC_inGroup($A['group_id'])
             ) {
@@ -1178,8 +1181,8 @@ class Election
                     $LANG_ELECTION['results'],
                     Config::get('url') . "/index.php?results=x&pid={$A['pid']}"
                 );
-            }
-        case 'status':
+            }*/
+        case 'user_action':
             if (Voter::hasVoted($A['pid'], $A['group_id'])) {
                 $retval = '<form action="' . Config::get('url') . '/index.php" method="post">';
                 $retval .= '<input type="text" size="15" placeholder="Enter Key" name="votekey" value="" />';
@@ -1199,8 +1202,11 @@ class Election
                     $LANG_ELECTION['vote'] . '</button>';
             }
             break;
-        case 'is_open':
-            if ($fieldvalue == '1') {
+        case 'status':
+            if ($fieldvalue == 2) {
+                $retval .= MO::_('Archived');
+                break;
+            } elseif ($fieldvalue == 1) {
                 $switch = 'checked="checked"';
                 $enabled = 1;
             } else {
@@ -1209,7 +1215,7 @@ class Election
             }
             $retval .= "<input type=\"checkbox\" $switch value=\"1\" name=\"ena_check\"
                     id=\"togenabled{$A['pid']}\"
-                    onclick='" . Config::PI_NAME . "_toggle(this,\"{$A['pid']}\",\"is_open\",".
+                    onclick='" . Config::PI_NAME . "_toggle(this,\"{$A['pid']}\",\"status\",".
                     "\"election\");' />" . LB;
             break;
         case 'display':
@@ -1350,7 +1356,7 @@ class Election
 
             $results = '';
             if (
-                $this->is_open == 0 ||
+                $this->status == 0 ||
                 $this->hideresults == 0 ||
                 (
                     $this->hideresults == 1 &&
@@ -1559,8 +1565,7 @@ class Election
 
 
     /**
-     * Shows all election in system.
-     * List all the election on the system if no $pid is provided.
+     * Shows all election in system unless archived.
      *
      * @return   string          HTML for election listing
      */
@@ -1593,7 +1598,7 @@ class Election
             ),
             array(
                 'text' => $LANG_ELECTION['message'],
-                'field' => 'status',
+                'field' => 'user_action',
                 'sort' => true,
                 'align' => 'center',
             ),
@@ -1615,9 +1620,9 @@ class Election
             'is_admin' => false,
         );
         $sql_now = $_CONF['_now']->toMySQL(true);
-        $filter = "WHERE is_open = 1 AND ('$sql_now' BETWEEN opens AND closes " .
+        $filter = "WHERE status = 1 AND ('$sql_now' BETWEEN opens AND closes " .
             SEC_buildAccessSql('AND', 'group_id') . ") OR (
-                (hideresults = 0 OR is_open = 0 OR closes < '$sql_now') " .
+                (hideresults = 0 OR status = 0 OR closes < '$sql_now') " .
                     SEC_buildAccessSql('AND', 'results_gid') .
                     ')';
         $sql = "SELECT COUNT(*) AS count FROM " . DB::table('topics') . ' ' . $filter;
@@ -1654,7 +1659,7 @@ class Election
                 (SELECT COUNT(v.id) FROM " . DB::table('voters') . " v WHERE v.pid = p.pid) AS vote_count
                 FROM " . DB::table('topics') . " p",
             'query_fields' => array('topic'),
-            'default_filter' => "WHERE is_open = 1 AND ('$sql_now' BETWEEN opens AND closes " .
+            'default_filter' => "WHERE status = 1 AND ('$sql_now' BETWEEN opens AND closes " .
                 SEC_buildAccessSql('AND', 'group_id') .
                 ") OR (closes < '$sql_now' " . SEC_buildAccessSql('AND', 'results_gid') . ')',
             'query' => '',
@@ -1844,11 +1849,16 @@ class Election
     {
         $id = DB_escapeString($id);
         // Determing the new value (opposite the old)
-        $oldvalue = $oldvalue == 1 ? 1 : 0;
-        $newvalue = $oldvalue == 1 ? 0 : 1;
+        if ($oldvalue == 1) {
+            $newvalue = 0;
+        } elseif ($oldvalue == 0) {
+            $newvalue = 1;
+        } else {
+            return $oldvalue;
+        }
 
         $sql = "UPDATE " . DB::table('topics') . "
-                SET is_open = $newvalue
+                SET status = $newvalue
                 WHERE pid = '$id'";
         // Ignore SQL errors since varname is indeterminate
         DB_query($sql, 1);

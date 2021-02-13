@@ -38,7 +38,7 @@ $LANG_ELECTION = array(
     'stats_votes'       => 'Votes',
     'stats_none'        => 'It appears that there are no election on this site or no one has ever voted.',
     'stats_summary'     => 'Election (Answers) in the system',
-    'open'              => 'Open for Voting',
+    'status'            => 'Voting Status',
     'answer_all'        => 'Please answer all remaining questions',
     'not_saved'         => 'Result not saved',
     'upgrade1'          => 'You installed a new version of the Election plugin. Please',
@@ -84,6 +84,9 @@ $LANG_ELECTION = array(
 'rnd_questions' => 'Randomize question order?',
 'rnd_answers' => 'Randomize answer order?',
 'declares_winner' => 'Declares a Winner?',
+'open' => 'Open',
+'closed' => 'Closed',
+'archived' => 'Archived',
 );
 
 ###############################################################################

@@ -628,11 +628,11 @@ function plugin_displaycomment_elections($id, $cid, $title, $order, $format, $pa
     $pid = $id;
     $aid = 0;
 
-    $result = DB_query("SELECT is_open FROM " . DB::table('topics') . " WHERE pid='".DB_escapeString($pid)."'");
+    $result = DB_query("SELECT status FROM " . DB::table('topics') . " WHERE pid='".DB_escapeString($pid)."'");
     if ( $result && DB_numRows($result) > 0 ) {
         $row = DB_fetchArray($result);
-        $is_open = $row['is_open'];
-        if ($is_open != 1) {
+        $status = $row['status'];
+        if ($is_open != 0) {
             $aid = -1; // poll closed - show result
         }
         $Election = Election::getInstance($pid);
