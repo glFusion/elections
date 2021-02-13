@@ -44,7 +44,7 @@ $_SQL[DB::key('topics')] = "CREATE TABLE " . DB::table('topics') . " (
   `pid` varchar(128) NOT NULL,
   `topic` varchar(255) DEFAULT NULL,
   `description` text,
-  `date` datetime DEFAULT NULL,
+  `created` datetime DEFAULT NULL,
   `opens` datetime NOT NULL DEFAULT '1970-01-01 00:00:00',
   `closes` datetime NOT NULL DEFAULT '9999-12-31 23:59:59',
   `display` tinyint(4) NOT NULL DEFAULT '0',
@@ -58,7 +58,7 @@ $_SQL[DB::key('topics')] = "CREATE TABLE " . DB::table('topics') . " (
   `rnd_answers` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`pid`),
   KEY `questions_qid` (`pid`),
-  KEY `questions_date` (`date`),
+  KEY `questions_created` (`created`),
   KEY `questions_display` (`display`),
   KEY `questions_commentcode` (`commentcode`),
   KEY `idx_enabled` (`status`)

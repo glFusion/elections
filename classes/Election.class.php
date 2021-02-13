@@ -639,10 +639,10 @@ class Election
             if (isset($A['vote_count'])) {
                 $this->_vote_count = (int)$A['vote_count'];
             }
-            if (!isset($A['date']) || $A['date'] === NULL) {
-                $this->Date = clone $_CONF['_now'];
+            if (!isset($A['created']) || $A['created'] === NULL) {
+                $this->Created = clone $_CONF['_now'];
             } else {
-                $this->Date = new \Date($A['date'], $_CONF['timezone']);
+                $this->Created = new \Date($A['created'], $_CONF['timezone']);
             }
             $this->setOpenDate($A['opens']);
             $this->setClosingDate($A['closes']);
@@ -882,8 +882,8 @@ class Election
             }
             $this->setVars($A, false);
         }
-        if ($this->Date === NULL) {
-            $this->Date = clone $_CONF['_now'];
+        if ($this->Created === NULL) {
+            $this->Created = clone $_CONF['_now'];
         }
 
         $frm_name = $this->topic;
@@ -912,7 +912,7 @@ class Election
         $sql2 = "pid = '" . DB_escapeString($this->pid) . "',
             topic = '" . DB_escapeString($this->topic) . "',
             description = '" . DB_escapeString($this->dscp) . "',
-            date = '" . $this->Date->toMySQL(true) . "',
+            created = '" . $this->Created->toMySQL(true) . "',
             opens = '" . $this->Opens->toMySQL(true) . "',
             closes = '" . $this->Closes->toMySQL(true) . "',
             display = " . (int)$this->inblock . ",
@@ -1081,7 +1081,7 @@ class Election
 
         $query_arr = array(
             'table' => 'electiontopics',
-            'sql' => "SELECT p.*, UNIX_TIMESTAMP(p.date) AS unixdate, count(v.id) as vote_count
+            'sql' => "SELECT p.*, UNIX_TIMESTAMP(p.created) AS unixdate, count(v.id) as vote_count
                 FROM " . DB::table('topics') . " p
                 LEFT JOIN " . DB::table('voters') . " v
                 ON v.pid = p.pid",
@@ -1637,7 +1637,7 @@ class Election
             $retval .= '<div class="floatright"><a class="uk-button uk-button-small uk-button-danger" href="' .
                 Config::get('admin_url') . '/index.php">Admin</a></div>' . LB;
         }
-        $sql = "SELECT p.*, UNIX_TIMESTAMP(p.date) AS unixdate,
+        $sql = "SELECT p.*, UNIX_TIMESTAMP(p.created) AS unixdate,
                 (SELECT COUNT(v.id) FROM " . DB::table('voters') . " v WHERE v.pid = p.pid) AS vote_count
                 FROM " . DB::table('topics') . " AS p " . $filter;
                 /*WHERE is_open = 1 AND ('$sql_now' BETWEEN opens AND closes " .
@@ -1655,7 +1655,7 @@ class Election
         );
         /*$query_arr = array(
             'table' => DB::key('topics'),
-            'sql' => "SELECT p.*, UNIX_TIMESTAMP(p.date) AS unixdate,
+            'sql' => "SELECT p.*, UNIX_TIMESTAMP(p.created) AS unixdate,
                 (SELECT COUNT(v.id) FROM " . DB::table('voters') . " v WHERE v.pid = p.pid) AS vote_count
                 FROM " . DB::table('topics') . " p",
             'query_fields' => array('topic'),
@@ -1791,7 +1791,7 @@ class Election
         );
 
         $defsort_arr = array(
-            'field' => 'date',
+            'field' => 'created',
             'direction' => 'desc',
         );
         $text_arr = array(
