@@ -329,7 +329,7 @@ class Election
         global $_CONF;
 
         if (
-            $this->status > 0||
+            $this->status > 0 ||
             $this->Opens->toMySQL(true) > $_CONF['_now']->toMySQL(true) ||
             $this->Closes->toMySQL(true) < $_CONF['_now']->toMySQL(true)
         ) {
@@ -1212,7 +1212,7 @@ class Election
             if ($fieldvalue == 2) {
                 $retval .= MO::_('Archived');
                 break;
-            } elseif ($fieldvalue == 1) {
+            } elseif ($fieldvalue == 0) {
                 $switch = 'checked="checked"';
                 $enabled = 1;
             } else {
