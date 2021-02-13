@@ -93,7 +93,6 @@ case 'lv' :
     break;
 
 case 'edit':
-    $page = Menu::Admin();
     $page .= Election::getInstance($pid)->editElection();
     break;
 
