@@ -144,13 +144,13 @@ $LANG_PO_AUTOTAG = array(
     'desc_vote'            => 'HTML: renders a voting block for a Election on this site.  usage: [election_vote:<i>election_id</i>]',
 );
 
-$PLG_election_MESSAGE19 = 'Your election has been successfully saved.';
-$PLG_election_MESSAGE20 = 'Your election has been successfully deleted.';
-$PLG_election_MESSAGE21 = 'An invalid access key was entered.';
+$PLG_elections_MESSAGE19 = 'Your election has been successfully saved.';
+$PLG_elections_MESSAGE20 = 'Your election has been successfully deleted.';
+$PLG_elections_MESSAGE21 = 'An invalid access key was entered.';
 
 // Messages for the plugin upgrade
-$PLG_election_MESSAGE3001 = 'Plugin upgrade not supported.';
-$PLG_election_MESSAGE3002 = $LANG32[9];
+$PLG_elections_MESSAGE3001 = 'Plugin upgrade not supported.';
+$PLG_elections_MESSAGE3002 = $LANG32[9];
 
 
 // Localization of the Admin Configuration UI
