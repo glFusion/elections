@@ -1206,7 +1206,7 @@ class Election
             if ($fieldvalue == 2) {
                 $retval .= MO::_('Archived');
                 break;
-            } elseif ($fieldvalue == 1) {
+            } elseif ($fieldvalue == 0) {
                 $switch = 'checked="checked"';
                 $enabled = 1;
             } else {
