@@ -170,7 +170,7 @@ case 'showvote':
         $Election = Election::getInstance($Voter->getPid());
         $page .= '<div class="uk-alert uk-alert-danger">' .
             sprintf(
-                MO::_('Your vote was record as shown at %1$s on %2$s'),
+                MO::_('Your vote was recorded as shown at %1$s on %2$s'),
                 $Voter->getDate($_CONF['timeonly']),
                 $Voter->getDate($_CONF['dateonly'])
             ) . '</div>';
@@ -190,7 +190,7 @@ default:
             $page .= COM_showMessage($msg, Config::get('pi_name'));
         }
         if (isset($_POST['aid'])) {
-            $eMsg = MO::_('Please answer all remaining questions') .
+            $eMsg = MO::_('Please answer all remaining questions.') .
                 ' "' . $filter->filterData($Election->getTopic()) . '"';
             $page .= COM_showMessageText($eMsg, MO::_('Results were not saved.'), true, 'error');
         }

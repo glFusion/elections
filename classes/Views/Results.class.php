@@ -203,7 +203,7 @@ class Results
             'isOpen' => $this->Election->isOpen(),
             'adminView' => $this->Election->hideResults(),
             'lang_back' => MO::_('Back to Listing'),
-            'lang_is_open' => MO::_('Early results, election is open'),
+            'lang_is_open' => MO::_('Early results, election is open.'),
             'url' => Config::get('url') . '/index.php',
             'lang_question' => MO::_('Question'),
         ) );

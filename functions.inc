@@ -65,7 +65,7 @@ spl_autoload_register(function ($class)
         require $file;
     }
 });
-use Polls\MO;
+use Elections\MO;
 use Elections\DB;
 use Elections\Config;
 use Elections\Election;

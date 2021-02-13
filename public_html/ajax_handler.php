@@ -60,19 +60,19 @@ if (isset ($_POST['pid'])) {
 }
 
 if ( $pid == '' || $aid == 0 ) {
-    $retval['statusMessage'] = 'Error Processing Election Vote';
+    $retval['statusMessage'] = MO::_('There was an error recording your vote.');
     $retval['html'] = Election::getInstance($pid)->Render();
 } else {
     $Election = Election::getInstance($pid);
     if (!$Election->canVote()) {
-        $retval['statusMessage'] = 'This poll is not open for voting';
+        $retval['statusMessage'] = MO::_('This election is not open for voting.');
     } elseif (
         isset($_POST['aid']) &&
         count($_POST['aid']) == $Election->numQuestions()
     ) {
         $retval = ELECTION_saveVote_AJAX($pid,$aid);
     } else {
-        $eMsg = MO::_('Please answer all remaining questions') .
+        $eMsg = MO::_('Please answer all remaining questions.') .
             ' "' . $Election->getTopic() . '"';
         $retval['statusMessage'] = $eMsg;
     }
@@ -90,17 +90,17 @@ function ELECTION_saveVote_AJAX($pid, $aid)
     $retval = array('html' => '','statusMessage' => '');
     $Election = Election::getInstance($pid);
     if (!$Election->canVote()) {
-        $retval['statusMessage'] = 'This poll is not available for voting';
+        $retval['statusMessage'] = MO::_('This election is not open for voting.');
         $retval['html'] = Election::listElections();
     } elseif ($Election->alreadyVoted()) {
-        $retval['statusMessage'] = 'You have already voted on this poll';
+        $retval['statusMessage'] = MO::_('Your vote has already been recorded.');
         $retval['html'] = (new Results($pid))->Render();
     } else {
         if ((new Election($pid))->saveVote($aid)) {
             $eMsg = MO::_('Your vote has been recorded.') .
                 ' "' . $Election->getTopic() . '"';
         } else {
-            $eMsg = MO::_('There was an error recording your vote');
+            $eMsg = MO::_('There was an error recording your vote.');
         }
         $retval['statusMessage'] = $eMsg;
         $retval['html'] = (new Results($pid))->Render();

@@ -65,7 +65,7 @@ case 'toggle':
         'component' => $_POST['component'],
         'newval'    => $newval,
         'statusMessage' => $newval != $_POST['oldval'] ?
-            MO::_('Item(s) have been updated') : MO::_('Item(s) are unchanged'),
+            MO::_('Item(s) have been updated.') : MO::_('Item(s) are unchanged.'),
         'title' => $title,
     );
 }
