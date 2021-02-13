@@ -47,7 +47,7 @@ case 'toggle':
     switch ($_POST['component']) {
     case 'election':
         switch ($_POST['type']) {
-        case 'is_open':
+        case 'status':
             $newval = Election::toggleEnabled($_POST['oldval'], $_POST['id']);
             break;
          default:
@@ -65,7 +65,7 @@ case 'toggle':
         'component' => $_POST['component'],
         'newval'    => $newval,
         'statusMessage' => $newval != $_POST['oldval'] ?
-            MO::_('Item(s) have been updated') : MO::_('Item(s) are unchanged');
+            MO::_('Item(s) have been updated') : MO::_('Item(s) are unchanged'),
         'title' => $title,
     );
 }

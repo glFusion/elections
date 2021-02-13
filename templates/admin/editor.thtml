@@ -71,9 +71,13 @@
                     </div>
                 </div>
                 <div class="uk-form-row">
-                    <label class="uk-form-label" for="open">{lang_openforvoting}</label>
+                    <label class="uk-form-label" for="open">{lang_status}</label>
                     <div class="uk-form-controls">
-                        <input type="checkbox" id="open" value="1" name="is_open" {open} />
+                        <select name="status">
+                            <option value="0" {open_0}>{lang_open}</option>
+                            <option value="1" {open_1}>{lang_closed}</option>
+                            <option value="2" {open_2}>{lang_archived}</option>
+                        </select>
                     </div>
                 </div>
 

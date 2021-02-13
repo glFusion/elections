@@ -164,15 +164,15 @@ case 'showvote':
     $Voter = Voter::getInstance($_POST['votekey']);
     $data = $Voter->decodeData();
     if (
-        $data !== false && 
+        $data !== false &&
         $Voter->getPid() == $pid    // verify right election is selected
     ) {
         $Election = Election::getInstance($Voter->getPid());
         $page .= '<div class="uk-alert uk-alert-danger">' .
             sprintf(
-                MO::_('You are viewing the vote that you previously cast on %1$s at %2$s.'),
-                $Voter->getDate($_CONF['dateonly']),
-                $Voter->getDate($_CONF['timeonly'])
+                MO::_('Your vote was record as shown at %1$s on %2$s'),
+                $Voter->getDate($_CONF['timeonly']),
+                $Voter->getDate($_CONF['dateonly'])
             ) . '</div>';
         $page .= $Election->withKey($Voter->getPrvKey())
                       ->withVoteId($Voter->getId())
@@ -202,7 +202,12 @@ default:
         } elseif ($Election->canVote()) {
             $page .= $Election->Render();
         } else {
-            COM_setMsg(MO::_("Voting for this election is unavailable. Either you've already voted, the election has been removed or you do not have sufficient permissions."),'error', true);
+            COM_setMsg(
+                MO::_("Voting for this election is unavailable.") . ' ' .
+                MO::_("Either you've already voted, the election has been removed or you do not have sufficient permissions."),
+                'error',
+                true
+            );
             COM_refresh(Config::get('url') . '/index.php');
         }
     } else {
