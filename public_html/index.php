@@ -209,7 +209,4 @@ default:
 $display = Menu::siteHeader($title);
 $display .= $page;
 $display .= Menu::siteFooter();
-
 echo $display;
-
-?>

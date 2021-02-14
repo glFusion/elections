@@ -157,8 +157,7 @@ default:
     break;
 }
 
-$display .= COM_siteHeader('menu', $title);
+$display .= COM_siteHeader($title);
 $display .= $page;
 $display .= COM_siteFooter();
 echo $display;
-?>
