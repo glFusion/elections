@@ -211,7 +211,7 @@ default:
             COM_refresh(Config::get('url') . '/index.php');
         }
     } else {
-        $title = MO::_('Title');
+        $title = MO::_('Elections');
         $page .= Election::listElections();
     }
     break;
