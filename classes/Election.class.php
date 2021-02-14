@@ -42,7 +42,7 @@ class Election
 
     /** Date the election was added.
      * @var object */
-    private $Date = NULL;
+    private $Created = NULL;
 
     /** Does the election appear in the election block?
      * @var boolean */
@@ -211,11 +211,11 @@ class Election
             $mode = Modes::ALL;
         }
         $in_block = $mode == Modes::BLOCK ? ' AND display = 1' : '';
-        $sql = "SELECT p.*, 
+        $sql = "SELECT p.*,
             (SELECT count(v.id) FROM " . DB::table('voters') . " v
                 WHERE v.pid = p.pid) as vote_count FROM " . DB::table('topics') . " p
             WHERE status = 0 $in_block
-            AND '" . $_CONF['_now']->toMySQL(true) . "' BETWEEN opens AND closes " .
+            AND UNIX_TIMESTAMP() BETWEEN opens AND closes " .
             SEC_buildAccessSql('AND', 'group_id') .
             " ORDER BY pid ASC";
         //echo $sql;die;
@@ -330,8 +330,8 @@ class Election
 
         if (
             $this->status > 0 ||
-            $this->Opens->toMySQL(true) > $_CONF['_now']->toMySQL(true) ||
-            $this->Closes->toMySQL(true) < $_CONF['_now']->toMySQL(true)
+            $this->Opens->toUnix() > $_CONF['_now']->toUnix() ||
+            $this->Closes->toUnix() < $_CONF['_now']->toUnix()
         ) {
             return 0;
         } else {
@@ -549,14 +549,14 @@ class Election
     /**
      * Set the opening date, minimum date by default.
      *
-     * @param   string  $dt     Datetime string
+     * @param   string|integer  $dt     Datetime string or timestamp
      * @return  object  $this
      */
     public function setOpenDate($dt=NULL)
     {
         global $_CONF;
 
-        if ($dt === NULL) {
+        if (empty($dt)) {
             $dt = Dates::MIN_DATE . ' ' . Dates::MIN_TIME;
         }
         $this->Opens = new \Date($dt, $_CONF['timezone']);
@@ -565,16 +565,16 @@ class Election
 
 
     /**
-     * Set the closing date, minimum date by default.
+     * Set the closing date, maximum date by default.
      *
-     * @param   string  $dt     Datetime string
+     * @param   string|integer  $dt     Datetime string or timestamp
      * @return  object  $this
      */
     public function setClosingDate($dt=NULL)
     {
         global $_CONF;
 
-        if ($dt === NULL) {
+        if (empty($dt)) {
             $dt = Dates::MAX_DATE . ' ' . Dates::MAX_TIME;
         }
         $this->Closes = new \Date($dt, $_CONF['timezone']);
@@ -805,6 +805,7 @@ class Election
             'lang_rnd_a' => MO::_('Randomize answer order?'),
             'lang_decl_winner' => MO::_('Declares a winner?'),
             'decl_chk' => $this->decl_winner ? 'checked="checked"' : '',
+            'timezone' => $_CONF['timezone'],
         ) );
 
         $T->set_block('editor','questiontab','qt');
@@ -904,7 +905,7 @@ class Election
             $x = DB_count(DB::table('topics'), 'pid', $this->pid);
             if ($x > 0) {
                 $this->pid = COM_makeSid();
-                $changingID = true;     // tread as a changed ID if we have to create one
+                $changingID = true;     // treat as a changed ID if we have to create one
             }
         }
 
@@ -918,9 +919,9 @@ class Election
         $sql2 = "pid = '" . DB_escapeString($this->pid) . "',
             topic = '" . DB_escapeString($this->topic) . "',
             description = '" . DB_escapeString($this->dscp) . "',
-            created = '" . $this->Created->toMySQL(true) . "',
-            opens = '" . $this->Opens->toMySQL(true) . "',
-            closes = '" . $this->Closes->toMySQL(true) . "',
+            created = '" . $this->Created->toUnix() . "',
+            opens = '" . $this->Opens->toUnix() . "',
+            closes = '" . $this->Closes->toUnix() . "',
             display = " . (int)$this->inblock . ",
             status = " . (int)$this->status . ",
             hideresults = " . (int)$this->hideresults . ",
@@ -970,6 +971,7 @@ class Election
 
             CTL_clearCache();       // so autotags pick up changes
             $msg = '';              // no error message if successful
+            PLG_itemSaved($this->pid, 'election', $this->old_pid);
         } else {
             COM_errorLog("Election::Save Error: $sql");
             $msg = "An error occurred saving the election";
@@ -1036,8 +1038,8 @@ class Election
                 'align' => 'center',
             ),
             array(
-                'text' => MO::_('Date'),
-                'field' => 'unixdate',
+                'text' => MO::_('Created'),
+                'field' => 'created',
                 'sort' => true,
                 'align' => 'center',
             ),
@@ -1075,7 +1077,7 @@ class Election
             ),
         );
         $defsort_arr = array(
-            'field' => 'unixdate',
+            'field' => 'created',
             'direction' => 'desc',
         );
 
@@ -1088,7 +1090,7 @@ class Election
 
         $query_arr = array(
             'table' => 'electiontopics',
-            'sql' => "SELECT p.*, UNIX_TIMESTAMP(p.created) AS unixdate, count(v.id) as vote_count
+            'sql' => "SELECT p.*, count(v.id) as vote_count
                 FROM " . DB::table('topics') . " p
                 LEFT JOIN " . DB::table('voters') . " v
                 ON v.pid = p.pid",
@@ -1098,7 +1100,7 @@ class Election
         );
         $extras = array(
             'token' => SEC_createToken(),
-            '_now' => $_CONF['_now']->toMySQL(true),
+            '_now' => $_CONF['_now']->toUnix(),
             'is_admin' => true,
         );
 
@@ -1135,18 +1137,17 @@ class Election
                 Config::get('admin_url') . "/index.php?edit=x&amp;pid={$A['pid']}"
             );
             break;
-        case 'unixdate':
-            $dt = new \Date('now',$_USER['tzid']);
-            $dt->setTimestamp($fieldvalue);
+        case 'created':
+            $dt = new \Date($fieldvalue);
+            $dt->setTimezone(new \DateTimezone($_USER['tzid']));
             $retval = $dt->format($_CONF['daytime'], true);
             break;
         case 'opens':
         case 'closes':
-            if ($fieldvalue != Dates::MAX_DATE . ' ' . Dates::MAX_TIME && 
-                $fieldvalue != Dates::MIN_DATE . ' ' . Dates::MIN_TIME
-            ) {
+            if ($fieldvalue > 100000 && $fieldvalue < 2145988800) {
                 $dt = new \Date($fieldvalue, $_USER['tzid']);
-                $retval = $dt->format($_CONF['daytime'], true);
+                $retval = $dt->format($_CONF['dateonly'], true) . ' ' .
+                    $dt->format($_CONF['timeonly'], true);
             }
             break;
         case 'topic':
@@ -1348,7 +1349,7 @@ class Election
                 'can_submit' => $this->mod_allowed == 2 || $this->_access_key == '',
                 'vote_id' => COM_encrypt($this->_vote_id),
             ) );
-                                                
+
             if ($nquestions == 1 || $this->disp_showall) {
                 // Only one question (block) or showing all (main form)
                 $election->set_var('lang_vote', MO::_('Vote'));
@@ -1610,8 +1611,14 @@ class Election
                 'align' => 'center',
             ),
             array(
-                'text' => MO::_('Created'),
-                'field' => 'unixdate',
+                'text' => MO::_('Opens'),
+                'field' => 'opens',
+                'sort' => true,
+                'align' => 'center',
+            ),
+            array(
+                'text' => MO::_('Closes'),
+                'field' => 'closes',
                 'sort' => true,
                 'align' => 'center',
             ),
@@ -1624,7 +1631,7 @@ class Election
         );
 
         $defsort_arr = array(
-            'field' => 'unixdate',
+            'field' => 'created',
             'direction' => 'desc',
         );
         $text_arr = array(
@@ -1635,13 +1642,13 @@ class Election
         );
         $extras = array(
             'token' => 'dummy',
-            '_now' => $_CONF['_now']->toMySQL(true),
+            '_now' => $_CONF['_now']->toUnix(),
             'is_admin' => false,
         );
-        $sql_now = $_CONF['_now']->toMySQL(true);
-        $filter = "WHERE status = 1 AND ('$sql_now' BETWEEN opens AND closes " .
+        $sql_now = $_CONF['_now']->toUnix();
+        $filter = "WHERE status = 1 AND (UNIX_TIMESTAMP() BETWEEN opens AND closes " .
             SEC_buildAccessSql('AND', 'group_id') . ") OR (
-                (hideresults = 0 OR status = 0 OR closes < '$sql_now') " .
+                (hideresults = 0 OR status = 0 OR closes < UNIX_TIMESTAMP())" .
                     SEC_buildAccessSql('AND', 'results_gid') .
                     ')';
         $sql = "SELECT COUNT(*) AS count FROM " . DB::table('topics') . ' ' . $filter;
@@ -1656,7 +1663,7 @@ class Election
             $retval .= '<div class="floatright"><a class="uk-button uk-button-small uk-button-danger" href="' .
                 Config::get('admin_url') . '/index.php">Admin</a></div>' . LB;
         }
-        $sql = "SELECT p.*, UNIX_TIMESTAMP(p.created) AS unixdate,
+        $sql = "SELECT p.*,
                 (SELECT COUNT(v.id) FROM " . DB::table('voters') . " v WHERE v.pid = p.pid) AS vote_count
                 FROM " . DB::table('topics') . " AS p " . $filter;
         $res = DB_query($sql);
@@ -1671,7 +1678,7 @@ class Election
         );
         /*$query_arr = array(
             'table' => DB::key('topics'),
-            'sql' => "SELECT p.*, UNIX_TIMESTAMP(p.created) AS unixdate,
+            'sql' => "SELECT p.*,
                 (SELECT COUNT(v.id) FROM " . DB::table('voters') . " v WHERE v.pid = p.pid) AS vote_count
                 FROM " . DB::table('topics') . " p",
             'query_fields' => array('topic'),
@@ -1784,7 +1791,7 @@ class Election
             ),
             array(
                 'text' => MO::_('Date Voted'),
-                'field' => 'unixdate',
+                'field' => 'date',
                 'sort' => true,
             ),
         );
@@ -1799,7 +1806,7 @@ class Election
             'form_url'     => Config::get('admin_url') . '/index.php?lv=x&amp;pid='.urlencode($this->pid),
         );
 
-        $sql = "SELECT *, `date` as unixdate FROM " . DB::table('voters') . " AS voters
+        $sql = "SELECT * FROM " . DB::table('voters') . " AS voters
             LEFT JOIN " . DB::table('users') . " AS users ON voters.uid=users.uid
             WHERE voters.pid='" . DB_escapeString($this->pid) . "'";
 
