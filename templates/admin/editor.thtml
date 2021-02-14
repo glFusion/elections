@@ -97,6 +97,7 @@
                                 data-uk-timepicker title="{lang_timepicker}" placeholder="{min_time}"
                                 data-uk-tooltip />
                         </div>
+                        &nbsp;({timezone})
                     </div>
                 </div>
                 <div class="uk-form-row">
@@ -115,6 +116,7 @@
                                 data-uk-timepicker title="{lang_timepicker}" placeholder="{max_time}"
                                 data-uk-tooltip />
                         </div>
+                        &nbsp;({timezone})
                     </div>
                 </div>
 

@@ -87,6 +87,8 @@ $LANG_ELECTION = array(
 'open' => 'Open',
 'closed' => 'Closed',
 'archived' => 'Archived',
+'opens' => 'Opens',
+'closes' => 'Closes',
 );
 
 ###############################################################################
