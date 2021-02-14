@@ -1033,7 +1033,7 @@ class Election
             ),
             array(
                 'text' => $LANG25[3],
-                'field' => 'unixdate',
+                'field' => 'created',
                 'sort' => true,
                 'align' => 'center',
             ),
