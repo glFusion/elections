@@ -144,8 +144,11 @@ class Election
      */
     function __construct($pid = '')
     {
-        $this->setOpenDate();
-        $this->setClosingDate();
+        $this->Opens = new \Date;
+        $this->Closes = new \Date;
+        $this->Created = new \Date;
+//        $this->setOpenDate();
+//        $this->setClosingDate();
         if (is_array($pid)) {
             $this->setVars($pid, true);
         } elseif (!empty($pid)) {
@@ -559,7 +562,11 @@ class Election
         if (empty($dt)) {
             $dt = Dates::MIN_DATE . ' ' . Dates::MIN_TIME;
         }
-        $this->Opens = new \Date($dt, $_CONF['timezone']);
+        if (is_numeric($dt)) {
+            $this->Opens->setTimestamp($dt);
+        } else {
+            $this->Opens = new \Date($dt, $_CONF['timezone']);
+        }
         return $this;
     }
 
@@ -577,7 +584,33 @@ class Election
         if (empty($dt)) {
             $dt = Dates::MAX_DATE . ' ' . Dates::MAX_TIME;
         }
-        $this->Closes = new \Date($dt, $_CONF['timezone']);
+        if (is_numeric($dt)) {
+            $this->Closes->setTimestamp($dt);
+        } else {
+            $this->Closes = new \Date($dt, $_CONF['timezone']);
+        }
+        return $this;
+    }
+
+
+    /**
+     * Set the closing date, maximum date by default.
+     *
+     * @param   string|integer  $dt     Datetime string or timestamp
+     * @return  object  $this
+     */
+    public function setCreatedDate($dt=NULL)
+    {
+        global $_CONF;
+
+        if (empty($dt)) {
+            $dt = Dates::MAX_DATE . ' ' . Dates::MAX_TIME;
+        }
+        if (is_numeric($dt)) {
+            $this->Created->setTimestamp($dt);
+        } else {
+            $this->Created = new \Date($dt, $_CONF['timezone']);
+        }
         return $this;
     }
 
@@ -642,7 +675,7 @@ class Election
             if (!isset($A['created']) || $A['created'] === NULL) {
                 $this->Created = clone $_CONF['_now'];
             } else {
-                $this->Created = new \Date($A['created'], $_CONF['timezone']);
+                $this->setCreatedDate($A['created']);
             }
             $this->setOpenDate($A['opens']);
             $this->setClosingDate($A['closes']);
