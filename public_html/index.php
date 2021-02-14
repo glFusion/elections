@@ -158,6 +158,7 @@ case 'results':
     } else {
         $page .= Election::listElections();
     }
+    $title = MO::_('Results');
     break;
 
 case 'showvote':
@@ -220,7 +221,4 @@ default:
 $display = Menu::siteHeader($title);
 $display .= $page;
 $display .= Menu::siteFooter();
-
 echo $display;
-
-?>

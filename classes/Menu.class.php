@@ -85,16 +85,14 @@ class Menu
         $retval = '';
 
         switch (Config::get('displayblocks')) {
-        case 0 : // left only
-        case 2 :
-            $retval .= COM_siteHeader('menu',$title,$meta);
-            break;
         case 1 : // right only
         case 3 :
-            $retval .= COM_siteHeader('none',$title,$meta);
+            $retval .= COM_siteHeader('none', $title, $meta);
             break;
+        case 0 : // left only
+        case 2 :
         default :
-            $retval .= COM_siteHeader('menu',$title,$meta);
+            $retval .= COM_siteHeader('menu', $title, $meta);
             break;
         }
         return $retval;

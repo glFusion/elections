@@ -126,6 +126,7 @@ case 'save':
 
 case 'results':
     $page .= (new Results($pid))->withAdmin(true)->Render();
+    $title = MO::_('Results');
     break;
 
 case 'presults':
@@ -162,7 +163,7 @@ default:
     break;
 }
 
-$display .= Menu::siteHeader('menu', $title);
+$display .= Menu::siteHeader($title);
 $display .= Menu::Admin($action);
 $display .= $page;
 $display .= Menu::siteFooter();
