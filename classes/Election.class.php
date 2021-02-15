@@ -1688,7 +1688,7 @@ class Election
         );
         $text_arr = array(
             'has_menu' =>  false,
-            'title' => MO::_('Title'),
+            'title' => MO::_('Elections'),
             'instructions' => "",
             'icon' => '', 'form_url' => '',
         );
