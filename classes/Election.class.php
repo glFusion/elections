@@ -1845,7 +1845,7 @@ class Election
             ),
             array(
                 'text' => $LANG_ELECTION['date_voted'],
-                'field' => 'date',
+                'field' => 'dt_voted',
                 'sort' => true,
             ),
         );
@@ -1860,7 +1860,8 @@ class Election
             'form_url'     => Config::get('admin_url') . '/index.php?lv=x&amp;pid='.urlencode($this->pid),
         );
 
-        $sql = "SELECT * FROM " . DB::table('voters') . " AS voters
+        $sql = "SELECT voters.*, FROM_UNIXTIME(voters.date) as dt_voted, users.username
+            FROM " . DB::table('voters') . " AS voters
             LEFT JOIN " . DB::table('users') . " AS users ON voters.uid=users.uid
             WHERE voters.pid='" . DB_escapeString($this->pid) . "'";
 
