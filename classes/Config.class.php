@@ -73,12 +73,14 @@ final class Config
      * @param   string|NULL $key    Name of item to retrieve
      * @return  mixed       Value of config item
      */
-    public function _get($key=NULL)
+    public function _get($key=NULL, $default=NULL)
     {
         if ($key === NULL) {
             return $this->properties;
+        } elseif (array_key_exists($key, $this->properties)) {
+            return $this->properties[$key];
         } else {
-            return array_key_exists($key, $this->properties) ? $this->properties[$key] : NULL;
+           return $default;
         }
     }
 
@@ -124,9 +126,9 @@ final class Config
      * @param   string|NULL $key    Name of item to retrieve
      * @return  mixed       Value of config item
      */
-    public static function get($key=NULL)
+    public static function get($key=NULL, $default=NULL)
     {
-        return self::getInstance()->_get($key);
+        return self::getInstance()->_get($key, $default);
     }
 
 }
