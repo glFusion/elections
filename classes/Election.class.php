@@ -600,7 +600,7 @@ class Election
     public function setClosingDate($dt=NULL, $local=false)
     {
         if (empty($dt)) {
-            $dt = Dates::maxDateTime()
+            $dt = Dates::maxDateTime();
         }
         $this->Closes = self::_createDate($dt, $local);
         return $this;
