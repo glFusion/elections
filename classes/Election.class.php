@@ -1536,7 +1536,7 @@ class Election
                 );
             }
         } else {
-            COM_setMsg("There are no questions for this election", 'error');
+            COM_setMsg(MO::_("There are no questions for this election"), 'error');
             COM_refresh(Config::get('url') . '/index.php');
         }
         return $retval;
