@@ -188,6 +188,17 @@ $electionConfigData = array(
         'set' => true,
         'group' => $pi_name,
     ),
+    array(
+        'name' => 'archive_days',
+        'default_value' => '365',
+        'type' => 'text',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 0,
+        'sort' => 120,
+        'set' => true,
+        'group' => $pi_name,
+    ),
 
     /*array(
         'name' => 'default_permissions',
