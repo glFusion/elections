@@ -3,10 +3,10 @@
  * Class to represent a election.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2020-2021 Lee Garner <lee@leegarner.com>
- * @package     elections
- * @version     v3.0.0
- * @since       v3.0.0
+ * @copyright   Copyright (c) 2021 Lee Garner <lee@leegarner.com>
+ * @package     election
+ * @version     v0.1.0
+ * @since       v0.1.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -15,6 +15,7 @@ namespace Elections;
 use Elections\Models\Dates;
 use Elections\Models\Groups;
 use Elections\Models\Modes;
+use Elections\Models\Status;
 use Elections\Views\Results;
 
 
@@ -146,9 +147,6 @@ class Election
     {
         $this->Opens = new \Date;
         $this->Closes = new \Date;
-        $this->Created = new \Date;
-//        $this->setOpenDate();
-//        $this->setClosingDate();
         if (is_array($pid)) {
             $this->setVars($pid, true);
         } elseif (!empty($pid)) {
@@ -217,8 +215,8 @@ class Election
         $sql = "SELECT p.*,
             (SELECT count(v.id) FROM " . DB::table('voters') . " v
                 WHERE v.pid = p.pid) as vote_count FROM " . DB::table('topics') . " p
-            WHERE status = 0 $in_block
-            AND UNIX_TIMESTAMP() BETWEEN opens AND closes " .
+            WHERE status = " . Status::OPEN . " $in_block
+            AND '" . $CONF['_now']->toMySQL(false) . "' BETWEEN opens AND closes " .
             SEC_buildAccessSql('AND', 'group_id') .
             " ORDER BY pid ASC";
         //echo $sql;die;
@@ -333,8 +331,8 @@ class Election
 
         if (
             $this->status > 0 ||
-            $this->Opens->toUnix() > $_CONF['_now']->toUnix() ||
-            $this->Closes->toUnix() < $_CONF['_now']->toUnix()
+            $this->Opens->toMySQL() > $_CONF['_now']->toMySQL() ||
+            $this->Closes->toMySQL() < $_CONF['_now']->toMySQL()
         ) {
             return 0;
         } else {
@@ -550,23 +548,45 @@ class Election
 
 
     /**
+     * Create a date object based on a string or timestamp.
+     *
+     * @param   string|integer  $dt     Date string or timestamp
+     * @param   boolean     $local      True for local time, False for UTC
+     * @return  object      Date object
+     */
+    private function _createDate($dt, $local)
+    {
+        global $_CONF;
+
+        if (is_numeric($dt)) {
+            // Timestamp
+            $retval = new \Date;
+            $retval->setTimestamp($dt);
+            $retval->setTimezone(new \DateTimezone($_CONF['timezone']));
+        } elseif ($local) {
+            // Date string using local time
+            $retval = new \Date($dt, $_CONF['timezone']);
+        } else {
+            // Date string using UTC
+            $retval = new \Date($dt);
+            $retval->setTimezone(new \DateTimezone($_CONF['timezone']));
+        }
+        return $retval;
+    }
+
+
+    /**
      * Set the opening date, minimum date by default.
      *
      * @param   string|integer  $dt     Datetime string or timestamp
      * @return  object  $this
      */
-    public function setOpenDate($dt=NULL)
+    public function setOpenDate($dt=NULL, $local=false)
     {
-        global $_CONF;
-
         if (empty($dt)) {
-            $dt = Dates::MIN_DATE . ' ' . Dates::MIN_TIME;
+            $dt = Dates::minDateTime();
         }
-        if (is_numeric($dt)) {
-            $this->Opens->setTimestamp($dt);
-        } else {
-            $this->Opens = new \Date($dt, $_CONF['timezone']);
-        }
+        $this->Opens = self::_createDate($dt, $local);
         return $this;
     }
 
@@ -577,18 +597,12 @@ class Election
      * @param   string|integer  $dt     Datetime string or timestamp
      * @return  object  $this
      */
-    public function setClosingDate($dt=NULL)
+    public function setClosingDate($dt=NULL, $local=false)
     {
-        global $_CONF;
-
         if (empty($dt)) {
-            $dt = Dates::MAX_DATE . ' ' . Dates::MAX_TIME;
+            $dt = Dates::maxDateTime()
         }
-        if (is_numeric($dt)) {
-            $this->Closes->setTimestamp($dt);
-        } else {
-            $this->Closes = new \Date($dt, $_CONF['timezone']);
-        }
+        $this->Closes = self::_createDate($dt, $local);
         return $this;
     }
 
@@ -599,18 +613,12 @@ class Election
      * @param   string|integer  $dt     Datetime string or timestamp
      * @return  object  $this
      */
-    public function setCreatedDate($dt=NULL)
+    public function setCreatedDate($dt=NULL, $local=NULL)
     {
-        global $_CONF;
-
         if (empty($dt)) {
-            $dt = Dates::MAX_DATE . ' ' . Dates::MAX_TIME;
+            $dt = 'now';
         }
-        if (is_numeric($dt)) {
-            $this->Created->setTimestamp($dt);
-        } else {
-            $this->Created = new \Date($dt, $_CONF['timezone']);
-        }
+        $this->Created = self::_createDate($dt, $local);
         return $this;
     }
 
@@ -675,10 +683,10 @@ class Election
             if (!isset($A['created']) || $A['created'] === NULL) {
                 $this->Created = clone $_CONF['_now'];
             } else {
-                $this->setCreatedDate($A['created']);
+                $this->setCreatedDate($A['created'], false);
             }
-            $this->setOpenDate($A['opens']);
-            $this->setClosingDate($A['closes']);
+            $this->setOpenDate($A['opens'], false);
+            $this->setClosingDate($A['closes'], false);
         } else {
             if (empty($A['opens_date'])) {
                 $A['opens_date'] = Dates::MIN_DATE;
@@ -686,14 +694,14 @@ class Election
             if (empty($A['opens_time'])) {
                 $A['opens_time'] = Dates::MIN_TIME;
             }
-            $this->setOpenDate($A['opens_date'] . ' ' . $A['opens_time']);
+            $this->setOpenDate($A['opens_date'] . ' ' . $A['opens_time'], true);
             if (empty($A['closes_date'])) {
                 $A['closes_date'] = Dates::MAX_DATE;
             }
             if (empty($A['closes_time'])) {
                 $A['closes_time'] = Dates::MAX_TIME;
             }
-            $this->setClosingDate($A['closes_date'] . ' ' . $A['closes_time']);
+            $this->setClosingDate($A['closes_date'] . ' ' . $A['closes_time'], true);
         }
     }
 
@@ -952,9 +960,9 @@ class Election
         $sql2 = "pid = '" . DB_escapeString($this->pid) . "',
             topic = '" . DB_escapeString($this->topic) . "',
             description = '" . DB_escapeString($this->dscp) . "',
-            created = '" . $this->Created->toUnix() . "',
-            opens = '" . $this->Opens->toUnix() . "',
-            closes = '" . $this->Closes->toUnix() . "',
+            created = '" . $this->Created->toMySQL(false) . "',
+            opens = '" . $this->Opens->toMySQL(false) . "',
+            closes = '" . $this->Closes->toMySQL(false) . "',
             display = " . (int)$this->inblock . ",
             status = " . (int)$this->status . ",
             hideresults = " . (int)$this->hideresults . ",
@@ -1133,7 +1141,7 @@ class Election
         );
         $extras = array(
             'token' => SEC_createToken(),
-            '_now' => $_CONF['_now']->toUnix(),
+            '_now' => $_CONF['_now']->toMySQL(false),
             'is_admin' => true,
         );
 
@@ -1177,8 +1185,14 @@ class Election
             break;
         case 'opens':
         case 'closes':
-            if ($fieldvalue > 100000 && $fieldvalue < 2145988800) {
-                $dt = new \Date($fieldvalue, $_USER['tzid']);
+            $dt = new \Date($fieldvalue);
+            $dt->setTimezone(new \DateTimezone($_USER['tzid']));
+            if (
+                $dt->toMySQL(true) <= Dates::minDateTime() ||
+                $dt->toMySQL(true) >= Dates::maxDateTime()
+            ) {
+                $retval = '';
+            } else {
                 $retval = $dt->format($_CONF['dateonly'], true) . ' ' .
                     $dt->format($_CONF['timeonly'], true);
             }
@@ -1244,7 +1258,7 @@ class Election
             break;
         case 'status':
             if ($fieldvalue == 2) {
-                $retval .= MO::_('Archived');
+                $retval .= $LANG_ELECTION['archived'];
                 break;
             } elseif ($fieldvalue == 0) {
                 $switch = 'checked="checked"';
@@ -1332,8 +1346,11 @@ class Election
 
         $retval = '';
 
-        // If the current user can't vote, decide what to do or display
-        if (!$this->canVote() && empty($this->_access_key)) {
+        // If the current user can't vote, decide what to do or display.
+        if (
+            !$this->canVote() &&
+            (empty($this->_access_key) || !is_array($this->_selections))
+        ) {
             if ($this->canViewResults()) {
                 if ($this->disp_type == Modes::NORMAL) {
                     // not in a block or autotag, just refresh to the results page
@@ -1381,6 +1398,7 @@ class Election
                 'lang_back' => MO::_('Back to Listing'),
                 'can_submit' => $this->mod_allowed == 2 || $this->_access_key == '',
                 'vote_id' => COM_encrypt($this->_vote_id),
+                'lang_back' => $LANG_ELECTION['back_to_list'],
             ) );
 
             if ($nquestions == 1 || $this->disp_showall) {
@@ -1401,7 +1419,7 @@ class Election
 
             $results = '';
             if (
-                $this->status == 0 ||
+                $this->status == Status::OPEN ||
                 $this->hideresults == 0 ||
                 (
                     $this->hideresults == 1 &&
@@ -1674,17 +1692,18 @@ class Election
             'instructions' => "",
             'icon' => '', 'form_url' => '',
         );
+        $sql_now_utc = $_CONF['_now']->toMySQL(false);
         $extras = array(
             'token' => 'dummy',
-            '_now' => $_CONF['_now']->toUnix(),
+            '_now' => $sql_now_utc,
             'is_admin' => false,
         );
-        $sql_now = $_CONF['_now']->toUnix();
-        $filter = "WHERE status = 1 AND (UNIX_TIMESTAMP() BETWEEN opens AND closes " .
-            SEC_buildAccessSql('AND', 'group_id') . ") OR (
-                (hideresults = 0 OR status = 0 OR closes < UNIX_TIMESTAMP())" .
-                    SEC_buildAccessSql('AND', 'results_gid') .
-                    ')';
+        $filter = "WHERE (status = " . Status::CLOSED . " AND '$sql_now_utc' BETWEEN opens AND closes " .
+                SEC_buildAccessSql('AND', 'group_id') .
+            ") OR (
+                (hideresults = 0 OR status = " . Status::OPEN . " OR closes < '$sql_now_utc')" .
+                SEC_buildAccessSql('AND', 'results_gid') .
+            ')';
         $sql = "SELECT COUNT(*) AS count FROM " . DB::table('topics') . ' ' . $filter;
         //echo $sql;die;
         $count = 0;
@@ -1716,9 +1735,9 @@ class Election
                 (SELECT COUNT(v.id) FROM " . DB::table('voters') . " v WHERE v.pid = p.pid) AS vote_count
                 FROM " . DB::table('topics') . " p",
             'query_fields' => array('topic'),
-            'default_filter' => "WHERE status = 1 AND ('$sql_now' BETWEEN opens AND closes " .
+            'default_filter' => "WHERE status = 1 AND ('$sql_now_utc' BETWEEN opens AND closes " .
                 SEC_buildAccessSql('AND', 'group_id') .
-                ") OR (closes < '$sql_now' " . SEC_buildAccessSql('AND', 'results_gid') . ')',
+                ") OR (closes < '$sql_now_utc' " . SEC_buildAccessSql('AND', 'results_gid') . ')',
             'query' => '',
             'query_limit' => 0,
         );
@@ -1831,7 +1850,7 @@ class Election
         );
 
         $defsort_arr = array(
-            'field' => 'created',
+            'field' => 'date',
             'direction' => 'desc',
         );
         $text_arr = array(

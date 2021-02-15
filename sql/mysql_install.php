@@ -41,12 +41,12 @@ $_SQL[DB::key('questions')] = "CREATE TABLE " . DB::table('questions') . " (
 ";
 
 $_SQL[DB::key('topics')] = "CREATE TABLE " . DB::table('topics') . " (
- `pid` varchar(128) NOT NULL,
+  `pid` varchar(128) NOT NULL,
   `topic` varchar(255) DEFAULT NULL,
   `description` text DEFAULT NULL,
-  `created` bigint(11) DEFAULT current_timestamp(),
-  `opens` bigint(11) unsigned DEFAULT 0,
-  `closes` bigint(11) DEFAULT 253402300799,
+  `created` datetime DEFAULT NULL,
+  `opens` datetime DEFAULT NULL,
+  `closes` datetime DEFAULT NULL,
   `display` tinyint(4) NOT NULL DEFAULT 0,
   `status` tinyint(1) unsigned NOT NULL DEFAULT 0,
   `hideresults` tinyint(1) NOT NULL DEFAULT 0,
