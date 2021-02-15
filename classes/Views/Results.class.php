@@ -191,6 +191,11 @@ class Results
             'votes_num' => 'votes_num.thtml',
         ) );
 
+        if ($this->isAdmin) {
+            $list_url = Config::get('admin_url') . '/index.php';
+        } else {
+            $list_url = Config::get('url') . '/index.php';
+        }
         $poll->set_var(array(
             //'layout_url'    => $_CONF['layout_url'],
             'topic'     => $filter->filterData($this->Election->getTopic()),
@@ -203,7 +208,7 @@ class Results
             'adminView' => $this->Election->hideResults(),
             'lang_back' => $LANG_ELECTION['back_to_list'],
             'lang_is_open' => $LANG_ELECTION['msg_results_open'],
-            'url' => Config::get('url') . '/index.php',
+            'url'       => $list_url,
             'lang_question' => $LANG25[31],
         ) );
 
