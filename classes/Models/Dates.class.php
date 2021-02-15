@@ -26,7 +26,7 @@ class Dates
 
     /** Maximum possible date value.
      */
-    public const MAX_DATE = '9999-12-31';
+    public const MAX_DATE = '2037-12-31';
 
     /** Maximum possible Unix date, where timestamps are used.
      */
@@ -47,4 +47,15 @@ class Dates
     /** Full date format: Month Day, Year.
      */
     public const FMT_FULLDATE = 'F j, Y';
+
+    public static function minDateTime()
+    {
+        return self::MIN_DATE . ' ' . self::MIN_TIME;
+    }
+
+    public static function maxDateTime()
+    {
+        return self::MAX_DATE . ' ' . self::MAX_TIME;
+    }
+
 }
