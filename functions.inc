@@ -1064,6 +1064,21 @@ function plugin_getconfigelementhelp_elections($type, $option, $doclang = 'engli
 
 
 /**
+ * Run scheduled tasks.
+ * - Delete old carts that aren't assigned to any user.
+ * - Call PLG_itemDeleted to notify plugins that an item is not available
+ */
+function plugin_runScheduledTask_elections()
+{
+    $cutoff = time() - (Config::get('archive_days', 365) * 86400);
+    $sql = "UPDATE " . DB::table('topics') .
+        " SET status = 2
+        WHERE closes < $cutoff";
+    DB_query($sql, 1);
+}
+
+
+/**
  * Create an array of groups for the voting group configuration.
  *
  * @return  array               Array of groups as name=>ID
@@ -1149,6 +1164,3 @@ function ELECTION_countElectionAndVotes()
 
     return array ($total_election, $total_answers);
 }
-
-
-?>
