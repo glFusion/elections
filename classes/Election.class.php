@@ -1258,7 +1258,7 @@ class Election
             break;
         case 'status':
             if ($fieldvalue == 2) {
-                $retval .= $LANG_ELECTION['archived'];
+                $retval .= MO::_('Archived');
                 break;
             } elseif ($fieldvalue == 0) {
                 $switch = 'checked="checked"';
@@ -1398,7 +1398,7 @@ class Election
                 'lang_back' => MO::_('Back to Listing'),
                 'can_submit' => $this->mod_allowed == 2 || $this->_access_key == '',
                 'vote_id' => COM_encrypt($this->_vote_id),
-                'lang_back' => $LANG_ELECTION['back_to_list'],
+                'lang_back' => MO::_('Back to Listing'),
             ) );
 
             if ($nquestions == 1 || $this->disp_showall) {
