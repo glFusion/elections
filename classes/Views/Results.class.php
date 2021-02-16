@@ -175,7 +175,7 @@ class Results
                 if ($this->Election->alreadyVoted()) {
                     $msg .= $LANG_ELECTION['alreadyvoted'] . '<br />';
                 }
-                $msg .= $LANG_ELECTION['pollhidden'];
+                $msg .= $LANG_ELECTION['electionhidden'];
                 $retval = COM_showMessageText($msg,'', true,'error');
                 $retval .= Election::listElections();
                 return $retval;
