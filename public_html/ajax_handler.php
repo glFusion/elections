@@ -36,7 +36,7 @@
 
 require_once '../lib-common.php';
 
-if (!in_array('election', $_PLUGINS)) {
+if (!in_array('elections', $_PLUGINS)) {
     COM_404();
     die();
 }
