@@ -134,6 +134,10 @@ class Election
      * @var string */
     private $_access_key = '';
 
+    /** Flag to indicate admin access by root or election owner.
+     * @var boolean */
+    private $_isAdmin = false;
+
 
     /**
      * Constructor.
@@ -350,12 +354,13 @@ class Election
     {
         static $can_view = NULL;
         if ($can_view === NULL) {
-            if (SEC_inGroup('Root')) {
+            if (!$this->_isAdmin && $this->isOpen() && $this->hideresults) {
+                $can_view = false;
+            } elseif (SEC_inGroup('Root')) {
                 $can_view = true;
             } elseif (
                 $this->isNew() ||
-                !SEC_inGroup($this->results_gid) ||
-                ($this->isOpen() && $this->hideresults)
+                !SEC_inGroup($this->results_gid)
             ) {
                 $can_view = false;
             } else {
@@ -1353,14 +1358,13 @@ class Election
 
         $retval = '';
 
-        // If the current user can't vote, decide what to do or display.
         if (
             !$preview &&
             !$this->canVote() &&
             (empty($this->_access_key) || !is_array($this->_selections))
         ) {
-            echo "her";die;
-            return 'Results are not available';
+            // This is not an admin preview, the user can't vote (maybe already did),
+            // and this is not a voter checking their vote. See if they can view the results.
             if ($this->canViewResults()) {
                 if ($this->disp_type == Modes::NORMAL) {
                     // not in a block or autotag, just refresh to the results page
@@ -1376,7 +1380,7 @@ class Election
                 }
             } elseif (empty($this->_access_key)) {
                 // Can't vote, and can't view results. Return nothing.
-                return $retval;
+                return $this->msgNoResultsWhileOpen();
             }
         }
 
@@ -1417,6 +1421,7 @@ class Election
                 'can_submit' => $can_submit,
                 'vote_id' => COM_encrypt($this->_vote_id),
                 'lang_back' => MO::_('Back to Listing'),
+                'disp_mode' => $this->disp_type,
             ) );
 
             if ($nquestions == 1 || $this->disp_showall) {
@@ -1968,6 +1973,18 @@ class Election
             SEC_buildAccessSql('OR', 'results_gid');
         $sql .= ') ';    // close the paren
         return $sql;
+    }
+
+
+    public function msgNoResultsWhileOpen()
+    {
+        $msg = '';
+        if ($this->alreadyVoted()) {
+            $msg = MO::_('Your vote has already been recorded.') . '<br />';
+        }
+        $msg .= MO::_('Election results will be available only after the election has closed.');
+        $retval = '<div class="uk-alert uk-alert-danger">' . $msg . '</div>';
+        return $retval;
     }
 
 }
