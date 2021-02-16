@@ -722,19 +722,19 @@ function plugin_autotags_elections($op, $content = '', $autotag = '')
 
     if ($op == 'tagname' ) {
         return array(
-            Config::KEY . '_vote',
-            Config::KEY . '_result',
-            Config::KEY,
+            Config::PI_NAME . '_vote',
+            Config::PI_NAME . '_result',
+            Config::PI_NAME,
         );
     } elseif ( $op == 'desc' ) {
         switch($content) {
-        case Config::KEY . '_vote':
+        case Config::PI_NAME . '_vote':
             return $LANG_PO_AUTOTAG['desc_poll_vote'];
             break;
-        case Config::KEY . '_result' :
+        case Config::PI_NAME . '_result' :
             return $LANG_PO_AUTOTAG['desc_poll_result'];
             break;
-        case Config::KEY:
+        case Config::PI_NAME:
             return $LANG_PO_AUTOTAG['desc_poll'];
             break;
         default :
@@ -778,7 +778,7 @@ function plugin_autotags_elections($op, $content = '', $autotag = '')
                 } elseif (substr ($part, 0, 8) == 'showall:') {
                     $a = explode (':', $part);
                     $val = isset($a[1]) ? (int)$a[1] : 1;
-                    if ( $val != 0 ) {
+                    if ($val != 0) {
                         $showall = true;
                     }
                     $skip++;
@@ -804,7 +804,7 @@ function plugin_autotags_elections($op, $content = '', $autotag = '')
         $pid = COM_applyFilter($autotag['parm1']);
 
         switch ($autotag['tag']) {
-        case Config::KEY:
+        case Config::PI_NAME:
             $filter = new sanitizer();
             $filter->setPostmode('text');
 
@@ -826,24 +826,21 @@ function plugin_autotags_elections($op, $content = '', $autotag = '')
                 );
             }
             break;
-        case Config::KEY . '_vote':
-        case Config::KEY . '_result':
-            if ($autotag['tag'] == Config::KEY . '_vote') {
-                $retval = Election::getInstance($pid)
-                    ->withShowall($showall)
-                    ->withDisplaytype(Modes::AUTOTAG)
-                    ->Render();
-            } else {
-                $Results = new Results($pid);
-                $retval = $Results->withDisplaytype(Modes::AUTOTAG)->Render();
-            }
-
-            if ( $retval != '' ) {
-                $retval = '<div class="' . $class . '">' . $retval . '</div>';
-            }
+        case Config::PI_NAME . '_vote':
+            $retval = Election::getInstance($pid)
+                ->withShowall($showall)
+                ->withDisplaytype(Modes::AUTOTAG)
+                ->Render();
+            break;
+        case Config::PI_NAME . '_result':
+            $Results = new Results($pid);
+            $retval = $Results->withDisplaytype(Modes::AUTOTAG)->Render();
             break;
         }
 
+        if ( $retval != '' ) {
+            $retval = '<div class="' . $class . '">' . $retval . '</div>';
+        }
         $content = str_replace($autotag['tagstr'], $retval, $content);
     }
     return $content;
