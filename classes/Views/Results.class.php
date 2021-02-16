@@ -159,7 +159,7 @@ class Results
 
         if (
             $this->Election->hideResults() &&
-            !$this->Election->isOpen()
+            $this->Election->isOpen()
         ) {
             if (
                 $this->displaytype == Modes::NORMAL
