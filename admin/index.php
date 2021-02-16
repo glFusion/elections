@@ -60,6 +60,7 @@ if (!plugin_ismoderator_elections()) {
 $action = '';
 $expected = array(
     'edit','save','delete','lv', 'results', 'presults', 'resetelection',
+    'preview',
 );
 foreach($expected as $provided) {
     if (isset($_POST[$provided])) {
@@ -151,6 +152,13 @@ case 'delete':
             $_USER['username']
         ) );
         echo COM_refresh($_CONF['site_admin_url'] . '/index.php');
+    }
+    break;
+
+case 'preview':
+    $Election = new Election($pid);
+    if (isset($Election) && !$Election->isNew()) {
+        $page .= $Election->Render(true);
     }
     break;
 

@@ -1063,7 +1063,7 @@ class Election
             ),
             array(
                 'text' => MO::_('Topic'),
-                'field' => 'topic',
+                'field' => 'topic_preview',
                 'sort' => true,
             ),
             array(
@@ -1197,6 +1197,13 @@ class Election
                     $dt->format($_CONF['timeonly'], true);
             }
             break;
+        case 'topic_preview':
+            $retval = COM_createLink(
+                $A['topic'],
+                Config::get('admin_url') . '/index.php?preview&pid=' . urlencode($A['pid'])
+            );
+            break;
+
         case 'topic':
             $retval = htmlspecialchars($fieldvalue);
             $voted = Voter::hasVoted($A['pid'], $A['group_id']);
@@ -1337,7 +1344,7 @@ class Election
      *
      * @return       string  HTML Formatted Election
      */
-    public function Render()
+    public function Render($preview=false)
     {
         global $_CONF, $_USER;
 
@@ -1348,9 +1355,12 @@ class Election
 
         // If the current user can't vote, decide what to do or display.
         if (
+            !$preview &&
             !$this->canVote() &&
             (empty($this->_access_key) || !is_array($this->_selections))
         ) {
+            echo "her";die;
+            return 'Results are not available';
             if ($this->canViewResults()) {
                 if ($this->disp_type == Modes::NORMAL) {
                     // not in a block or autotag, just refresh to the results page
@@ -1385,6 +1395,14 @@ class Election
                 $election->set_var('topic', $filterS->filterData($this->topic));
                 $election->set_var('lang_question', MO::_('Question'));
             }
+            if ($preview) {
+                $url = Config::get('admin_url') . '/index.php';
+                $can_submit = false;
+            } else {
+                $url = Config::get('url') . '/index.php';
+                $can_submit = $this->mod_allowed == 2 || $this->_access_key == '';
+            }
+
             // create a random number to ID fields if multiple blocks showing
             $random = rand(0,100);
             $election->set_var(array(
@@ -1393,10 +1411,10 @@ class Election
                 'num_votes' => COM_numberFormat($this->_vote_count),
                 'vote_url' => Config::get('url') . '/index.php',
                 'ajax_url' => Config::get('url') . '/ajax_handler.php',
-                'url' => Config::get('url') . '/index.php',
+                'url' => $url,
                 'description' => $this->disp_type != Modes::BLOCK ? $this->dscp : '',
                 'lang_back' => MO::_('Back to Listing'),
-                'can_submit' => $this->mod_allowed == 2 || $this->_access_key == '',
+                'can_submit' => $can_submit,
                 'vote_id' => COM_encrypt($this->_vote_id),
                 'lang_back' => MO::_('Back to Listing'),
             ) );
