@@ -152,7 +152,7 @@ class Results
         $filter = new \sanitizer();
         $filter->setPostmode('text');
 
-        if ($this->Election->isNew() || !$this->Election->canViewResults()) {
+        if ($this->Election->isNew()/* || !$this->Election->canViewResults()*/) {
             // Invalid poll or no access
             return '';
         }
@@ -171,11 +171,7 @@ class Results
                 )
             ) {
                 // Normal mode, show a message if not an owner or admin
-                $msg = '';
-                if ($this->Election->alreadyVoted()) {
-                    $msg .= $LANG_ELECTION['alreadyvoted'] . '<br />';
-                }
-                $msg .= $LANG_ELECTION['electionhidden'];
+                $msg = $this->Election->msgNoResultsWhileOpen();
                 $retval = COM_showMessageText($msg,'', true,'error');
                 $retval .= Election::listElections();
                 return $retval;
