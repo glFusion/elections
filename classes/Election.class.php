@@ -1358,14 +1358,17 @@ class Election
 
         $retval = '';
 
-        if (
-            !$preview &&
-            !$this->canVote() &&
-            (empty($this->_access_key) || !is_array($this->_selections))
-        ) {
-            // This is not an admin preview, the user can't vote (maybe already did),
-            // and this is not a voter checking their vote. See if they can view the results.
-            if ($this->canViewResults()) {
+        // This is not an admin preview, the user can't vote (maybe already did),
+        // and this is not a voter checking their vote. See if they can view the results.
+        if (!$preview) {
+            if (empty($this->_access_key) || !is_array($this->_selections)) {
+                if ($this->alreadyVoted()) {
+                    // Can't vote, and can't view results. Return nothing.
+                    return $this->msgNoResultsWhileOpen();
+                } elseif (!$this->canVote()) {
+                    return $this->msgNoAccess();
+                }
+            } elseif ($this->canViewResults()) {
                 if ($this->disp_type == Modes::NORMAL) {
                     // not in a block or autotag, just refresh to the results page
                     COM_refresh(Config::get('url') . '/index.php?results&pid=' . $this->pid);
@@ -1378,9 +1381,6 @@ class Election
                     // in a block, return nothing
                     return $retval;
                 }
-            } elseif (empty($this->_access_key)) {
-                // Can't vote, and can't view results. Return nothing.
-                return $this->msgNoResultsWhileOpen();
             }
         }
 
@@ -1976,15 +1976,46 @@ class Election
     }
 
 
+    /**
+     * General wrapper function to create an alert message.
+     *
+     * @param   string  $msg    Message to display
+     * @return  string      HTML for formatted message block
+     */
+    public static function msgAlert($msg)
+    {
+        return '<div class="uk-alert uk-alert-danger">' . $msg . '</div>';
+    }
+
+
+    /**
+     * Display a message if access to results is denied while election is open.
+     *
+     * @return  string      HTML for formatted message block
+     */
     public function msgNoResultsWhileOpen()
     {
         $msg = '';
         if ($this->alreadyVoted()) {
-            $msg = MO::_('Your vote has already been recorded.') . '<br />';
+            $msg = MO::_('Your vote has already been recorded.') . '<br />' . LB;
         }
         $msg .= MO::_('Election results will be available only after the election has closed.');
-        $retval = '<div class="uk-alert uk-alert-danger">' . $msg . '</div>';
-        return $retval;
+        return self::msgAlert($msg);
+    }
+
+
+    /**
+     * Display a message if access is denied completely due to permissions.
+     *
+     * @return  string      HTML for formatted message block
+     */
+    public function msgNoAccess()
+    {
+        global $LANG_ELECTION;
+
+        return self::msgAlert(
+            MO::_('You are trying to access a poll that you do not have rights to.')
+        );
     }
 
 }
