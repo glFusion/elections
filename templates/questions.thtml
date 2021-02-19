@@ -1,6 +1,11 @@
 {# begin {templatelocation} #}
 <div class="uk-panel-box uk-panel-box-primary uk-margin">
-    <h3>{lang_question} {lang_question_number}: {question}</h3>
+    <h3>
+{!if lang_question_number}
+        {lang_question} {lang_question_number}:
+{!endif}
+        {question}
+</h3>
     <ul class="uk-list elections_answers">
         {answers}
     </ul>
