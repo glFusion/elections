@@ -138,6 +138,10 @@ class Election
      * @var boolean */
     private $_isAdmin = false;
 
+    /** URL to send the voter after voting.
+     * @var string */
+    private $_aftervoteUrl = '';
+
 
     /**
      * Constructor.
@@ -792,7 +796,7 @@ class Election
             'lang_donotusespaces' => $LANG25[7],
             'lang_topic' => $LANG25[9],
             'topic' => htmlspecialchars ($this->topic),
-            'lang_mode' => $LANG25[1],
+            'lang_mode' => $LANG_ELECTION['comments'],
             'description' => $this->dscp,
             'lang_description' => $LANG_ELECTION['description'],
             'comment_options' => COM_optionList(DB::table('commentcodes'),'code,name',$this->commentcode),
@@ -846,6 +850,8 @@ class Election
             'lang_decl_winner' => $LANG_ELECTION['declares_winner'],
             'decl_chk' => $this->decl_winner ? 'checked="checked"' : '',
             'timezone' => $_CONF['timezone'],
+            'lang_resetresults' => $LANG_ELECTION['resetresults'],
+            'lang_exp_reset' => $LANG_ELECTION['exp_resetresults'],
         ) );
 
         $T->set_block('editor','questiontab','qt');
@@ -936,6 +942,10 @@ class Election
         $frm_name = $this->topic;
         if (empty($frm_name)) {
             return $LANG_ELECTION['err_name_required'];
+        }
+
+        if (isset($A['resetresults']) && $A['resetresults'] == 1) {
+            self::deleteVotes($this->pid);
         }
 
         // If saving a new record or changing the ID of an existing one,
@@ -1331,33 +1341,59 @@ class Election
     }
 
 
-    /**
-     * Shows a election form
-     *
-     * Shows an HTML formatted election for the given topic ID
-     *
-     * @return       string  HTML Formatted Election
-     */
-    public function Render($preview=false)
+    public function Render($preview = false)
     {
-        global $_CONF, $LANG_ELECTION, $LANG01, $_USER, $LANG25, $_IMAGE_TYPE;
+        if (
+            $preview ||
+            $this->canVote() ||
+            (!empty($this->_access_key) && is_array($this->_selections))
+        ) {
+            return $this->showElectionForm($preview);
+        } elseif ($this->alreadyVoted() ) {
+            if ($this->canViewResults()) {
+                if ($this->disp_type == Modes::NORMAL) {
+                    // not in a block or autotag, just refresh to the results page
+                    COM_refresh(Config::get('url') . '/index.php?results&pid=' . $this->pid);
+                } elseif ($this->disp_type == Modes::AUTOTAG) {
+                    // In an autotag
+                    return (new Results($this->pid))
+                        ->withDisplayType($this->disp_type)
+                        ->Render();
+                } else {
+                    // in a block
+                    return '';
+                }
+            } else {
+                return $this->msgNoResultsWhileOpen();
+            }
+        } else {
+            return $this->msgNoAccess();
+        }
+    }
 
-        $filterS = new \sanitizer();
-        $filterS->setPostmode('text');
-
-        $retval = '';
-
-        // This is not an admin preview, the user can't vote (maybe already did),
+        /*// This is not an admin preview, the user can't vote (maybe already did),
         // and this is not a voter checking their vote. See if they can view the results.
-        if (!$preview) {
+        if (!$preview && !$this->canVote()) {
             if (empty($this->_access_key) || !is_array($this->_selections)) {
                 if ($this->alreadyVoted()) {
-                    // Can't vote, and can't view results. Return nothing.
-                    return $this->msgNoResultsWhileOpen();
-                } elseif (!$this->canVote()) {
-                    return $this->msgNoAccess();
-                }
-            } elseif ($this->canViewResults()) {
+                    if ($this->canViewResults()) {
+                        if ($this->disp_type == Modes::NORMAL) {
+                            // not in a block or autotag, just refresh to the results page
+                            COM_refresh(Config::get('url') . '/index.php?results&pid=' . $this->pid);
+                        } elseif ($this->disp_type == Modes::AUTOTAG) {
+                            // In an autotag
+                            return (new Results($this->pid))
+                                ->withDisplayType($this->disp_type)
+                                ->Render();
+                        } else {
+                            // in a block
+                            return '';
+                        }
+                    } else {
+                        return $this->msgNoResultsWhileOpen();
+                    }
+                                }
+            } elseif (empty($this->_access_key) && $this->canViewResults()) {
                 if ($this->disp_type == Modes::NORMAL) {
                     // not in a block or autotag, just refresh to the results page
                     COM_refresh(Config::get('url') . '/index.php?results&pid=' . $this->pid);
@@ -1371,8 +1407,39 @@ class Election
                     return $retval;
                 }
             }
-        }
+        }*/
 
+
+    /**
+     * Shows a election form
+     *
+     * Shows an HTML formatted election for the given topic ID
+     *
+     * @return       string  HTML Formatted Election
+     */
+    public function showElectionForm($preview=false)
+    {
+        global $_CONF, $LANG_ELECTION, $LANG01, $_USER, $LANG25, $_IMAGE_TYPE;
+
+        $filterS = new \sanitizer();
+        $filterS->setPostmode('text');
+
+        $retval = '';
+
+        $use_ajax = false;
+        switch ($this->disp_type) {
+        case Modes::AUTOTAG:
+            $aftervote_url = COM_getCurrentURL();
+            break;
+        case Modes::BLOCK:
+            $aftervote_url = '';
+            $use_ajax = true;
+            break;
+        case Modes::NORMAL:
+        default:
+            $aftervote_url = Config::get('url') . '/index.php?results&pid=' . $this->pid;
+            break;
+        }
         $Questions = Question::getByElection($this->pid, $this->rnd_questions, $this->rnd_answers);
         $nquestions = count($Questions);
         if ($nquestions > 0) {
@@ -1389,10 +1456,10 @@ class Election
                 $election->set_var('lang_question', $LANG25[31]);
             }
             if ($preview) {
-                $url = Config::get('admin_url') . '/index.php';
+                $back_url = Config::get('admin_url') . '/index.php';
                 $can_submit = false;
             } else {
-                $url = Config::get('url') . '/index.php';
+                $back_url = Config::get('url') . '/index.php';
                 $can_submit = $this->mod_allowed == 2 || $this->_access_key == '';
             }
 
@@ -1404,23 +1471,24 @@ class Election
                 'num_votes' => COM_numberFormat($this->_vote_count),
                 'vote_url' => Config::get('url') . '/index.php',
                 'ajax_url' => Config::get('url') . '/ajax_handler.php',
-                'url' => $url,
+                'back_url' => $back_url,
                 'description' => $this->disp_type != Modes::BLOCK ? $this->dscp : '',
                 'lang_back_to_list' => $LANG_ELECTION['back_to_list'],
                 'can_submit' => $can_submit,
                 'vote_id' => COM_encrypt($this->_vote_id),
                 'lang_back' => $LANG_ELECTION['back_to_list'],
                 'disp_mode' => $this->disp_type,
+                'aftervote_url' => $aftervote_url,
             ) );
 
             if ($nquestions == 1 || $this->disp_showall) {
                 // Only one question (block) or showing all (main form)
                 $election->set_var('lang_vote', $LANG_ELECTION['vote']);
                 $election->set_var('showall',true);
-                if ($this->disp_type == Modes::AUTOTAG) {
-                    $election->set_var('autotag', true);
+                if ($this->disp_type == Modes::BLOCK) {
+                    $election->set_var('use_ajax', true);
                 } else {
-                    $election->unset_var('autotag');
+                    $election->unset_var('use_ajax');
                 }
             } else {
                 $election->set_var('lang_vote', $LANG_ELECTION['start_election']);
@@ -1594,6 +1662,10 @@ class Election
             time() + Config::get('cookietime')
         );
 
+        if (isset($_POST['aftervote_url'])) {
+            $this->_aftervoteUrl = $_POST['aftervote_url'];
+        }
+
         // Record that this user has voted
         $Voter = Voter::create($this->pid, $aid);
         if ($Voter !== false) {
@@ -1613,8 +1685,10 @@ class Election
                     'lang_yourkeyis' => $LANG_ELECTION['msg_yourkeyis'],
                     'lang_copyclipboard' => $LANG_ELECTION['copy_clipboard'],
                     'lang_copy_success' => $LANG_ELECTION['copy_clipboard_success'],
+                    'lang_keyonetime' => $LANG_ELECTION['msg_keyonetime'],
                     'prv_key' => $Voter->getId() . ':' . $Voter->getPrvKey(),
                     'mod_allowed' => $this->mod_allowed,
+                    'url' => Config::get('url') . '/index.php',
                 ) );
                 $T->parse('output', 'msg');
                 $msg = $T->finish($T->get_var('output'));
@@ -2017,6 +2091,16 @@ class Election
         global $LANG_ELECTION;
 
         return self::msgAlert($LANG_ELECTION['noaccess']);
+    }
+
+
+    public function getAftervoteUrl()
+    {
+        if (!empty($this->_aftervoteUrl)) {
+            return $this->_aftervoteUrl;
+        } else {
+            return Config::get('url') . '/index.php';
+        }
     }
 
 }

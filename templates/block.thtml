@@ -1,5 +1,5 @@
 {# begin {templatelocation} #}
-{!if autotag}
+{!if use_ajax}
 <script>
   $(window).load(function() {
     $( "#electionautotag_{id}" ).on( "click", "#votebutton", function(event) {
@@ -31,7 +31,7 @@
 {!if edit_url}
     <span class="uk-align-right"><a href="{edit_url}" class="uk-aling-right uk-icon uk-icon-edit tm-meta-icon"></a></span>
 {!endif}
-    <a class="uk-align-right" href="{url}">{lang_back}</a>
+    <a class="uk-align-right" href="{back_url}">{lang_back}</a>
 {!endif}
 
 {!if topic}
@@ -45,6 +45,7 @@
     <form class="uk-form uk-form-horizontal uk-width-1-1" action="{vote_url}" id="vote{id}" method="post">
         <input type="hidden" name="pid" value="{id}" />
         <input type="hidden" name="vid" value="{vote_id}" />
+        <input type="hidden" name="aftervote_url" value="{aftervote_url}" />
         {questions}
         <span class="uk-text-small">{notification}</span><br>
 
@@ -60,7 +61,7 @@
     </form>
 {!!if {disp_mode} == 0 !!}
     <span class="uk-text-small">
-        <a href="{url}">{lang_topics}</a> | {num_votes} {lang_votes} {comments}
+        <a href="{public_url}">{lang_topics}</a> | {num_votes} {lang_votes} {comments}
     </span>
 {!endif}
 </div>

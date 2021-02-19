@@ -34,6 +34,7 @@
                         <textarea id="description" name="description" class="uk-form-width-large" rows="5" columns="100">{description}</textarea>
                     </div>
                 </div>
+
                 <div class="uk-form-row">
                     <label class="uk-form-label" for="commentcode">{lang_mode}</label>
                     <div class="uk-form-controls">
@@ -70,6 +71,14 @@
                         <input type="checkbox" id="mainpage" name="display" value="1" {display} />
                     </div>
                 </div>
+
+                <div class="uk-form-row">
+                    <label class="uk-form-label" for="hideresults">{lang_hideresults}</label>
+                    <div class="uk-form-controls">
+                        <input type="checkbox" id="hideresults" name="hideresults" value="1" {hideresults}> <span class="uk-text-small">{hideresults_explain}</span>
+                    </div>
+                </div>
+
                 <div class="uk-form-row">
                     <label class="uk-form-label" for="open">{lang_status}</label>
                     <div class="uk-form-controls">
@@ -100,6 +109,7 @@
                         &nbsp;({timezone})
                     </div>
                 </div>
+
                 <div class="uk-form-row">
                     <label class="uk-form-label">{lang_closes}</label>
                     <div class="uk-form-controls">
@@ -120,10 +130,11 @@
                     </div>
                 </div>
 
-                <div class="uk-form-row">
-                    <label class="uk-form-label" for="hideresults">{lang_hideresults}</label>
+                <div class="uk-form-row uk-alert uk-alert-danger">
+                    <label class="uk-form-label" for="resetresults">{lang_resetresults}</label>
                     <div class="uk-form-controls">
-                        <input type="checkbox" id="hideresults" name="hideresults" value="1" {hideresults}> <span class="uk-text-small">{hideresults_explain}</span>
+                        <input type="checkbox" id="resetresults" name="resetresults" value="1" />
+                        <span class="uk-text-small">{lang_exp_reset}</span>
                     </div>
                 </div>
             </li>

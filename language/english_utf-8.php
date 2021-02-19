@@ -74,6 +74,7 @@ $LANG_ELECTION = array(
 'confirm_reset' => 'Are you sure you want to delete all of the results for this election?',
 'viewing_vote' => 'You are viewing the vote that you previously cast on %1$s at %2$s.',
 'msg_copykey' => 'Copy your key to a safe location if you wish to verify your vote later.',
+'msg_keyonetime' => 'This key will not be displayed again.',
 'msg_errorsaving' => 'There was an error recording your vote, please try again.',
 'msg_yourkeyis' => 'Your private access key is:',
 'copy_clipboard' => 'Copy to clipboard',
@@ -89,6 +90,9 @@ $LANG_ELECTION = array(
 'archived' => 'Archived',
 'opens' => 'Opens',
 'closes' => 'Closes',
+'resetresults' => 'Reset Results',
+'exp_resetresults' => 'Delete all votes received for this election.',
+'comments' => 'Comments',
 );
 
 ###############################################################################

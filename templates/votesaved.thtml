@@ -7,7 +7,10 @@
         <i class="uk-icon-clipboard uk-icon-hover"></i>
     </a>
 </p>
-<p>{lang_copykey}</p>
+<p>
+{lang_copykey} <a href="{url}" target="_blank" rel="nofollow">{url}</a><br />
+<b>{lang_keyonetime}</b>
+</p>
 <script src="{site_url}/javascript/addons/clipboard/clipboard.min.js"></script>
 <script>
 var clipboard = new Clipboard('.cpybtn');
