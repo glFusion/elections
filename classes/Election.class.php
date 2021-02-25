@@ -852,6 +852,9 @@ class Election
             'timezone' => $_CONF['timezone'],
             'lang_resetresults' => $LANG_ELECTION['resetresults'],
             'lang_exp_reset' => $LANG_ELECTION['exp_resetresults'],
+            'lang_general' => $LANG_ELECTION['general'],
+            'lang_questions' => $LANG_ELECTION['questions'],
+            'lang_permissions' => $LANG_ELECTION['permissions'],
         ) );
 
         $T->set_block('editor','questiontab','qt');
