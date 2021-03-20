@@ -286,10 +286,11 @@ function plugin_dopluginsearch_elections(
     $tbl_topics = DB::table('topics');
     $pi_name = Config::get('pi_name');
     // Search election
-    $sql = "SELECT p.pid AS id, p.topic AS title, p.description AS description, UNIX_TIMESTAMP(p.date) AS date, "
-        . " p.owner_id AS uid, p.voters AS hits, CONCAT('/$pi_name/index.php?pid=',p.pid) AS url "
+    $sql = "SELECT p.pid AS id, p.topic AS title, p.description AS description, UNIX_TIMESTAMP(p.created) AS date, "
+        . " p.owner_id AS uid, CONCAT('/$pi_name/index.php?pid=',p.pid) AS url "
         . " FROM {$tbl_topics} AS p "
-        . " WHERE (p.date <= '".$_CONF['_now']->toMySQL(true)."') AND "
+        . " WHERE status = 0 AND (p.opens <= '".$_CONF['_now']->toMySQL(true)
+        . "' AND p.closes >= '" . $_CONF['_now']->toMySQL(true) . "') AND "
         . Election::getPermSQL(0, 'p');
 
     if (!Election::hasRights('admin', $uid)) {
@@ -299,14 +300,13 @@ function plugin_dopluginsearch_elections(
     if (!empty($author)) {
         $sql .= "AND (p.owner_id = '{$author}') ";
     }
-
     $search = new SearchCriteria(
         Config::get('pi_name'),
-        array(ucfirst(Config::get('pi_name')))
+        array(ucfirst($pi_name))
     );
 
     $columns = array('title' => 'p.topic', 'description' => 'p.description');
-    $sql .= $search->getDateRangeSQL('AND', 'p.date', $dateStart, $dateEnd);
+    //$sql .= $search->getDateRangeSQL('AND', 'p.date', $dateStart, $dateEnd);
     list($sql, $ftsql) = $search->buildSearchSQL($keyType, $query, $columns, $sql);
 
     $search->setSQL($sql);
