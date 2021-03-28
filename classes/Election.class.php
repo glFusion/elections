@@ -856,11 +856,8 @@ class Election
             'lang_decl_winner' => MO::_('Declares a winner?'),
             'decl_chk' => $this->decl_winner ? 'checked="checked"' : '',
             'timezone' => $_CONF['timezone'],
-            'lang_resetresults' => $LANG_ELECTION['resetresults'],
-            'lang_exp_reset' => $LANG_ELECTION['exp_resetresults'],
-            'lang_general' => $LANG_ELECTION['general'],
-            'lang_questions' => $LANG_ELECTION['questions'],
-            'lang_permissions' => $LANG_ELECTION['permissions'],
+            'lang_resetresults' => MO::_('Reset Results'),
+            'lang_exp_reset' => MO::_('Reset all results for this election'),
         ) );
 
         $T->set_block('editor','questiontab','qt');
@@ -1433,7 +1430,7 @@ class Election
      */
     public function showElectionForm($preview=false)
     {
-        global $_CONF, $LANG_ELECTION, $LANG01, $_USER, $LANG25, $_IMAGE_TYPE;
+        global $_CONF, $LANG01, $_USER, $LANG25, $_IMAGE_TYPE;
 
         $filterS = new \sanitizer();
         $filterS->setPostmode('text');
@@ -1472,9 +1469,11 @@ class Election
             if ($preview) {
                 $back_url = Config::get('admin_url') . '/index.php';
                 $can_submit = false;
+                $topic_msg = MO::_('Preview - Submissions Disabled');
             } else {
                 $back_url = Config::get('url') . '/index.php';
                 $can_submit = $this->mod_allowed == 2 || $this->_access_key == '';
+                $topic_msg = '';
             }
 
             // create a random number to ID fields if multiple blocks showing
@@ -1493,6 +1492,7 @@ class Election
                 'lang_back' => MO::_('Back to Listing'),
                 'disp_mode' => $this->disp_type,
                 'aftervote_url' => $aftervote_url,
+                'topic_msg' => $topic_msg,
             ) );
 
             if ($nquestions == 1 || $this->disp_showall) {
@@ -1847,9 +1847,9 @@ class Election
             $header_arr, $text_arr, $query_arr, $defsort_arr, '', $extras
         );*/
         if ($count == 0) {
-            $retval .= '<div class="uk-alert uk-alert-danger">' .
-                MO::_('It appears that there are no polls on this site or no one has ever voted.') .
-                '</div>';
+            $retval .= self::msgAlert(
+                MO::_('It appears that there are no polls on this site or no one has ever voted.')
+            );
         }
         return $retval;
     }
@@ -2061,7 +2061,11 @@ class Election
      */
     public static function msgAlert($msg)
     {
-        return '<div class="uk-alert uk-alert-danger">' . $msg . '</div>';
+        $T = new \Template(__DIR__ . '/../templates/');
+        $T->set_file('alert', 'alert_msg.thtml');
+        $T->set_var('message', $msg);
+        $T->parse('output', 'alert');
+        return $T->finish($T->get_var('output'));
     }
 
 
@@ -2088,14 +2092,18 @@ class Election
      */
     public function msgNoAccess()
     {
-        global $LANG_ELECTION;
-
         return self::msgAlert(
             MO::_('You are trying to access a poll that you do not have rights to.')
         );
     }
 
 
+    /**
+     * Get the URL to which the voter should be redirected after voting.
+     * Default is the plugin's homepage.
+     *
+     * @return  string      Destination URL
+     */
     public function getAftervoteUrl()
     {
         if (!empty($this->_aftervoteUrl)) {

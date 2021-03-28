@@ -169,12 +169,13 @@ case 'showvote':
         $Voter->getPid() == $pid    // verify right election is selected
     ) {
         $Election = Election::getInstance($Voter->getPid());
-        $page .= '<div class="uk-alert uk-alert-danger">' .
+        $page .= Election::msgAlert(
             sprintf(
                 MO::_('Your vote was recorded as shown at %1$s on %2$s'),
                 $Voter->getDate($_CONF['timeonly']),
                 $Voter->getDate($_CONF['dateonly'])
-            ) . '</div>';
+            )
+        );
         $page .= $Election->withKey($Voter->getPrvKey())
                       ->withVoteId($Voter->getId())
                       ->withSelections($data)
