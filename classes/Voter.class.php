@@ -123,41 +123,86 @@ class Voter
         }
     }
 
+
+    /**
+     * Set the encrypted voting data field.
+     *
+     * @param   string  $data   Encrypted data string
+     * @return  object  $this
+     */
     public function withData($data)
     {
         $this->data = $data;
         return $this;
     }
 
+
+    /**
+     * Get the vote data value.
+     *
+     * @return  string      Encrypted voting data
+     */
     public function getData()
     {
         return $this->data;
     }
 
+
+    /**
+     * Set the public key for a saved vote.
+     *
+     * @param   string  $key    Public key
+     * @return  object  $this
+     */
     public function withPubKey($key)
     {
         $this->pub_key = $key;
         return $this;
     }
 
+
+    /**
+     * Get the public key for a saved vote.
+     *
+     * @return  string      Public key
+     */
     public function getPubKey()
     {
         return $this->pub_key;
     }
 
 
+    /**
+     * Set the private key for a saved vote.
+     *
+     * @param   string  $key    Private key
+     * @return  object  $this
+     */
     public function withPrvKey($key)
     {
         $this->_prv_key = $key;
         return $this;
     }
 
+
+    /**
+     * Get the private key assigned to this voter.
+     * Called to display the key upon vote submission.
+     *
+     * @return  string      Private voting key
+     */
     public function getPrvKey()
     {
         return $this->_prv_key;
     }
 
 
+    /**
+     * Get a specific voting record.
+     *
+     * @param   string|integer  $vote_id    Record ID or record:private_key
+     * @return  object      Voter object
+     */
     public static function getInstance($vote_id)
     {
         $prv_key = NULL;
@@ -363,7 +408,7 @@ class Voter
      */
     public static function createKeys()
     {
-        $len = 16;      // Actual length of the token needed.
+        $len = 12;      // Actual length of the token needed.
         $retval = array();
 
         // Make public key
