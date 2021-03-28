@@ -224,7 +224,7 @@ class Election
             (SELECT count(v.id) FROM " . DB::table('voters') . " v
                 WHERE v.pid = p.pid) as vote_count FROM " . DB::table('topics') . " p
             WHERE status = " . Status::OPEN . " $in_block
-            AND '" . $CONF['_now']->toMySQL(false) . "' BETWEEN opens AND closes " .
+            AND '" . $_CONF['_now']->toMySQL(false) . "' BETWEEN opens AND closes " .
             SEC_buildAccessSql('AND', 'group_id') .
             " ORDER BY pid ASC";
         //echo $sql;die;
