@@ -5,7 +5,7 @@
  * definitions, or are items that don't lend themselves well to the
  * glFusion configuration system, such as allowed file types.
  *
- * @copyright   Copyright (c) 2000-2020 The following authors:
+ * @copyright   Copyright (c) 2000-2021 The following authors:
  * @author      Mark R. Evans <mark AT glfusion DOT org>
  * @author      Tony Bibbs <tony AT tonybibbs DOT com>
  * @author      Tom Willett <twillett AT users DOT sourceforge DOT net>
