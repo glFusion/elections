@@ -16,6 +16,7 @@ use Elections\Election;
 use Elections\Answer;
 use Elections\Config;
 use Elections\Models\Modes;
+use Elections\Models\Status;
 use Elections\MO;
 
 
@@ -209,6 +210,9 @@ class Results
             'url'       => $list_url,
         ) );
 
+        if ($this->Election->getStatus() == Status::ARCHIVED) {
+            $poll->set_var('alert_msg', MO::_('Election is archived and not visible to regular voters.'));
+        }
         if ($this->displaytype == Modes::NORMAL && Election::hasRights('edit')) {
             $editlink = COM_createLink(
                 MO::_('Edit'),

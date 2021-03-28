@@ -8,6 +8,11 @@
 {!if topic}
     <h3>{topic}</h3>
 {!endif}
+{!if alert_msg}
+    <div class="uk-alert uk-alert-danger">
+        {alert_msg}
+    </div>
+{!endif}
 {!if isOpen}
     <div class="uk-alert uk-alert-danger">
         {lang_is_open}

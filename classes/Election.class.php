@@ -300,6 +300,17 @@ class Election
 
 
     /**
+     * Get the status (open, closed or archived).
+     *
+     * @return  intger      Status flag
+     */
+    public function getStatus()
+    {
+        return (int)$this->status;
+    }
+
+
+    /**
      * Set the owner ID.
      *
      * @param   integer $uid    User ID of election owner
@@ -357,13 +368,16 @@ class Election
     public function canViewResults()
     {
         static $can_view = NULL;
+
         if ($can_view === NULL) {
-            if (!$this->_isAdmin && $this->isOpen() && $this->hideresults) {
-                $can_view = false;
-            } elseif (SEC_inGroup('Root')) {
+            $admin = SEC_inGroup('Root');
+            if ($admin) {
                 $can_view = true;
+            } elseif ($this->isOpen() && $this->hideresults) {
+                $can_view = false;
             } elseif (
                 $this->isNew() ||
+                $this->status == Status::ARCHIVED ||
                 !SEC_inGroup($this->results_gid)
             ) {
                 $can_view = false;
