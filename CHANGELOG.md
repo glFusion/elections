@@ -1,7 +1,12 @@
 # Elections plugin for glFusion - Changelog
 
+## v0.1.1
+Release 2021-04-06
+
+  * Add missing Voter::anonymize() function to handle user deletion.
+
 ## v0.1.0
-Release TBD
+Release 2021-03-21
 
 These reflect the changes relative to the existing Polls plugin on which the
 Elections plugin is based.
