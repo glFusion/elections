@@ -13,7 +13,7 @@
  * @author      Dirk Haun <dirk AT haun-online DOT de>
  * @author      Lee Garner <lee@leegarner.com>
  * @package     elections
- * @version     v0.1.0
+ * @version     v0.1.2
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource

@@ -78,3 +78,6 @@ $_SQL[DB::key('voters')] = "CREATE TABLE " . DB::table('voters') . " (
   KEY `pollid` (`pid`)
 ) ENGINE=MyISAM
 ";
+
+$ELECTION_UPGRADE = array(
+);
