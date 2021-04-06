@@ -28,7 +28,7 @@ use Elections\DB;
 global $_DB_table_prefix;
 
 Config::set('pi_display_name', 'Elections');
-Config::set('pi_version', '0.1.0');
+Config::set('pi_version', '0.1.1');
 Config::set('gl_version', '1.7.8');
 Config::set('pi_url', 'https://www.glfusion.org');
 

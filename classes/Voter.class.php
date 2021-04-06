@@ -371,9 +371,10 @@ class Voter
      */
     public static function moveUser($origUID, $destUID)
     {
-        DB_query("UPDATE " . DB::table('voters') . "
-            SET uid = '" . (int)$destUID . "'
-            WHERE uid = '" . (int)$origUID . "'"
+        DB_query(
+            "UPDATE " . DB::table('voters') . " SET
+            uid = " . (int)$destUID . "
+            WHERE uid = " . (int)$origUID
         );
     }
 
@@ -419,6 +420,21 @@ class Voter
         $bytes = random_bytes(ceil($len / 2));
         $retval['prv_key'] = substr(bin2hex($bytes), 0, $len);
         return $retval;
+    }
+
+
+    /**
+     * Change the voter record to "anonymous" when a user is deleted.
+     *
+     * @param   integer $uid    ID of user being deleted
+     */
+    public static function anonymize($uid)
+    {
+        DB_query(
+            "UPDATE " . DB::table('voters') . " SET
+            uid = 1
+            WHERE uid = ". (int)$uid
+        );
     }
 
 }
