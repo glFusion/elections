@@ -13,7 +13,7 @@
  * @author      Dirk Haun <dirk AT haun-online DOT de>
  * @author      Lee Garner <lee@leegarner.com>
  * @package     elections
- * @version     v0.1.0
+ * @version     v0.1.2
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -28,7 +28,7 @@ use Elections\DB;
 global $_DB_table_prefix;
 
 Config::set('pi_display_name', 'Elections');
-Config::set('pi_version', '0.1.0');
+Config::set('pi_version', '0.1.2');
 Config::set('gl_version', '1.7.8');
 Config::set('pi_url', 'https://www.glfusion.org');
 
