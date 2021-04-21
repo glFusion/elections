@@ -1,5 +1,8 @@
 # Elections plugin for glFusion - Changelog
 
+## v0.1.2
+Release TBD
+
 ## v0.1.1
 Release 2021-04-06
 
