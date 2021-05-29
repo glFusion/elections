@@ -153,8 +153,10 @@ class Election
      */
     function __construct($pid = '')
     {
-        $this->Opens = new \Date;
-        $this->Closes = new \Date;
+        global $_CONF;
+
+        $this->Opens = new \Date('now', $_CONF['timezone']);
+        $this->Closes = clone $this->Opens;
         if (is_array($pid)) {
             $this->setVars($pid, true);
         } elseif (!empty($pid)) {
@@ -789,21 +791,29 @@ class Election
             $Questions = array();
         }
 
-        $open_date = $this->Opens->format('Y-m-d', true);
-        if ($open_date == Dates::MIN_DATE) {
+        if ($this->old_pid == '') {
+            // creating a new election, use empty date/time fields
             $open_date = '';
-        }
-        $open_time= $this->Opens->format('H:i:s', true);
-        if ($open_time == Dates::MIN_TIME) {
             $open_time = '';
-        }
-        $close_date = $this->Closes->format('Y-m-d', true);
-        if ($close_date == Dates::MAX_DATE) {
             $close_date = '';
-        }
-        $close_time= $this->Closes->format('H:i:s', true);
-        if ($close_time == Dates::MAX_TIME) {
             $close_time = '';
+        } else {
+            $open_date = $this->Opens->format('Y-m-d', true);
+            if ($open_date == Dates::MIN_DATE) {
+                $open_date = '';
+            }
+            $open_time= $this->Opens->format('H:i:s', true);
+            if ($open_time == Dates::MIN_TIME) {
+                $open_time = '';
+            }
+            $close_date = $this->Closes->format('Y-m-d', true);
+            if ($close_date == Dates::MAX_DATE) {
+                $close_date = '';
+            }
+            $close_time= $this->Closes->format('H:i:s', true);
+            if ($close_time == Dates::MAX_TIME) {
+                $close_time = '';
+            }
         }
         $ownername = COM_getDisplayName($this->owner_id);
         $T->set_var(array(
@@ -872,6 +882,7 @@ class Election
             'timezone' => $_CONF['timezone'],
             'lang_resetresults' => MO::_('Reset Results'),
             'lang_exp_reset' => MO::_('Reset all results for this election'),
+            'lang_reset' => MO::_('Reset'),
         ) );
 
         $T->set_block('editor','questiontab','qt');
