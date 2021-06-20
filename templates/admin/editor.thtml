@@ -1,25 +1,28 @@
 {# begin {templatelocation} #}
+<script src="{site_url}/javascript/addons/datetime/jquery.datetimepicker.full.min.js" type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="{site_url}/javascript/addons/datetime/jquery.datetimepicker.min.css"/ >
+<script src="{site_url}/javascript/addons/datetime/datetimepicker.js" type="text/javascript"></script>
 <form id="electioneditor" class="uk-form uk-form-horizontal" action="{action_url}" method="post">
 	<input type="hidden" name="{sectoken_name}" value="{sectoken}">
 	<input type="hidden" value="{old_pid}" name="old_pid">
 
-	<ul class="uk-tab" data-uk-tab="{connect:'#pe-form',swiping:false}">
+	<ul uk-switcher="connect:#pe-form" class="uk-tab" data-uk-tab="{connect:'#pe-form',swiping:false}">
 		<li><a href="#">{lang_general}</a></li>
 		<li><a href="#">{lang_questions}</a></li>
 		<li><a href="#">{lang_permissions}</a></li>
 	</ul>
 
 	<div class="uk-panel uk-panel-box uk-margin">
-		<div class="uk-form-row">
+		<div class="uk-form-row uk-margin">
 			<label class="uk-form-label" for="pid">{lang_electionid}</label>
 			<div class="uk-form-controls">
-				<input class="uk-form-width-medium required" type="text" id="pid" name="pid" value="{id}"> <span class="uk-text-small">{lang_donotusespaces}</span>
+				<input class="uk-input uk-form-small uk-form-width-medium required" type="text" id="pid" name="pid" value="{id}"> <span class="uk-text-small">{lang_donotusespaces}</span>
 			</div>
 		</div>
-		<div class="uk-form-row">
+		<div class="uk-form-row uk-margin">
 			<label class="uk-form-label" for="topic">{lang_topic}</label>
 			<div class="uk-form-controls">
-				<input type="text" id="topic" name="topic" value="{topic}" class="uk-form-width-large required" maxlength="255">
+				<input class="required uk-input uk-form-small" type="text" id="topic" name="topic" value="{topic}" />
 			</div>
 		</div>
 	</div>
@@ -28,61 +31,61 @@
 		<ul id="pe-form" class="uk-switcher uk-margin">
 			{# General Panel #}
 			<li>
-				<div class="uk-form-row">
+				<div class="uk-form-row uk-margin">
 					<label class="uk-form-label" for="description">{lang_description}</label>
 					<div class="uk-form-controls">
-						<textarea id="description" name="description" class="uk-form-width-large" rows="5" columns="100">{description}</textarea>
+						<textarea cid="description" name="description" class="uk-textarea uk-width-1-1" rows="5">{description}</textarea>
 					</div>
 				</div>
 
-				<div class="uk-form-row">
+				<div class="uk-form-row uk-margin">
 					<label class="uk-form-label" for="commentcode">{lang_mode}</label>
-					<div class="uk-form-controls">
-						<select name="commentcode" id="commentcode">
+					<div class="uk-form-controls uk-form-controls-text">
+						<select class="uk-select uk-form-small uk-form-width-medium" name="commentcode" id="commentcode">
 							{comment_options}
 						</select>
 					</div>
 				</div>
 
-				<div class="uk-form-row">
+				<div class="uk-form-row uk-margin">
 					<label class="uk-form-label" for="rnd_q">{lang_rnd_q}</label>
-					<div class="uk-form-controls">
-						<input type="checkbox" id="rnd_q" name="rnd_questions" value="1" {rndq_chk} />
+					<div class="uk-form-controls uk-form-controls-text">
+						<input class="uk-checkbox" type="checkbox" id="rnd_q" name="rnd_questions" value="1" {rndq_chk} />
 					</div>
 				</div>
 
-				<div class="uk-form-row">
+				<div class="uk-form-row uk-margin" style="clear:both;">
 					<label class="uk-form-label" for="rnd_a">{lang_rnd_a}</label>
-					<div class="uk-form-controls">
-						<input type="checkbox" id="rnd_a" name="rnd_answers" value="1" {rnda_chk} />
+					<div class="uk-form-controls uk-form-controls-text">
+						<input class="uk-checkbox" type="checkbox" id="rnd_a" name="rnd_answers" value="1" {rnda_chk} />
 					</div>
 				</div>
 
-				<div class="uk-form-row">
+				<div class="uk-form-row uk-margin" style="clear:both;">
 					<label class="uk-form-label" for="decl_winner">{lang_decl_winner}</label>
-					<div class="uk-form-controls">
-						<input type="checkbox" id="decl_winner" name="decl_winner" value="1" {decl_chk} />
+					<div class="uk-form-controls uk-form-controls-text">
+						<input class="uk-checkbox" type="checkbox" id="decl_winner" name="decl_winner" value="1" {decl_chk} />
 					</div>
 				</div>
 
-				<div class="uk-form-row">
+				<div class="uk-form-row uk-margin" style="clear:both;">
 					<label class="uk-form-label" for="mainpage">{lang_appearsonhomepage}</label>
-					<div class="uk-form-controls">
-						<input type="checkbox" id="mainpage" name="display" value="1" {display} />
+					<div class="uk-form-controls uk-form-controls-text">
+						<input class="uk-checkbox" type="checkbox" id="mainpage" name="display" value="1" {display} />
 					</div>
 				</div>
 
-				<div class="uk-form-row">
+				<div class="uk-form-row uk-margin" style="clear:both;">
 					<label class="uk-form-label" for="hideresults">{lang_hideresults}</label>
-					<div class="uk-form-controls">
-						<input type="checkbox" id="hideresults" name="hideresults" value="1" {hideresults}> <span class="uk-text-small">{hideresults_explain}</span>
+					<div class="uk-form-controls uk-form-controls-text">
+						<input class="uk-checkbox" type="checkbox" id="hideresults" name="hideresults" value="1" {hideresults}> <span class="uk-text-small">{hideresults_explain}</span>
 					</div>
 				</div>
 
-				<div class="uk-form-row">
+				<div class="uk-form-row uk-margin">
 					<label class="uk-form-label" for="open">{lang_status}</label>
-					<div class="uk-form-controls">
-						<select name="status">
+					<div class="uk-form-controls uk-form-controls-text">
+						<select class="uk-select uk-form-small uk-form-width-medium" name="status">
 							<option value="0" {open_0}>{lang_open}</option>
 							<option value="1" {open_1}>{lang_closed}</option>
 							<option value="2" {open_2}>{lang_archived}</option>
@@ -90,72 +93,50 @@
 					</div>
 				</div>
 
-				<div class="uk-form-row">
+				<div class="uk-form-row uk-margin">
 					<label class="uk-form-label">{lang_opens}</label>
 					<div class="uk-form-controls">
+						<input class="uk-input uk-form-small uk-form-width-medium popupcal" type="text" id="opens_dt" name="opens_date" value="{opens_date}" />
 						<i class="uk-icon uk-icon-remove uk-text-danger tooltip"
-						onclick="$('#opens_dt').val('');$('#opens_time').val('');"
-						title="{lang_reset}"
-						></i>
-						<div class="uk-form-icon">
-							<i class="uk-icon-calendar"></i>
-							<input type="text" id="opens_dt" name="opens_date" value="{opens_date}" size="12" maxlength="12"
-								data-uk-datepicker="{format:'YYYY-MM-DD'}" title="{lang_datepicker}"
-								placeholder="{min_date}"
-								data-uk-tooltip />
-						</div>
-						<div class="uk-form-icon">
-							<i class="uk-icon-clock-o"></i>
-							<input type="text" id="opens_time" name="opens_time" value="{opens_time}" size="12" maxlength="12"
-								data-uk-timepicker title="{lang_timepicker}" placeholder="{min_time}"
-								data-uk-tooltip />
-						</div>
+							onclick="$('#opens_dt').val('');"
+							title="{lang_reset}"
+							></i>
 						&nbsp;({timezone})
 					</div>
 				</div>
 
-				<div class="uk-form-row">
+				<div class="uk-form-row uk-margin">
 					<label class="uk-form-label">{lang_closes}</label>
 					<div class="uk-form-controls">
+						<input class="uk-input uk-form-small uk-form-width-medium popupcal" type="text" id="closes_dt" name="closes_date" value="{closes_date}" />
 						<i class="uk-icon uk-icon-remove uk-text-danger tooltip"
-						title="{lang_reset}"
-						onclick="$('#closes_dt').val('');$('#closes_time').val('');"
-						></i>
-						<div class="uk-form-icon">
-							<i class="uk-icon-calendar"></i>
-							<input type="text" id="closes_dt" name="closes_date" value="{closes_date}" size="12" maxlength="12"
-								data-uk-datepicker="{format:'YYYY-MM-DD'}" title="{lang_datepicker}"
-								placeholder="{max_date}"
-								data-uk-tooltip />
-						</div>
-						<div class="uk-form-icon">
-							<i class="uk-icon-clock-o"></i>
-							<input type="text" id="closes_time" name="closes_time" value="{closes_time}" size="12" maxlength="12"
-								data-uk-timepicker title="{lang_timepicker}" placeholder="{max_time}"
-								data-uk-tooltip />
-						</div>
+							title="{lang_reset}"
+							onclick="$('#closes_dt').val('');"
+							></i>
 						&nbsp;({timezone})
 					</div>
 				</div>
 
-				<div class="uk-form-row uk-alert uk-alert-danger">
+{!if lang_resetresults}
+				<div class="uk-form-row uk-margin uk-alert uk-alert-danger">
 					<label class="uk-form-label" for="resetresults">{lang_resetresults}</label>
-					<div class="uk-form-controls">
-						<input type="checkbox" id="resetresults" name="resetresults" value="1" />
+					<div class="uk-form-controls uk-form-controls-text">
+						<input class="uk-checkbox" type="checkbox" id="resetresults" name="resetresults" value="1" />
 						<span class="uk-text-small">{lang_exp_reset}</span>
 					</div>
 				</div>
+{!endif}
 			</li>
 
 			{# Questions Panel #}
 			<li>
-				<ul class="uk-tab" data-uk-tab="{connect:'#question-tabs',swiping:false}">
+				<ul uk-tab class="uk-tab" data-uk-tab="{connect:'#question-tabs',swiping:false}">
 <!-- BEGIN questiontab -->
 					<li><a href="#">{!if !hasdata}<span class="uk-text-muted">{!endif}{question_tab}{!if !hasdata}</span>{!endif}</a></li>
 <!-- END questiontab -->
 				</ul>
 
-				<div class="uk-form-row uk-margin">
+				<div class="uk-form-row uk-margin uk-margin">
 					<div class="uk-form-controls">
 						<span class="uk-text-bold">{lang_answersvotes}</span>
 					</div>
@@ -170,28 +151,28 @@
 			<li>
 				<div class="uk-text-bold uk-text-large">{lang_accessrights}</div>
 
-				<div class="uk-form-row">
+				<div class="uk-form-row uk-margin">
 					<label class="uk-form-label">{lang_owner}</label>
 					<div class="uk-form-controls">
 						{owner_name}<input type="hidden" name="owner_id" value="{owner_id}">
 					</div>
 				</div>
-				<div class="uk-form-row">
+				<div class="uk-form-row uk-margin">
 					<label class="uk-form-label" for="group">{lang_voting_group}</label>
 					<div class="uk-form-controls">
 						{group_dropdown}
 					</div>
 				</div>
-				<div class="uk-form-row">
+				<div class="uk-form-row uk-margin">
 					<label class="uk-form-label">{lang_results_group}</label>
 					<div class="uk-form-controls">
 						{res_grp_dropdown}
 					</div>
 				</div>
-				<div class="uk-form-row">
+				<div class="uk-form-row uk-margin">
 					<label class="uk-form-label">{lang_voteaccess}</label>
-					<div class="uk-form-controls">
-						<select name="voteaccess">
+					<div class="uk-form-controls uk-form-controls-text">
+						<select class="uk-select uk-form-small uk-form-width-medium" name="voteaccess">
 							<option value="0" {voteaccess_0}>{lang_noaccess}</option>
 							<option value="1" {voteaccess_1}>{lang_view}</option>
 							<!--<option value="2" {voteaccess_0}>{lang_noaccess}</option>-->

@@ -148,7 +148,7 @@ class Results
     public function Render()
     {
         global $_CONF, $_TABLES, $_USER, $_IMAGE_TYPE,
-           $_COM_VERBOSE;
+           $_COM_VERBOSE, $_SYSTEM;
 
         $retval = '';
         $filter = new \sanitizer();
@@ -180,7 +180,10 @@ class Results
             }
         }
 
-        $poll = new \Template(__DIR__ . '/../../templates/');
+        $poll = new \Template(array(
+            __DIR__ . '/../../templates/' . $_SYSTEM['framework'],
+            __DIR__ . '/../../templates/',
+        ) );
         $poll->set_file(array(
             'result' => 'result.thtml',
             'question' => 'question.thtml',
@@ -306,9 +309,10 @@ class Results
 
         $poll->set_var('lang_topics', MO::_('Topics'));
         if ($this->isAdmin && $this->displaytype !== Modes::PRINT) {
-            $retval .= '<a class="uk-button uk-button-success" target="_blank" href="' .
-                Config::get('admin_url') . '/index.php?presults=x&pid=' .
-                urlencode($this->pid) . '">Print</a>' . LB;
+            $poll->set_var(array(
+                'print_url' => Config::get('admin_url') . '/index.php?presults=x&pid=' . urlencode($this->pid),
+                'lang_print' => MO::_('Print'),
+            ) );
         }
         $retval .= $poll->finish($poll->parse('output', 'result' ));
 
