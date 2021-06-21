@@ -714,19 +714,13 @@ class Election
             $this->setClosingDate($A['closes'], false);
         } else {
             if (empty($A['opens_date'])) {
-                $A['opens_date'] = Dates::MIN_DATE;
+                $A['opens_date'] = Dates::minDateTime();
             }
-            if (empty($A['opens_time'])) {
-                $A['opens_time'] = Dates::MIN_TIME;
-            }
-            $this->setOpenDate($A['opens_date'] . ' ' . $A['opens_time'], true);
+            $this->setOpenDate($A['opens_date'], true);
             if (empty($A['closes_date'])) {
-                $A['closes_date'] = Dates::MAX_DATE;
+                $A['closes_date'] = Dates::maxDateTime();
             }
-            if (empty($A['closes_time'])) {
-                $A['closes_time'] = Dates::MAX_TIME;
-            }
-            $this->setClosingDate($A['closes_date'] . ' ' . $A['closes_time'], true);
+            $this->setClosingDate($A['closes_date'], true);
         }
     }
 
@@ -794,25 +788,15 @@ class Election
         if ($this->old_pid == '') {
             // creating a new election, use empty date/time fields
             $open_date = '';
-            $open_time = '';
             $close_date = '';
-            $close_time = '';
         } else {
-            $open_date = $this->Opens->format('Y-m-d', true);
+            $open_date = $this->Opens->format('Y-m-d H:i', true);
             if ($open_date == Dates::MIN_DATE) {
                 $open_date = '';
             }
-            $open_time= $this->Opens->format('H:i:s', true);
-            if ($open_time == Dates::MIN_TIME) {
-                $open_time = '';
-            }
-            $close_date = $this->Closes->format('Y-m-d', true);
+            $close_date = $this->Closes->format('Y-m-d H:i', true);
             if ($close_date == Dates::MAX_DATE) {
                 $close_date = '';
-            }
-            $close_time= $this->Closes->format('H:i:s', true);
-            if ($close_time == Dates::MAX_TIME) {
-                $close_time = '';
             }
         }
         $ownername = COM_getDisplayName($this->owner_id);
@@ -842,13 +826,9 @@ class Election
             'lang_opens' => MO::_('Opens'),
             'lang_closes' => MO::_('Closes'),
             'opens_date' => $open_date,
-            'opens_time' => $open_time,
             'closes_date' => $close_date,
-            'closes_time' => $close_time,
             'min_date' => Dates::MIN_DATE,
             'max_date' => Dates::MAX_DATE,
-            'min_time' => Dates::MIN_TIME,
-            'max_time' => Dates::MAX_TIME,
             // user access info
             'lang_accessrights' => MO::_('Access Rights'),
             'lang_owner' => MO::_('Owner'),
@@ -880,7 +860,7 @@ class Election
             'lang_decl_winner' => MO::_('Declares a winner?'),
             'decl_chk' => $this->decl_winner ? 'checked="checked"' : '',
             'timezone' => $_CONF['timezone'],
-            'lang_resetresults' => MO::_('Reset Results'),
+            'lang_resetresults' => $this->old_pid != '' ? MO::_('Reset Results') : '',
             'lang_exp_reset' => MO::_('Reset all results for this election'),
             'lang_reset' => MO::_('Reset'),
         ) );
@@ -1141,7 +1121,7 @@ class Election
                 'field' => 'status',
                 'sort' => true,
                 'align' => 'center',
-                'width' => '35px',
+                //'width' => '35px',
             ),
             array(
                 'text' => MO::_('Reset'),
@@ -1304,6 +1284,7 @@ class Election
             }
             break;
         case 'status':
+            $fieldvalue = (int)$fieldvalue;
             if ($fieldvalue == 2) {
                 $retval .= MO::_('Archived');
                 break;
@@ -1316,7 +1297,7 @@ class Election
             }
             $retval .= "<input type=\"checkbox\" $switch value=\"1\" name=\"ena_check\"
                     id=\"togenabled{$A['pid']}\"
-                    onclick='" . Config::PI_NAME . "_toggle(this,\"{$A['pid']}\",\"status\",".
+                    onclick='" . Config::PI_NAME . "_toggle(this,\"{$A['pid']}\",\"{$fieldname}\",".
                     "\"election\");' />" . LB;
             break;
         case 'display':
