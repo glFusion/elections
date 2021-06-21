@@ -1285,10 +1285,10 @@ class Election
             break;
         case 'status':
             $fieldvalue = (int)$fieldvalue;
-            if ($fieldvalue == 2) {
+            if ($fieldvalue == Status::ARCHIVED) {
                 $retval .= MO::_('Archived');
                 break;
-            } elseif ($fieldvalue == 0) {
+            } elseif ($fieldvalue == Status::OPEN) {
                 $switch = 'checked="checked"';
                 $enabled = 1;
             } else {
@@ -1329,15 +1329,20 @@ class Election
             }
             break;
         case 'reset':
-            $retval = COM_createLink(
-                '<i class="uk-icon-refresh uk-text-danger"></i>',
-                Config::get('admin_url') . "/index.php?resetelection&pid={$A['pid']}",
-                array(
-                    'onclick' => "return confirm('" .
-                    MO::_('Are you sure you want to delete all of the results for this election?') .
-                    "');",
-                )
-            );
+            if ($A['status'] == Status::ARCHIVED) {
+                $retval = '<i class="uk-icon-refresh uk-text-disabled tooltip" title="' .
+                    MO::_('Cannot reset archived elections.') . '"></i>';
+            } else { 
+                $retval = COM_createLink(
+                    '<i class="uk-icon-refresh uk-text-danger"></i>',
+                    Config::get('admin_url') . "/index.php?resetelection&pid={$A['pid']}",
+                    array(
+                        'onclick' => "return confirm('" .
+                        MO::_('Are you sure you want to delete all of the results for this election?') .
+                        "');",
+                    )
+                );
+            }
             break;
         case 'delete':
             $attr['title'] = MO::_('Delete');
@@ -1915,7 +1920,7 @@ class Election
     public static function deleteVotes($pid)
     {
         $Election = new self($pid);
-        if (!$Election->isNew()) {
+        if (!$Election->isNew() && $Election->getStatus() < Status::ARCHIVED) {
             Answer::resetElection($Election->getID());
             Voter::deleteElection($Election->getID());
         }
