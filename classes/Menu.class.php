@@ -109,7 +109,7 @@ class Menu
         global $_CONF;
 
         $retval = '';
-        switch (Config::get('displayblocks')) {
+        switch ((int)Config::get('displayblocks')) {
         case 0 : // left only
         case 3 : // none
             $retval .= COM_siteFooter();
@@ -126,7 +126,3 @@ class Menu
     }
 
 }
-
-?>
-
-
