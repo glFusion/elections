@@ -2,7 +2,7 @@
 {!if use_ajax}
 <script>
   $(window).load(function() {
-    $( "#electionautotag_{id}" ).on( "click", "#votebutton", function(event) {
+    $( "#electionautotag_{uniqid}" ).on( "click", "#vb_{uniqid}", function(event) {
       event.preventDefault();
       var data = $("#vote{id}").serialize();
       $.ajax({
@@ -14,7 +14,7 @@
           var result = $.parseJSON(data["json"]);
           try {
             $.UIkit.notify("<i class='uk-icon-check'></i>&nbsp;" + result.statusMessage, {timeout: 1000,pos:'top-center'});
-            $('#electionautotag_{id}').html(result.html);
+            $('#electionautotag_{uniqid}').html(result.html);
           }
           catch(err) {
             alert(result.statusMessage);
@@ -26,7 +26,7 @@
 </script>
 {!endif}
 
-<div id="electionautotag_{id}">
+<div id="electionautotag_{uniqid}">
 {!!if {disp_mode} == 0 !!}
 {!if edit_url}
     <span class="uk-align-right"><a href="{edit_url}" class="uk-aling-right uk-icon uk-icon-edit tm-meta-icon"></a></span>
@@ -58,7 +58,7 @@
             {lang_login_required}
         </div>
 {!elseif can_submit}
-        <button class="uk-button uk-button-primary" id="votebutton" name="votebutton" type="submit" value="{lang_vote}">{lang_vote}</button>
+        <button class="uk-button uk-button-primary" id="vb_{uniqid}" name="votebutton" type="submit" value="{lang_vote}">{lang_vote}</button>
         {results}
 {!endif}
 

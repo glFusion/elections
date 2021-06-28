@@ -1,3 +1,8 @@
 {# begin {templatelocation} #}
-<br>{item_num}. <a href="{url}">{question}</a> ({votes} {lang_votes}){ending_br}
+{!if is_admin}
+<div class="floatright">
+	<a class="uk-button uk-button-small uk-button-danger" href="{admin_url}">{lang_admin}</a>
+</div>
+{!endif}
+{election_list}
 {# end {templatelocation} #}

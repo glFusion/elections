@@ -1247,35 +1247,30 @@ class Election
                 );
             }
             break;
-        /*case 'user_action':
-            if (
-                $A['closes'] < $extras['_now'] &&
-                $A['status'] &&
-                !Voter::hasVoted($A['pid']) &&
-                SEC_inGroup($A['group_id'])
-            ) {
-                $retval = COM_createLink(
-                    MO::_('Vote'),
-                    Config::get('url') . "/index.php?pid={$A['pid']}"
-                );
-            } elseif (SEC_inGroup($A['results_gid'])) {
-                $retval = COM_createLink(
-                    MO::_('Results'),
-                    Config::get('url') . "/index.php?results=x&pid={$A['pid']}"
-                );
-            }*/
         case 'user_action':
-            if (Voter::hasVoted($A['pid'], $A['group_id'])) {
+            if (
+                $A['closes'] < $extras['_now'] ||
+                $A['status'] == Status::CLOSED
+            ) {
+                // Show the button to see early results, if allowed.
+                if ($A['hideresults']) {
+                    $retval = MO::_('Closed');
+                } else {
+                    $retval = COM_createLink(
+                        MO::_('Results'),
+                        Config::get('url') . '/index.php?pid=' . urlencode($A['pid']),
+                        array(
+                            'class' => 'uk-button uk-button-mini uk-button-primary',
+                            'style' => 'float:right;',
+                        )
+                    );
+                }
+            } elseif (Voter::hasVoted($A['pid'], $A['group_id'])) {
                 $retval = '<form action="' . Config::get('url') . '/index.php" method="post">';
                 $retval .= '<input type="text" size="15" placeholder="Enter Key" name="votekey" value="" />';
                 $retval .= '<input type="hidden" name="pid" value="' . $A['pid'] . '" />';
                 $retval .= '<button type="submit" style="float:right;" class="uk-button uk-button-mini uk-button-primary" name="showvote">';
                 $retval .= 'Show Vote</button></form>';
-            } elseif (
-                $A['closes'] < $extras['_now'] &&
-                $A['opens'] < $extras['_now']
-            ) {
-                $retval = MO::_('Closed');
             } else {
                 $retval = MO::_('Open');
                 $retval .= '&nbsp;<a href="' . Config::get('url') . '/index.php?pid=' .
@@ -1492,6 +1487,7 @@ class Election
             $election->set_var(array(
                 'id' => $this->pid,
                 'old_pid' => $this->old_pid,
+                'uniqid' => uniqid(),
                 'num_votes' => COM_numberFormat($this->_vote_count),
                 'vote_url' => Config::get('url') . '/index.php',
                 'ajax_url' => Config::get('url') . '/ajax_handler.php',
@@ -1509,7 +1505,7 @@ class Election
             if ($nquestions == 1 || $this->disp_showall) {
                 // Only one question (block) or showing all (main form)
                 $election->set_var('lang_vote', MO::_('Vote'));
-                $election->set_var('showall',true);
+                $election->set_var('showall', true);
                 if ($this->disp_type == Modes::BLOCK) {
                     $election->set_var('use_ajax', true);
                 } else {
@@ -1659,8 +1655,12 @@ class Election
                 );
             }
         } else {
-            COM_setMsg(MO::_("There are no questions for this election"), 'error');
-            COM_refresh(Config::get('url') . '/index.php');
+            if ($this->disp_showall) {
+                // not in a block, safe to return to the list
+                COM_setMsg(MO::_("There are no questions for this election"), 'error');
+                COM_refresh(Config::get('url') . '/index.php');
+            }
+            // else, nothing is returned to avoid a redirect loop
         }
         return $retval;
     }
@@ -1757,7 +1757,8 @@ class Election
     {
         global $_CONF, $_USER;
 
-        $retval = '';
+        $T = new \Template(__DIR__ . '/../templates/');
+        $T->set_file('list', 'list.thtml');
 
         USES_lib_admin();
 
@@ -1809,27 +1810,16 @@ class Election
             '_now' => $sql_now_utc,
             'is_admin' => false,
         );
-        $filter = "WHERE (status = " . Status::CLOSED . " AND '$sql_now_utc' BETWEEN opens AND closes " .
+        $filter = "(status = " . Status::CLOSED . " AND '$sql_now_utc' BETWEEN opens AND closes " .
                 SEC_buildAccessSql('AND', 'group_id') .
             ") OR (
                 (hideresults = 0 OR status = " . Status::OPEN . " OR closes < '$sql_now_utc')" .
                 SEC_buildAccessSql('AND', 'results_gid') .
             ')';
-        $sql = "SELECT COUNT(*) AS count FROM " . DB::table('topics') . ' ' . $filter;
-        //echo $sql;die;
-        $count = 0;
-        $res = DB_query("SELECT COUNT(*) AS count FROM " . DB::table('topics') . ' ' . $filter);
-        if ($res) {
-            $A = DB_fetchArray($res, false);
-            $count = (int)$A['count'];
-        }
-        if (plugin_ismoderator_elections()) {
-            $retval .= '<div class="floatright"><a class="uk-button uk-button-small uk-button-danger" href="' .
-                Config::get('admin_url') . '/index.php">Admin</a></div>' . LB;
-        }
+        $count = (int)DB_getItem(DB::table('topics'), 'count(*)', $filter);
         $sql = "SELECT p.*,
                 (SELECT COUNT(v.id) FROM " . DB::table('voters') . " v WHERE v.pid = p.pid) AS vote_count
-                FROM " . DB::table('topics') . " AS p " . $filter;
+                FROM " . DB::table('topics') . " AS p WHERE " . $filter;
         $res = DB_query($sql);
         $count = DB_numRows($res);
         $data_arr = array();
@@ -1837,32 +1827,32 @@ class Election
             $A['has_voted'] = Voter::hasVoted($A['pid'], $A['group_id']);
             $data_arr[] = $A;
         }
-        $retval .= ADMIN_simpleList(
-            array(__CLASS__, 'getListField'), $header_arr, $text_arr, $data_arr, '', '', $extras
-        );
-        /*$query_arr = array(
-            'table' => DB::key('topics'),
-            'sql' => "SELECT p.*,
-                (SELECT COUNT(v.id) FROM " . DB::table('voters') . " v WHERE v.pid = p.pid) AS vote_count
-                FROM " . DB::table('topics') . " p",
-            'query_fields' => array('topic'),
-            'default_filter' => "WHERE status = 1 AND ('$sql_now_utc' BETWEEN opens AND closes " .
-                SEC_buildAccessSql('AND', 'group_id') .
-                ") OR (closes < '$sql_now_utc' " . SEC_buildAccessSql('AND', 'results_gid') . ')',
-            'query' => '',
-            'query_limit' => 0,
-        );
-        $retval .= ADMIN_list(
-            Config::PI_NAME . '_' . __FUNCTION__,
-            array(__CLASS__, 'getListField'),
-            $header_arr, $text_arr, $query_arr, $defsort_arr, '', $extras
-        );*/
-        if ($count == 0) {
+        $T->set_var(array(
+            'election_list' => ADMIN_simpleList(
+                array(__CLASS__, 'getListField'),
+                $header_arr, $text_arr, $data_arr, '', '', $extras
+                ),
+            'is_admin' => plugin_ismoderator_elections(),
+            'admin_url' => Config::get('admin_url') . '/index.php',
+            'lang_admin' => MO::_('Admin'),
+            'msg_alert' => $count == 0 ?
+                self::msgAlert(
+                    MO::_('It appears that there are no elections available.')
+                ) :
+                '',
+            ) );
+
+/*        if (plugin_ismoderator_elections()) {
+            $retval .= '<div class="floatright"><a class="uk-button uk-button-small uk-button-danger" href="' .
+                Config::get('admin_url') . '/index.php">Admin</a></div>' . LB;
+        }*/
+        /*if ($count == 0) {
             $retval .= self::msgAlert(
-                MO::_('It appears that there are no polls on this site or no one has ever voted.')
+                MO::_('It appears that there are no elections available.')
             );
-        }
-        return $retval;
+            }*/
+        $T->parse('output', 'list');
+        return $T->finish($T->get_var('output'));
     }
 
 
