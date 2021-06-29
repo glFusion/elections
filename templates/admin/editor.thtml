@@ -136,12 +136,6 @@
 <!-- END questiontab -->
 				</ul>
 
-				<div class="uk-form-row uk-margin uk-margin">
-					<div class="uk-form-controls">
-						<span class="uk-text-bold">{lang_answersvotes}</span>
-					</div>
-				</div>
-
 				<ul id="question-tabs" class="uk-switcher uk-margin">
 					{question_list}
 				</ul>

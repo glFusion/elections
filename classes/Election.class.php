@@ -745,7 +745,7 @@ class Election
         $T->set_file(array(
             'editor' => 'editor.thtml',
             'question' => 'questions.thtml',
-            'answer' => 'answeroption.thtml',
+            'answer' => 'answeroptions.thtml',
         ) );
 
         if (!empty($this->pid)) {       // if not a new record
@@ -840,7 +840,6 @@ class Election
             'lang_results_group' => MO::_('Allowed to View Results'),
             'group_dropdown' => SEC_getGroupDropdown($this->voting_gid, 3),
             'res_grp_dropdown' => SEC_getGroupDropdown($this->results_gid, 3, 'results_gid'),
-            'lang_answersvotes' => MO::_('Answers / Votes / Remark'),
             'lang_save' => MO::_('Save'),
             'lang_cancel' => MO::_('Cancel'),
             'lang_datepicker' => MO::_('Date Picker'),
@@ -891,10 +890,14 @@ class Election
                 $T->unset_var('question_text');
             }
             $T->set_var('lang_question', MO::_('Question') . " $display_id");
+            $T->set_var('lang_answer', MO::_('Answer'));
+            $T->set_var('lang_votes', MO::_('Votes'));
+            $T->set_var('lang_remark', MO::_('Remark'));
             $T->set_var('lang_saveaddnew', MO::_('Save and Add'));
 
             $T->parse('qt','questiontab',true);
 
+            $T->set_block('answer', 'AnswerRow', 'AR');
             for ($i = 0; $i < Config::get('maxanswers'); $i++) {
                 if (isset($Answers[$i])) {
                     $T->set_var(array(
@@ -909,8 +912,9 @@ class Election
                         'remark_text' => '',
                     ) );
                 }
-                $T->parse ('answer_option', 'answer', true);
+                $T->parse ('AR', 'AnswerRow', true);
             }
+            $T->parse ('answer_option', 'answer', true);
             $T->parse ('question_list', 'question', true);
             $T->clear_var ('answer_option');
         }
@@ -1253,10 +1257,9 @@ class Election
                 $A['status'] == Status::CLOSED
             ) {
                 // Show the button to see early results, if allowed.
-                if ($A['hideresults']) {
-                    $retval = MO::_('Closed');
-                } else {
-                    $retval = COM_createLink(
+                $retval = MO::_('Closed');
+                if (SEC_inGroup('results_gid')) {
+                    $retval .= '&nbsp;' . COM_createLink(
                         MO::_('Results'),
                         Config::get('url') . '/index.php?pid=' . urlencode($A['pid']),
                         array(
@@ -1265,17 +1268,43 @@ class Election
                         )
                     );
                 }
-            } elseif (Voter::hasVoted($A['pid'], $A['group_id'])) {
-                $retval = '<form action="' . Config::get('url') . '/index.php" method="post">';
-                $retval .= '<input type="text" size="15" placeholder="Enter Key" name="votekey" value="" />';
-                $retval .= '<input type="hidden" name="pid" value="' . $A['pid'] . '" />';
-                $retval .= '<button type="submit" style="float:right;" class="uk-button uk-button-mini uk-button-primary" name="showvote">';
-                $retval .= 'Show Vote</button></form>';
             } else {
+                // Election is open. Show the voting link if the user hasn't voted,
+                // otherwise show the early results link if allowed.
                 $retval = MO::_('Open');
-                $retval .= '&nbsp;<a href="' . Config::get('url') . '/index.php?pid=' .
-                    $A['pid'] . '" style="float:right;" class="uk-button uk-button-mini uk-button-success">' .
-                    MO::_('Vote') . '</button>';
+                if (!Voter::hasVoted($A['pid'], $A['group_id'])) {
+                    $retval .= '&nbsp;' . COM_createLink(
+                        MO::_('Vote'),
+                        Config::get('url') . '/index.php?pid=' . urlencode($A['pid']),
+                        array(
+                            'style' => 'float:right;',
+                            'class' => 'uk-button uk-button-mini uk-button-success',
+                        )
+                    );
+                } elseif (!$A['hideresults'] && SEC_inGroup('results_gid')) {
+                    $retval .= '&nbsp;' . COM_createLink(
+                        MO::_('Results'),
+                        Config::get('url') . '/index.php?results&pid=' . urlencode($A['pid']),
+                        array(
+                            'class' => 'uk-button uk-button-mini uk-button-primary',
+                            'style' => 'float:right;',
+                        )
+                    );
+                }
+            }
+            break;
+        case 'user_extra':
+            if (Voter::hasVoted($A['pid'], $A['group_id'])) {
+                if ($A['voteaccess']) {
+                    $retval = '<form action="' . Config::get('url') . '/index.php" method="post">';
+                    $retval .= '<input type="text" size="15" placeholder="Enter Key" name="votekey" value="" />';
+                    $retval .= '<input type="hidden" name="pid" value="' . $A['pid'] . '" />';
+                    $retval .= '<button type="submit" style="float:right;" class="uk-button uk-button-mini uk-button-primary" name="showvote">';
+                    $retval .= MO::_('Show Vote') . '</button></form>';
+                } else {
+                    // Results available only after election closes
+                    $retval = MO::_('Results available after closing.');
+                }
             }
             break;
         case 'status':
@@ -1744,6 +1773,9 @@ class Election
      */
     public function alreadyVoted()
     {
+        if (Voter::hasVoted($this->pid, $this->voting_gid)) {
+        //    var_dump($this);die;
+        }
         return Voter::hasVoted($this->pid, $this->voting_gid);
     }
 
@@ -1775,20 +1807,20 @@ class Election
                 'align' => 'center',
             ),
             array(
-                'text' => MO::_('Opens'),
-                'field' => 'opens',
-                'sort' => true,
-                'align' => 'center',
-            ),
-            array(
                 'text' => MO::_('Closes'),
                 'field' => 'closes',
                 'sort' => true,
                 'align' => 'center',
             ),
             array(
-                'text' => MO::_('Message'),
+                'text' => MO::_('Action'),
                 'field' => 'user_action',
+                'sort' => true,
+                'align' => 'center',
+            ),
+            array(
+                'text' => MO::_('Message'),
+                'field' => 'user_extra',
                 'sort' => true,
                 'align' => 'center',
             ),

@@ -154,12 +154,11 @@ class Answer
                 qid = '{$this->getQid()}',
                 aid = '{$this->getAid()}',
                 answer = '$answer',
-                remark = '$remark',
-                votes = {$this->getVotes()}
+                remark = '$remark'
             ON DUPLICATE KEY UPDATE
                 answer = '$answer',
-                remark = '$remark',
-                votes = {$this->getVotes()}";
+                remark = '$remark'";
+                //votes = {$this->getVotes()}
         //echo $sql;die;
         DB_query($sql);
         if (DB_error()) {
