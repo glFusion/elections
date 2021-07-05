@@ -242,14 +242,17 @@ class Voter
         // If logged in and the user ID is in the voters table,
         // we can trust that this user has voted.
         if (!COM_isAnonUser()) {
-            if (DB_count(
-                DB::table('voters'),
-                 array('uid', 'pid'),
-                 array((int)$_USER['uid'], DB_escapeString($pid)) ) > 0
+            if (
+                DB_count(
+                    DB::table('voters'),
+                    array('uid', 'pid'),
+                    array((int)$_USER['uid'], DB_escapeString($pid))
+                ) > 0
             ) {
                 return true;
             }
         }
+
         if ($voting_grp != Groups::ALL_USERS) {
             // If a login is required, return false now since there's no need
             // to check for anonymous votes.
