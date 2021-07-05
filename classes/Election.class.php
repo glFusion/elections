@@ -914,8 +914,9 @@ class Election
                 }
                 $T->parse ('AR', 'AnswerRow', true);
             }
-            $T->parse ('answer_option', 'answer', true);
-            $T->parse ('question_list', 'question', true);
+            $T->parse('answer_option', 'answer', true);
+            $T->parse('question_list', 'question', true);
+            $T->clear_var('AR');
             $T->clear_var ('answer_option');
         }
         $token = SEC_createToken();
@@ -1387,6 +1388,12 @@ class Election
     }
 
 
+    /**
+     * Display the election options.
+     *
+     * @param   boolean $preview    True if previewing by admin
+     * @return  string      HTML for election form
+     */
     public function Render($preview = false)
     {
         if (
@@ -1417,47 +1424,9 @@ class Election
         }
     }
 
-        /*// This is not an admin preview, the user can't vote (maybe already did),
-        // and this is not a voter checking their vote. See if they can view the results.
-        if (!$preview && !$this->canVote()) {
-            if (empty($this->_access_key) || !is_array($this->_selections)) {
-                if ($this->alreadyVoted()) {
-                    if ($this->canViewResults()) {
-                        if ($this->disp_type == Modes::NORMAL) {
-                            // not in a block or autotag, just refresh to the results page
-                            COM_refresh(Config::get('url') . '/index.php?results&pid=' . $this->pid);
-                        } elseif ($this->disp_type == Modes::AUTOTAG) {
-                            // In an autotag
-                            return (new Results($this->pid))
-                                ->withDisplayType($this->disp_type)
-                                ->Render();
-                        } else {
-                            // in a block
-                            return '';
-                        }
-                    } else {
-                        return $this->msgNoResultsWhileOpen();
-                    }
-                                }
-            } elseif (empty($this->_access_key) && $this->canViewResults()) {
-                if ($this->disp_type == Modes::NORMAL) {
-                    // not in a block or autotag, just refresh to the results page
-                    COM_refresh(Config::get('url') . '/index.php?results&pid=' . $this->pid);
-                } elseif ($this->disp_type == Modes::AUTOTAG) {
-                    // In an autotag
-                    return (new Results($this->pid))
-                        ->withDisplayType($this->disp_type)
-                        ->Render();
-                } else {
-                    // in a block, return nothing
-                    return $retval;
-                }
-            }
-        }*/
-
 
     /**
-     * Shows a election form
+     * Shows the election form.
      *
      * Shows an HTML formatted election for the given topic ID
      *
