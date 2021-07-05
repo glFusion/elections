@@ -1,45 +1,28 @@
 <?php
-// +--------------------------------------------------------------------------+
-// | Election Plugin - glFusion CMS                                              |
-// +--------------------------------------------------------------------------+
-// | upgrade.php                                                              |
-// |                                                                          |
-// | Upgrade routines                                                         |
-// +--------------------------------------------------------------------------+
-// | Copyright (C) 2009-2017 by the following authors:                        |
-// |                                                                          |
-// | Mark R. Evans          mark AT glfusion DOT org                          |
-// |                                                                          |
-// | Copyright (C) 2000-2008 by the following authors:                        |
-// |                                                                          |
-// | Authors: Tony Bibbs       - tony AT tonybibbs DOT com                    |
-// |          Tom Willett      - twillett AT users DOT sourceforge DOT net    |
-// |          Blaine Lang      - langmail AT sympatico DOT ca                 |
-// |          Dirk Haun        - dirk AT haun-online DOT de                   |
-// +--------------------------------------------------------------------------+
-// |                                                                          |
-// | This program is free software; you can redistribute it and/or            |
-// | modify it under the terms of the GNU General Public License              |
-// | as published by the Free Software Foundation; either version 2           |
-// | of the License, or (at your option) any later version.                   |
-// |                                                                          |
-// | This program is distributed in the hope that it will be useful,          |
-// | but WITHOUT ANY WARRANTY; without even the implied warranty of           |
-// | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            |
-// | GNU General Public License for more details.                             |
-// |                                                                          |
-// | You should have received a copy of the GNU General Public License        |
-// | along with this program; if not, write to the Free Software Foundation,  |
-// | Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.          |
-// |                                                                          |
-// +--------------------------------------------------------------------------+
-
+/**
+ * Upgrade routines for the Elections plugin.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2020-2021 Lee Garner <lee@leegarner.com>
+ * @package     shop
+ * @version     v0.1.2
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 if (!defined ('GVERSION')) {
     die ('This file can not be used on its own.');
 }
 use Elections\DB;
 use Elections\Config;
 
+
+/**
+ * Upgrade the plugin to the current version.
+ *
+ * @param   boolean $dvlp   True for development upgrade (ignores errors)
+ * @return  boolean     True on success, False on failure
+ */
 function election_upgrade($dvlp=false)
 {
     global $_PLUGIN_INFO;
@@ -61,6 +44,7 @@ function election_upgrade($dvlp=false)
     USES_lib_install();
     require_once __DIR__ . '/install_defaults.php';
     _update_config($pi_name, $electionConfigData);
+    ELECTION_remove_old_files()
     return true;
 }
 
@@ -146,10 +130,65 @@ function ELECTION_do_set_version($ver)
         return false;
     } else {
         COM_errorLog(Config::get('pi_display_name') . " version set to $ver");
-        // Set in-memory config vars to avoid tripping SHOP_isMinVersion();
+        // Set in-memory config vars
         Config::set('pi_version', $ver);
         $_PLUGIN_INFO[Config::get('pi_name')]['pi_version'] = $ver;
         return true;
     }
 }
 
+
+/**
+ * Remove a file, or recursively remove a directory.
+ *
+ * @param   string  $dir    Directory name
+ */
+function ELECTION_rmdir($dir)
+{
+    if (is_dir($dir)) {
+        $objects = scandir($dir);
+        foreach ($objects as $object) {
+            if ($object != "." && $object != "..") {
+                if (is_dir($dir . '/' . $object)) {
+                    ELECTION_rmdir($dir . '/' . $object);
+                } else {
+                    @unlink($dir . '/' . $object);
+                }
+            }
+        }
+        @rmdir($dir);
+    } elseif (is_file($dir)) {
+        @unlink($dir);
+    }
+}
+
+
+/**
+ * Remove deprecated files
+ * Errors in unlink() and rmdir() are ignored.
+ */
+function ELECTION_remove_old_files()
+{
+    global $_CONF;
+
+    $paths = array(
+        // private/plugins/elections
+        __DIR__ => array(
+            // 0.1.2
+            'templates/votes_num.thtml',
+        ),
+        // public_html/elections
+        $_CONF['path_html'] . Config::PI_NAME => array(
+        ),
+        // admin/plugins/elections
+        $_CONF['path_html'] . 'admin/plugins/' . Config::PI_NAME => array(
+        ),
+    );
+
+    foreach ($paths as $path=>$files) {
+        foreach ($files as $file) {
+            SHOP_log("removing $path/$file");
+            SHOP_rmdir("$path/$file");
+        }
+    }
+}
