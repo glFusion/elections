@@ -1,12 +1,12 @@
 <?php
 /**
- * Class to represent the resultset for a poll.
+ * Class to represent the results view for an election.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2020 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2020-2021 Lee Garner <lee@leegarner.com>
  * @package     elections
- * @version     v3.0.0
- * @since       v3.0.0
+ * @version     v0.1.2
+ * @since       v0.1.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -189,7 +189,6 @@ class Results
             'question' => 'question.thtml',
             'comments' => 'comments.thtml',
             'votes_bar' => 'votes_bar.thtml',
-            'votes_num' => 'votes_num.thtml',
         ) );
 
         if ($this->isAdmin) {
@@ -247,18 +246,18 @@ class Results
             $Answers = Answer::getByScore($Q->getQid(), $this->pid);
             $nanswers = count($Answers);
             $q_totalvotes = 0;
-            $max_votes = -1;
+            $winner_votes = -1;
 
             // If the poll has closed, get the winning scores.
             foreach ($Answers as $idx=>$A) {
                 $q_totalvotes += $A->getVotes();
-                if ($A->getVotes() > $max_votes) {
-                    $max_votes = $A->getVotes();
+                if ($A->getVotes() > $winner_votes) {
+                    $winner_votes = $A->getVotes();
                 }
             }
             // For open polls, the winner is not highlighted.
             if ($this->Election->isOpen()) {
-                $max_votes = -1;
+                $winner_votes = -1;
             }
 
             for ($i=1; $i<=$nanswers; $i++) {
@@ -268,20 +267,15 @@ class Results
                 } else {
                     $percent = $A->getVotes() / $q_totalvotes;
                 }
-                $winner = ($this->Election->declaresWinner()) && ($A->getVotes() == $max_votes);
+                $width = (int)($percent * 100 );
+                $winner = ($this->Election->declaresWinner()) && ($A->getVotes() == $winner_votes);
                 $poll->set_var(array(
-                    'cssida' =>  1,
-                    'cssidb' =>  2,
                     'answer_text' => $filter->filterData($A->getAnswer()),
                     'remark_text' => $filter->filterData($A->getRemark()),
-                    'answer_counter' => $i,
-                    'answer_odd' => (($i - 1) % 2),
-                    'answer_num' => COM_numberFormat($A->getVotes()),
                     'answer_percent' => sprintf('%.2f', $percent * 100),
                     'winner' => $winner,
+                    'bar_width' => $width,
                 ) );
-                $width = (int) ($percent * 100 );
-                $poll->set_var('bar_width', $width);
                 $poll->parse('votes', 'votes_bar', true);
             }
             $poll->parse('questions', 'question', true);
