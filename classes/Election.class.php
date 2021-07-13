@@ -738,10 +738,10 @@ class Election
 
         $retval = COM_startBlock(
             MO::_('Edit Election'),
-            COM_getBlockTemplate ('_admin_block', 'header')
+            COM_getBlockTemplate('_admin_block', 'header')
         );
 
-        $T = new \Template(__DIR__ . '/../templates/admin/');
+        $T = new \Template(Config::path_template() . 'admin/');
         $T->set_file(array(
             'editor' => 'editor.thtml',
             'question' => 'questions.thtml',
@@ -1458,7 +1458,7 @@ class Election
         $Questions = Question::getByElection($this->pid, $this->rnd_questions, $this->rnd_answers);
         $nquestions = count($Questions);
         if ($nquestions > 0) {
-            $election = new \Template(__DIR__ . '/../templates/');
+            $T = new \Template(Config::path_template());
             $election->set_file(array(
                 'panswer' => 'answer.thtml',
                 'block' => 'block.thtml',
@@ -1709,7 +1709,7 @@ class Election
 
             // Set a return message, if not called via ajax
             if (!COM_isAjax()) {
-                $T = new \Template(__DIR__ . '/../templates/');
+                $T = new \Template(Config::path_template());
                 $T->set_file('msg', 'votesaved.thtml');
                 $T->set_var(array(
                     'lang_votesaved' => MO::_('Your vote has been recorded.'),
@@ -1758,7 +1758,7 @@ class Election
     {
         global $_CONF, $_USER;
 
-        $T = new \Template(__DIR__ . '/../templates/');
+        $T = new \Template(Config::path_template());
         $T->set_file('list', 'list.thtml');
 
         USES_lib_admin();
@@ -2063,7 +2063,7 @@ class Election
      */
     public static function msgAlert($msg)
     {
-        $T = new \Template(__DIR__ . '/../templates/');
+        $T = new \Template(Config::path_template());
         $T->set_file('alert', 'alert_msg.thtml');
         $T->set_var('message', $msg);
         $T->parse('output', 'alert');

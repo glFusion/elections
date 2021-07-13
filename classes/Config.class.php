@@ -63,6 +63,7 @@ final class Config
         $this->properties['pi_name'] = self::PI_NAME;
         $this->properties['url'] = $_CONF['site_url'] . '/' . self::PI_NAME;
         $this->properties['admin_url'] = $_CONF['site_admin_url'] . '/plugins/' . self::PI_NAME;
+        $this->properties['path'] = $_CONF['path'] . 'plugins/' . self::PI_NAME . '/';
     }
 
 
@@ -131,6 +132,26 @@ final class Config
         return self::getInstance()->_get($key, $default);
     }
 
-}
 
-?>
+    /**
+     * Convenience function to get the base plugin path.
+     *
+     * @return  string      Path to main plugin directory.
+     */
+    public static function path()
+    {
+        return self::_get('path');
+    }
+
+
+    /**
+     * Convenience function to get the path to plugin templates.
+     *
+     * @return  string      Template path
+     */
+    public static function path_template()
+    {
+        return self::get('path') . 'templates/';
+    }
+
+}

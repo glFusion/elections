@@ -151,8 +151,6 @@ class Results
            $_COM_VERBOSE, $_SYSTEM;
 
         $retval = '';
-        $filter = new \sanitizer();
-        $filter->setPostmode('text');
 
         if ($this->Election->isNew()/* || !$this->Election->canViewResults()*/) {
             // Invalid poll or no access
@@ -164,8 +162,8 @@ class Results
             $this->Election->isOpen()
         ) {
             if (
-                $this->displaytype == Modes::NORMAL
-                &&
+                $this->displaytype == Modes::NORMAL &&
+                !$this->isAdmin &&
                 (
                     !isset($_USER['uid']) ||
                     $_USER['uid'] != $this->Election->getOwnerID() ||
@@ -181,8 +179,8 @@ class Results
         }
 
         $poll = new \Template(array(
-            __DIR__ . '/../../templates/' . $_SYSTEM['framework'],
-            __DIR__ . '/../../templates/',
+            Config::path_template() . $SYSTEM['framework'],
+            Config::path_template(),
         ) );
         $poll->set_file(array(
             'result' => 'result.thtml',
@@ -196,6 +194,9 @@ class Results
         } else {
             $list_url = Config::get('url') . '/index.php';
         }
+
+        $filter = new \sanitizer();
+        $filter->setPostmode('text');
         $poll->set_var(array(
             //'layout_url'    => $_CONF['layout_url'],
             'topic'     => $filter->filterData($this->Election->getTopic()),
