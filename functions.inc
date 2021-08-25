@@ -353,8 +353,9 @@ function plugin_showstats_elections($showsitestats)
     $sql = "SELECT p.pid, p.topic, (
             SELECT COUNT(v.id) FROM " . DB::table('voters') . " v
             WHERE v.pid = p.pid) as voters
-        FROM " . DB::table('topics') . " p WHERE (voters > 0) AND " .
-        Election::getPermSQL() . " ORDER BY voters DESC LIMIT 10";
+        FROM " . DB::table('topics') . " p WHERE " . Election::getPermSQL() .
+        " GROUP BY p.pid HAVING voters > 0
+        ORDER BY voters DESC LIMIT 10";
     $result = DB_query($sql);
     $nrows  = DB_numRows ($result);
     if ($nrows > 0) {
@@ -1027,10 +1028,49 @@ function plugin_runScheduledTask_elections()
 {
     $cutoff = time() - (Config::get('archive_days', 365) * 86400);
     $sql = "UPDATE " . DB::table('topics') .
-        " SET status = 2
-        WHERE closes < $cutoff";
+        " SET status = " . Elections\Status::ARCHIVED .
+        " WHERE closes < $cutoff";
     DB_query($sql, 1);
 }
+
+
+/**
+ * Return information about the plugin's tables.
+ *
+ * @return  array       Array of table_name=>table_info
+ */
+function plugin_getContentTableInfo_elections()
+{
+    global $_DB_table_prefix;
+
+    $contentItems = array(
+        $_DB_table_prefix.'questions' => array(
+            'plugin' => 'elections',
+            'primary_key' => 'pid',
+            'columns' => array(
+                'question'
+            )
+        ),
+        $_DB_table_prefix.'answers' => array(
+            'plugin' => 'elections',
+            'primary_key' => 'pid,qid,aid',
+            'columns' => array(
+                'answer'
+            )
+        ),
+        $_DB_table_prefix.'topics' => array(
+            'plugin' => 'elections',
+            'primary_key' => 'pid,qid',
+            'columns' => array(
+                'topic',
+                'description',
+            )
+        ),
+    );
+    return $contentItems;
+}
+
+
 
 
 /**
