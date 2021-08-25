@@ -1459,16 +1459,16 @@ class Election
         $nquestions = count($Questions);
         if ($nquestions > 0) {
             $T = new \Template(Config::path_template());
-            $election->set_file(array(
+            $T->set_file(array(
                 'panswer' => 'answer.thtml',
                 'block' => 'block.thtml',
                 'pquestions' => 'questions.thtml',
                 'comments' => 'comments.thtml',
             ) );
             if ($nquestions > 1) {
-                $election->set_var('lang_topic', MO::_('Topic'));
-                $election->set_var('topic', $filterS->filterData($this->topic));
-                $election->set_var('lang_question', MO::_('Question'));
+                $T->set_var('lang_topic', MO::_('Topic'));
+                $T->set_var('topic', $filterS->filterData($this->topic));
+                $T->set_var('lang_question', MO::_('Question'));
             }
             if ($preview) {
                 $back_url = Config::get('admin_url') . '/index.php';
@@ -1482,7 +1482,7 @@ class Election
 
             // create a random number to ID fields if multiple blocks showing
             $random = rand(0,100);
-            $election->set_var(array(
+            $T->set_var(array(
                 'id' => $this->pid,
                 'old_pid' => $this->old_pid,
                 'uniqid' => uniqid(),
@@ -1502,19 +1502,19 @@ class Election
 
             if ($nquestions == 1 || $this->disp_showall) {
                 // Only one question (block) or showing all (main form)
-                $election->set_var('lang_vote', MO::_('Vote'));
-                $election->set_var('showall', true);
+                $T->set_var('lang_vote', MO::_('Vote'));
+                $T->set_var('showall', true);
                 if ($this->disp_type == Modes::BLOCK) {
-                    $election->set_var('use_ajax', true);
+                    $T->set_var('use_ajax', true);
                 } else {
-                    $election->unset_var('use_ajax');
+                    $T->unset_var('use_ajax');
                 }
             } else {
-                $election->set_var('lang_vote', MO::_('Start Voting'));
-                $election->unset_var('showall');
-                $election->unset_var('autotag');
+                $T->set_var('lang_vote', MO::_('Start Voting'));
+                $T->unset_var('showall');
+                $T->unset_var('autotag');
             }
-            $election->set_var('lang_votes', MO::_('Votes'));
+            $T->set_var('lang_votes', MO::_('Votes'));
 
             $results = '';
             if (
@@ -1537,22 +1537,22 @@ class Election
                         . '&amp;aid=-1'
                 );
             }
-            $election->set_var('results', $results);
+            $T->set_var('results', $results);
 
             if (self::hasRights('edit')) {
                 $editlink = COM_createLink(
                     MO::_('Edit'),
                     Config::get('admin_url') . '/index.php?edit=x&amp;pid=' . $this->pid
                 );
-                $election->set_var('edit_link', $editlink);
-                $election->set_var('edit_icon', $editlink);
-                $election->set_var('edit_url', Config::get('admin_url').'/index.php?edit=x&amp;pid=' . $this->pid);
+                $T->set_var('edit_link', $editlink);
+                $T->set_var('edit_icon', $editlink);
+                $T->set_var('edit_url', Config::get('admin_url').'/index.php?edit=x&amp;pid=' . $this->pid);
             }
 
             for ($j = 0; $j < $nquestions; $j++) {
                 $Q = $Questions[$j];
-                $election->set_var('question', $filterS->filterData($Q->getQuestion()));
-                $election->set_var('question_id', $j);
+                $T->set_var('question', $filterS->filterData($Q->getQuestion()));
+                $T->set_var('question_id', $j);
                 $notification = "";
                 if (!$this->disp_showall) {
                     $nquestions--;
@@ -1566,7 +1566,7 @@ class Election
                     );
                     $nquestions = 1;
                 } else {
-                    $election->set_var('lang_question_number', ($j+1));
+                    $T->set_var('lang_question_number', ($j+1));
                 }
                 $answers = $Q->getAnswers($this->rnd_answers);
                 $nanswers = count($answers);
@@ -1576,31 +1576,31 @@ class Election
                         isset($this->_selections[$j]) &&
                         (int)$this->_selections[$j] == $Answer->getAid()
                     ) {
-                        $election->set_var('selected', 'checked="checked"');
+                        $T->set_var('selected', 'checked="checked"');
                     } else {
-                        $election->clear_var('selected');
+                        $T->clear_var('selected');
                     }
                     if ($this->mod_allowed < 2 && $this->_access_key != '') {
-                        $election->set_var('radio_disabled', 'disabled="disabled"');
+                        $T->set_var('radio_disabled', 'disabled="disabled"');
                     }
-                    $election->set_var(array(
+                    $T->set_var(array(
                         'answer_id' =>$Answer->getAid(),
                         'answer_text' => $filterS->filterData($Answer->getAnswer()),
                         'rnd' => $random,
                     ) );
-                    $election->parse('answers', 'panswer', true);
+                    $T->parse('answers', 'panswer', true);
                 }
-                $election->parse('questions', 'pquestions', true);
-                $election->clear_var('answers');
+                $T->parse('questions', 'pquestions', true);
+                $T->clear_var('answers');
             }
-            $election->set_var('lang_topics', MO::_('Topic'));
-            $election->set_var('notification', $notification);
+            $T->set_var('lang_topics', MO::_('Topic'));
+            $T->set_var('notification', $notification);
             if ($this->commentcode >= 0 ) {
                 USES_lib_comment();
 
                 $num_comments = CMT_getCount(Config::PI_NAME, $this->pid);
-                $election->set_var('num_comments',COM_numberFormat($num_comments));
-                $election->set_var('lang_comments', MO::_('Comments'));
+                $T->set_var('num_comments',COM_numberFormat($num_comments));
+                $T->set_var('lang_comments', MO::_('Comments'));
 
                 $comment_link = CMT_getCommentLinkWithCount(
                     Config::PI_NAME,
@@ -1610,13 +1610,13 @@ class Election
                     0
                 );
 
-                $election->set_var('comments_url', $comment_link['link_with_count']);
-                $election->parse('comments', 'comments', true);
+                $T->set_var('comments_url', $comment_link['link_with_count']);
+                $T->parse('comments', 'comments', true);
             } else {
-                $election->set_var('comments', '');
-                $election->set_var('comments_url', '');
+                $T->set_var('comments', '');
+                $T->set_var('comments_url', '');
             }
-            $retval = $election->finish($election->parse('output', 'block')) . LB;
+            $retval = $T->finish($T->parse('output', 'block')) . LB;
 
             if (
                 $this->disp_showall &&
