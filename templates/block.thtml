@@ -34,6 +34,9 @@
     <a class="uk-align-right" href="{back_url}">{lang_back}</a>
 {!endif}
 
+{!!if {disp_mode} == "1" !!}
+	{topic}
+{!else}
 {!if topic}
     <h3>{topic}
 {!if topic_msg}
@@ -42,6 +45,7 @@
 	</h3>
 {!elseif edit_icon}
     <br />
+{!endif}
 {!endif}
 {!if description}
     <div class="uk-panel-box">{description}</div>
