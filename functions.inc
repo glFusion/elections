@@ -81,7 +81,7 @@ function plugin_getmenuitems_elections()
         return false;
     }
     return array(
-        MO::_('Elections') . ' <i class="uk-icon-check-square"></i>' => Config::get('url') . '/index.php',
+        Config::get('pi_display_name') . ' <i class="uk-icon-check-square"></i>' => Config::get('url') . '/index.php',
     );
 }
 
@@ -428,7 +428,7 @@ function plugin_cclabel_elections()
 {
     if (plugin_ismoderator_elections()) {
         return array(
-            ucfirst(Config::get('pi_name')),
+            Config::get('pi_display_name'),
             Config::get('admin_url') . '/index.php',
             plugin_geticon_elections()
         );
