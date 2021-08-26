@@ -179,7 +179,7 @@ class Results
         }
 
         $poll = new \Template(array(
-            Config::path_template() . $SYSTEM['framework'],
+            Config::path_template() . $_SYSTEM['framework'],
             Config::path_template(),
         ) );
         $poll->set_file(array(
@@ -198,7 +198,6 @@ class Results
         $filter = new \sanitizer();
         $filter->setPostmode('text');
         $poll->set_var(array(
-            //'layout_url'    => $_CONF['layout_url'],
             'topic'     => $filter->filterData($this->Election->getTopic()),
             'pid'       => $this->pid,
             'num_votes' => COM_numberFormat($this->Election->numVotes()),
