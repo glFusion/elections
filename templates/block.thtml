@@ -13,7 +13,7 @@
         success: function(data) {
           var result = $.parseJSON(data["json"]);
           try {
-            $.UIkit.notify("<i class='uk-icon-check'></i>&nbsp;" + result.statusMessage, {timeout: 1000,pos:'top-center'});
+			Elections.notify(result.statusMessage, "success");
             $('#electionautotag_{uniqid}').html(result.html);
           }
           catch(err) {
@@ -25,7 +25,6 @@
   });
 </script>
 {!endif}
-
 <div id="electionautotag_{uniqid}">
 {!!if {disp_mode} == 0 !!}
 {!if edit_url}

@@ -16,7 +16,7 @@
 var clipboard = new Clipboard('.cpybtn');
 clipboard.on('success', function(e) {
     e.clearSelection();
-    UIkit.notify('{lang_copy_success}',{timeout: 300});
+    Elections.notify('{lang_copy_success}', 'success');
 });
 </script>
 {!endif}

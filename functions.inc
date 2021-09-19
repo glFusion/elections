@@ -335,6 +335,21 @@ function plugin_dopluginsearch_comment_elections(
     return $search_c;
 }
 
+
+/**
+ * Get additional Javascript files to import in the header.
+ *
+ * @return  array   Array of filenames to import
+ */
+function plugin_getheaderjs_elections()
+{
+    $files = array(
+        __DIR__ . '/js/util.js',  // uikit v2/v3 compatible notifications
+    );
+    return $files;
+}
+
+
 /**
 * Shows the statistics for the Election plugin on stats.php.
 * If $showsitestats is 1 then we are to only print the overall stats in the
@@ -1028,7 +1043,7 @@ function plugin_runScheduledTask_elections()
 {
     $cutoff = time() - (Config::get('archive_days', 365) * 86400);
     $sql = "UPDATE " . DB::table('topics') .
-        " SET status = " . Elections\Status::ARCHIVED .
+        " SET status = " . Elections\Models\Status::ARCHIVED .
         " WHERE closes < $cutoff";
     DB_query($sql, 1);
 }
