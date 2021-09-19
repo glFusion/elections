@@ -32,6 +32,7 @@ $LANG_confignames[Config::PI_NAME] = array(
     'def_voting_gid' => MO::_('Default group allowed to vote'),
     'def_results_gid' => MO::_('Default group allowed to view results'),
     'allow_votemod' => MO::_('Default after-voting access'),
+    'archive_days' => MO::_('Days after which closed elections are archived'),
 );
 
 $LANG_configsubgroups[Config::PI_NAME] = array(
@@ -48,10 +49,6 @@ $LANG_configSelect[Config::PI_NAME] = array(
         1 => MO::_('True'),
         0 => MO::_('False'),
     ),
-    1 => array(
-        true => MO::_('True'),
-        false => MO::_('False'),
-    ),
     2 => array(
         'submitorder' => MO::_('As Submitted'),
         'voteorder' => MO::_('By Votes'),
@@ -61,18 +58,6 @@ $LANG_configSelect[Config::PI_NAME] = array(
         1 => MO::_('View Vote'),
         //2 => MO::_('Modify Vote'),
     ),
-    9 => array(
-        'item' => MO::_('Forward to Election'),
-        'list' => MO::_('Display Admin List'),
-        'plugin' => MO::_('Display Public List'),
-        'home' => MO::_('Display Home'),
-        'admin' => MO::_('Display Admin'),
-    ),
-    12 => array(
-        0 => MO::_('No access'),
-        2 => MO::_('Read-Only'),
-        3 => MO::_('Read-Write'),
-    ),
     13 => array(
         0 => MO::_('Left Blocks'),
         1 => MO::_('Right Blocks'),
@@ -80,5 +65,3 @@ $LANG_configSelect[Config::PI_NAME] = array(
         3 => MO::_('None'),
     ),
 );
-
-?>
