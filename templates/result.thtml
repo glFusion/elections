@@ -1,12 +1,14 @@
 {# begin {templatelocation} #}
 {!if print_url}
-<span class="uk-align-right"><a class="uk-button uk-button-success uk-button-mini" href="{print_url}">{lang_print}</a></span>
+<span class="uk-align-right"><a class="uk-button uk-button-success uk-button-small" href="{print_url}">
+	<i class="uk-icon uk-icon-print"></i>&nbsp;{lang_print}
+</a></span>
 {!endif}
 {!if edit_url}
-<span class="uk-align-right"><a href="{edit_url}" class="uk-align-right uk-icon uk-icon-edit tm-meta-icon"></a></span>
+<span class="uk-align-right"><a href="{edit_url}" class="uk-align-right uk-icon uk-icon-edit uk-icon-medium tm-meta-icon"></a></span>
 {!endif}
 {!if url}
-<a class="uk-align-right" href="{url}">{lang_back}</a>
+<a class="uk-button uk-button-primary uk-button-small uk-align-right" href="{url}">{lang_back}</a>
 {!endif}
 {!if topic}
 <h3>{topic}</h3>

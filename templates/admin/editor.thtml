@@ -16,13 +16,13 @@
 		<div class="uk-form-row uk-margin">
 			<label class="uk-form-label" for="pid">{lang_electionid}</label>
 			<div class="uk-form-controls">
-				<input class="uk-input uk-form-small uk-form-width-medium required" type="text" id="pid" name="pid" value="{id}"> <span class="uk-text-small">{lang_donotusespaces}</span>
+				<input class="uk-input uk-form-width-medium required" type="text" id="pid" name="pid" value="{id}"> <span class="uk-text-small">{lang_donotusespaces}</span>
 			</div>
 		</div>
 		<div class="uk-form-row uk-margin">
 			<label class="uk-form-label" for="topic">{lang_topic}</label>
 			<div class="uk-form-controls">
-				<input class="required uk-input uk-form-small" type="text" id="topic" name="topic" value="{topic}" />
+				<input class="required uk-input" type="text" id="topic" name="topic" value="{topic}" />
 			</div>
 		</div>
 	</div>
@@ -166,7 +166,7 @@
 				<div class="uk-form-row uk-margin">
 					<label class="uk-form-label">{lang_voteaccess}</label>
 					<div class="uk-form-controls uk-form-controls-text">
-						<select class="uk-select uk-form-small uk-form-width-medium" name="voteaccess">
+						<select class="uk-select uk-form-width-medium" name="voteaccess">
 							<option value="0" {voteaccess_0}>{lang_noaccess}</option>
 							<option value="1" {voteaccess_1}>{lang_view}</option>
 							<!--<option value="2" {voteaccess_0}>{lang_noaccess}</option>-->
