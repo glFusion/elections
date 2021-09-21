@@ -44,7 +44,7 @@ function election_upgrade($dvlp=false)
     USES_lib_install();
     require_once __DIR__ . '/install_defaults.php';
     _update_config($pi_name, $electionConfigData);
-    ELECTION_remove_old_files()
+    ELECTION_remove_old_files();
     return true;
 }
 
@@ -164,6 +164,32 @@ function ELECTION_rmdir($dir)
 
 
 /**
+ * Remove a file, or recursively remove a directory.
+ *
+ * @param   string  $dir    Directory name
+ */
+function ELECTIONS_rmdir($dir)
+{
+    if (is_dir($dir)) {
+        $objects = scandir($dir);
+        foreach ($objects as $object) {
+            if ($object != "." && $object != "..") {
+                if (is_dir($dir . '/' . $object)) {
+                    ELECTIONS_rmdir($dir . '/' . $object);
+                    @rmdir($dir . '/' . $object);
+                } else {
+                    @unlink($dir . '/' . $object);
+                }
+            }
+        }
+        @rmdir($dir);
+    } elseif (is_file($dir)) {
+        @unlink($dir);
+    }
+}
+
+
+/**
  * Remove deprecated files
  * Errors in unlink() and rmdir() are ignored.
  */
@@ -187,8 +213,8 @@ function ELECTION_remove_old_files()
 
     foreach ($paths as $path=>$files) {
         foreach ($files as $file) {
-            SHOP_log("removing $path/$file");
-            SHOP_rmdir("$path/$file");
+            COM_errorLog("removing $path/$file");
+            ELECTIONS_rmdir("$path/$file");
         }
     }
 }
