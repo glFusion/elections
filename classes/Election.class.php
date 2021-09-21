@@ -1195,6 +1195,7 @@ class Election
         global $_CONF, $_USER;
 
         $retval = '';
+        $message = '';      // to make sure the variable is set
 
         switch($fieldname) {
         case 'edit':
@@ -1253,6 +1254,7 @@ class Election
             }
             break;
         case 'user_action':
+            $message = '';
             if (
                 $A['closes'] < $extras['_now'] ||
                 $A['status'] == Status::CLOSED
@@ -1274,28 +1276,36 @@ class Election
                 // otherwise show the early results link if allowed.
                 $retval = MO::_('Open');
                 if (!Voter::hasVoted($A['pid'], $A['group_id'])) {
-                    $retval .= '&nbsp;' . COM_createLink(
-                        MO::_('Vote'),
-                        Config::get('url') . '/index.php?pid=' . urlencode($A['pid']),
-                        array(
-                            'style' => 'float:right;',
-                            'class' => 'uk-button uk-button-mini uk-button-success',
-                        )
-                    );
-                } elseif (!$A['hideresults'] && SEC_inGroup('results_gid')) {
-                    $retval .= '&nbsp;' . COM_createLink(
-                        MO::_('Results'),
-                        Config::get('url') . '/index.php?results&pid=' . urlencode($A['pid']),
-                        array(
-                            'class' => 'uk-button uk-button-mini uk-button-primary',
-                            'style' => 'float:right;',
-                        )
-                    );
+                    if (SEC_inGroup($A['group_id'], $_USER['uid'])) {
+                        $retval .= '&nbsp;' . COM_createLink(
+                            MO::_('Vote'),
+                            Config::get('url') . '/index.php?pid=' . urlencode($A['pid']),
+                            array(
+                                'style' => 'float:right;',
+                                'class' => 'uk-button uk-button-mini uk-button-success',
+                            )
+                        );
+                    } elseif (!$A['hideresults'] && SEC_inGroup('results_gid')) {
+                        $retval .= '&nbsp;' . COM_createLink(
+                            MO::_('Results'),
+                            Config::get('url') . '/index.php?results&pid=' . urlencode($A['pid']),
+                            array(
+                                'class' => 'uk-button uk-button-mini uk-button-primary',
+                                'style' => 'float:right;',
+                            )
+                        );
+                    } elseif (COM_isAnonUser()) {
+                        $message = MO::_('Log in to vote.');
+                    }
+                } else {
+                    $message = MO::_('Your vote has been recorded.');
                 }
             }
             break;
         case 'user_extra':
-            if (Voter::hasVoted($A['pid'], $A['group_id'])) {
+            if ($message != '') {
+                $retval = $message;
+            } elseif (Voter::hasVoted($A['pid'], $A['group_id'])) {
                 if ($A['voteaccess']) {
                     $retval = '<form action="' . Config::get('url') . '/index.php" method="post">';
                     $retval .= '<input type="text" size="15" placeholder="Enter Key" name="votekey" value="" />';
@@ -1816,7 +1826,7 @@ class Election
             ") OR (
                 (hideresults = 0 OR status = " . Status::OPEN . " OR closes < '$sql_now_utc')" .
                 SEC_buildAccessSql('AND', 'results_gid') .
-            ')';
+                ')';
         $count = (int)DB_getItem(DB::table('topics'), 'count(*)', $filter);
         $sql = "SELECT p.*,
                 (SELECT COUNT(v.id) FROM " . DB::table('voters') . " v WHERE v.pid = p.pid) AS vote_count
