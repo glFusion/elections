@@ -105,12 +105,13 @@ switch ($action) {
 case 'votebutton':
     // Get the answer array and check that the number is right, and the user hasn't voted
     $aid = (isset($_POST['aid']) && is_array($_POST['aid'])) ? $_POST['aid'] : array();
-    if ($Election->alreadyVoted()) {
+    if ($Election->alreadyVoted() && !$Election->canUpdate()) {
         COM_setMsg(MO::_('Your vote has already been recorded.'), 'error', true);
         COM_refresh(Config::get('url') . '/index.php');
     } else {
+        $old_aid = isset($_POST['old_aid']) ? $_POST['old_aid'] : array();
         if (count($aid) == $Election->numQuestions()) {
-            if ($Election->saveVote($aid)) {
+            if ($Election->saveVote($aid, $old_aid)) {
                 COM_refresh(Config::get('url') . '/index.php?results=x&pid=' . $Election->getID());
             } else {
                 COM_refresh(Config::get('url') . '/index.php');
@@ -164,6 +165,15 @@ case 'showvote':
     break;
 
 default:
+    if (!isset($Election)) {
+        // Didn't get an election ID in the URL, see if there's one using
+        // COM_buildUrl()
+        COM_setArgNames(array('pid'));
+        $pid = COM_getArgument('pid');
+        if (!empty($pid)) {
+            $Election = Election::getInstance($pid);
+        }
+    }
     if (isset($Election) && !$Election->isNew()) {
         if ($msg > 0) {
             $page .= COM_showMessage($msg, Config::get('pi_name'));

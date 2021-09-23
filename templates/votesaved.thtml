@@ -9,6 +9,7 @@
 </p>
 <p>
 {lang_copykey} <a href="{url}" target="_blank" rel="nofollow">{url}</a><br />
+<b>{lang_newkey}</b>
 <b>{lang_keyonetime}</b>
 </p>
 <script src="{site_url}/javascript/addons/clipboard/clipboard.min.js"></script>

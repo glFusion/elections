@@ -10,6 +10,9 @@
         {question}
 	</h3>
 {!endif}
+{!if old_aid}
+	<input type="hidden" name="old_aid[{question_id}]" value="{old_aid}" />
+{!endif}
     <ul class="uk-list elections_answers">
         {answers}
     </ul>

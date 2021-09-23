@@ -461,6 +461,17 @@ class Election
 
 
     /**
+     * Check if this election allows votes to be edited.
+     *
+     * @return  boolean     True if updates are allowed, False if not
+     */
+    public function canUpdate() : bool
+    {
+        return ($this->mod_allowed >= 2 && $this->isOpen());
+    }
+
+
+    /**
      * Get the election topic name.
      *
      * @return  string      Topic name
@@ -649,6 +660,27 @@ class Election
 
 
     /**
+     * Get the "Show Vote" button to display with the secret key field.
+     *
+     * @param   string  $pid    Election ID
+     * @return  string      HTML for the button
+     */
+    public static function getShowVoteButton($pid)
+    {
+        $T = new \Template(Config::path_template());
+        $T->set_file('button', 'showvotebutton.thtml');
+        $T->set_var(array(
+            'pid'           => $pid,
+            'action_url'    => Config::get('url'),
+            'lang_enterkey' => MO::_('Enter Key'),
+            'lang_showvote' => MO::_('Show Vote'),
+        ) );
+        $T->parse('output', 'button');
+        return $T->finish($T->get_var('output'));
+    }
+
+
+    /**
      * Read a single election record from the database
      *
      * @return  boolean     True on success, False on error
@@ -694,7 +726,6 @@ class Election
         $this->rnd_questions = isset($A['rnd_questions']) && $A['rnd_questions'] ? 1 : 0;
         $this->rnd_answers = isset($A['rnd_answers']) && $A['rnd_answers'] ? 1 : 0;
         $this->decl_winner = isset($A['decl_winner']) && $A['decl_winner'] ? 1 : 0;
-        //$this->login_required = isset($A['login_required']) && $A['login_required'] ? 1 : 0;
         $this->hideresults = isset($A['hideresults']) && $A['hideresults'] ? 1 : 0;
         $this->commentcode = (int)$A['commentcode'];
         $this->setOwner($A['owner_id']);
@@ -845,6 +876,7 @@ class Election
             'lang_datepicker' => MO::_('Date Picker'),
             'lang_timepicker' => MO::_('Time Picker'),
             'lang_view' => MO::_('View your vote'),
+            'lang_edit' => MO::_('Edit your vote'),
             'lang_noaccess' => MO::_('Access Denied'),
             'lang_voteaccess' => MO::_('After-voting access for voters'),
             'voteaccess_' . $this->mod_allowed => 'selected="selected"',
@@ -1241,7 +1273,7 @@ class Election
             ) {
                 $retval = COM_createLink(
                     $retval,
-                    Config::get('url') . "/index.php?pid={$A['pid']}"
+                    COM_buildUrl(Config::get('url') . "/index.php?pid={$A['pid']}")
                 );
             } elseif (
                 SEC_inGroup($A['results_gid']) &&
@@ -1296,7 +1328,7 @@ class Election
                     } elseif (COM_isAnonUser()) {
                         $message = MO::_('Log in to vote.');
                     }
-                } else {
+                } elseif (!$A['voteaccess']) {
                     $message = MO::_('Your vote has been recorded.');
                 }
             }
@@ -1306,11 +1338,7 @@ class Election
                 $retval = $message;
             } elseif (Voter::hasVoted($A['pid'], $A['group_id'])) {
                 if ($A['voteaccess']) {
-                    $retval = '<form action="' . Config::get('url') . '/index.php" method="post">';
-                    $retval .= '<input type="text" size="15" placeholder="Enter Key" name="votekey" value="" />';
-                    $retval .= '<input type="hidden" name="pid" value="' . $A['pid'] . '" />';
-                    $retval .= '<button type="submit" style="float:right;" class="uk-button uk-button-mini uk-button-primary" name="showvote">';
-                    $retval .= MO::_('Show Vote') . '</button></form>';
+                    $retval = self::getShowVoteButton($A['pid']);
                 } else {
                     // Results available only after election closes
                     $retval = MO::_('Results available after closing.');
@@ -1589,8 +1617,17 @@ class Election
                     } else {
                         $T->clear_var('selected');
                     }
-                    if ($this->mod_allowed < 2 && $this->_access_key != '') {
-                        $T->set_var('radio_disabled', 'disabled="disabled"');
+
+                    if (!empty($this->_access_key)) {
+                        switch ($this->mod_allowed) {
+                        case 0:
+                        case 1:
+                            $T->set_var('radio_disabled', 'disabled="disabled"');
+                            break;
+                        case 2:
+                            $T->set_var('old_aid', $Answer->getAid());
+                            break;
+                        }
                     }
                     $T->set_var(array(
                         'answer_id' =>$Answer->getAid(),
@@ -1682,13 +1719,13 @@ class Election
      * @param    array    $aid   selected answers
      * @return   string   HTML for election results
      */
-    public function saveVote($aid)
+    public function saveVote(array $aid, array $old_aid = array()) : string
     {
         global $_USER;
 
         $retval = '';
 
-        if ($this->alreadyVoted()) {
+        if ($this->alreadyVoted() && !$this->canUpdate()) {
             if (!COM_isAjax()) {
                 COM_setMsg(MO::_('Your vote has already been recorded.'));
             }
@@ -1706,13 +1743,21 @@ class Election
         if (isset($_POST['aftervote_url'])) {
             $this->_aftervoteUrl = $_POST['aftervote_url'];
         }
+        if (isset($_POST['vid']) && !empty($_POST['vid'])) {
+            $vote_id = COM_decrypt($_POST['vid']);
+        } else {
+            $vote_id = 0;
+        }
+        $Voter = Voter::create($this->pid, $aid, $vote_id);
 
         // Record that this user has voted
-        $Voter = Voter::create($this->pid, $aid);
         if ($Voter !== false) {
             // Increment the vote count for each answer
             $answers = count($aid);
             for ($i = 0; $i < $answers; $i++) {
+                if (isset($old_aid[$i])) {
+                    Answer::decrement($this->pid, $i, $old_aid[$i]);
+                }
                 Answer::increment($this->pid, $i, $aid[$i]);
             }
 
@@ -1727,6 +1772,7 @@ class Election
                     'lang_copyclipboard' => MO::_('Copy to clipboard'),
                     'lang_copy_success' => MO::_('Your private key was copied to your clipboard.'),
                     'lang_keyonetime' => MO::_('Your private key will not be displayed again.'),
+                    'lang_newkey' => MO::_('A new private key is generated for each submission.'),
                     'prv_key' => $Voter->getId() . ':' . $Voter->getPrvKey(),
                     'mod_allowed' => $this->mod_allowed,
                     'url' => Config::get('url') . '/index.php',

@@ -369,6 +369,26 @@ class Answer
 
 
     /**
+     * Decrement the number of votes received for an answer.
+     * Used when votes are edited.
+     *
+     * @param   string  $pid    Election ID
+     * @param   integer $qid    Question ID
+     * @param   integer $aid    Answer ID
+     * @return  void
+     */
+    public static function decrement(string $pid, int $qid, int $aid) : void
+    {
+        $sql = "UPDATE " . DB::table('answers') . "
+            SET votes = votes - 1
+            WHERE pid = '" . DB_escapeString($pid) . "'
+            AND qid = '" . (int)$qid . "'
+            AND aid = '" . (int)$aid . "'";
+        DB_query($sql, 1);
+    }
+
+
+    /**
      * Change the Election ID for all items if it was saved with a new ID.
      *
      * @param   string  $old_pid    Original Election ID

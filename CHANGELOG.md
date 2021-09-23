@@ -3,6 +3,8 @@
 ## v0.1.2
 Release TBD
 
+  * Enable vote editing.
+
 ## v0.1.1
 Release 2021-04-06
 
