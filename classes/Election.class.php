@@ -1195,7 +1195,7 @@ class Election
         global $_CONF, $_USER;
 
         $retval = '';
-        $message = '';      // to make sure the variable is set
+        static $message = '';      // to make sure the variable is set
 
         switch($fieldname) {
         case 'edit':
@@ -1254,7 +1254,6 @@ class Election
             }
             break;
         case 'user_action':
-            $message = '';
             if (
                 $A['closes'] < $extras['_now'] ||
                 $A['status'] == Status::CLOSED
