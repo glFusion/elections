@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-19 16:41-0700\n"
+"POT-Creation-Date: 2021-10-25 12:12-0700\n"
 "PO-Revision-Date: 2020-10-02 13:25-0700\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -35,270 +35,317 @@ msgid "Elections Administration"
 msgstr "Správa voleb"
 
 #: classes/Election.class.php:740 admin/index.php:66 admin/index.php:83
+#: classes/Election.class.php:771
 msgid "Edit Election"
 msgstr "Upravit volby"
 
 #: classes/Election.class.php:755 classes/Election.class.php:848
-#: admin/ajax.php:25
+#: admin/ajax.php:25 classes/Election.class.php:786
+#: classes/Election.class.php:880
 msgid "Access Denied"
 msgstr "Přístup odepřen"
 
 #: classes/Election.class.php:757 classes/Election.class.php:2098
+#: classes/Election.class.php:2108 classes/Election.class.php:788
+#: classes/Election.class.php:2153
 msgid "You are trying to access a poll that you do not have rights to."
 msgstr "Pokoušíte se získat přístup k hlasování, ke kterému nemáte práva."
 
-#: classes/Election.class.php:758
+#: classes/Election.class.php:758 classes/Election.class.php:789
 msgid "This attempt has been logged."
 msgstr "Tento pokus byl zaznamenán."
 
-#: classes/Election.class.php:760
+#: classes/Election.class.php:760 classes/Election.class.php:791
 msgid "Please go back to the poll administration screen."
 msgstr "Vraťte se prosím zpět na obrazovku správy hlasování."
 
 #: classes/Election.class.php:768 classes/Election.class.php:775
 #: classes/Election.class.php:1138 classes/Election.class.php:1373
+#: classes/Election.class.php:1383 classes/Election.class.php:799
+#: classes/Election.class.php:806 classes/Election.class.php:1170
+#: classes/Election.class.php:1410
 msgid "Delete"
 msgstr "Vymazat"
 
-#: classes/Election.class.php:805
+#: classes/Election.class.php:805 classes/Election.class.php:836
 msgid "Election ID"
 msgstr "Volební ID"
 
-#: classes/Election.class.php:808
+#: classes/Election.class.php:808 classes/Election.class.php:839
 msgid "Do not use spaces."
 msgstr "Nepoužívejte mezery."
 
 #: classes/Election.class.php:809 classes/Election.class.php:1090
 #: classes/Election.class.php:1469 classes/Election.class.php:1596
-#: classes/Election.class.php:1768
+#: classes/Election.class.php:1768 classes/Election.class.php:1479
+#: classes/Election.class.php:1606 classes/Election.class.php:1778
+#: classes/Election.class.php:840 classes/Election.class.php:1122
+#: classes/Election.class.php:1506 classes/Election.class.php:1642
+#: classes/Election.class.php:1823
 msgid "Topic"
 msgstr "Téma"
 
 #: classes/Election.class.php:811 classes/Election.class.php:1603
-#: classes/Views/Results.class.php:289
+#: classes/Views/Results.class.php:289 classes/Election.class.php:1613
+#: classes/Election.class.php:842 classes/Election.class.php:1649
 msgid "Comments"
 msgstr "Komentáře   "
 
-#: classes/Election.class.php:813
+#: classes/Election.class.php:813 classes/Election.class.php:844
 msgid "Description"
 msgstr "Popis"
 
-#: classes/Election.class.php:815
+#: classes/Election.class.php:815 classes/Election.class.php:846
 msgid "Appears on Election Block"
 msgstr "Objeví se na volebním bloku"
 
-#: classes/Election.class.php:816
+#: classes/Election.class.php:816 classes/Election.class.php:847
 msgid "Voting Status"
 msgstr "Stav hlasování"
 
 #: classes/Election.class.php:817 classes/Election.class.php:1275
+#: classes/Election.class.php:1277 classes/Election.class.php:848
+#: classes/Election.class.php:1308
 msgid "Open"
 msgstr "Otevřeno"
 
 #: classes/Election.class.php:818 classes/Election.class.php:1261
+#: classes/Election.class.php:1263 classes/Election.class.php:849
+#: classes/Election.class.php:1294
 msgid "Closed"
 msgstr "Zavřeno"
 
 #: classes/Election.class.php:819 classes/Election.class.php:1314
+#: classes/Election.class.php:1324 classes/Election.class.php:850
+#: classes/Election.class.php:1351
 msgid "Archived"
 msgstr "Archivováno"
 
-#: classes/Election.class.php:821
+#: classes/Election.class.php:821 classes/Election.class.php:852
 msgid "Hide results while open?"
 msgstr "Skrýt výsledky při otevřeném?"
 
-#: classes/Election.class.php:822
+#: classes/Election.class.php:822 classes/Election.class.php:853
 msgid ""
 "While the election is open, only the owner and administrators can see the "
 "results."
 msgstr "Zatímco jsou volby otevřené, „Vlastník a správci mohou vidět Výsledek."
 
-#: classes/Election.class.php:823
+#: classes/Election.class.php:823 classes/Election.class.php:854
 msgid "The topic will be only displayed if there is more than 1 question."
 msgstr "Téma se zobrazí pouze v případě, že existuje více než 1 otázka."
 
 #: classes/Election.class.php:826 classes/Election.class.php:1113
+#: classes/Election.class.php:857 classes/Election.class.php:1145
 msgid "Opens"
 msgstr "Otevře se"
 
 #: classes/Election.class.php:827 classes/Election.class.php:1119
-#: classes/Election.class.php:1779
+#: classes/Election.class.php:1779 classes/Election.class.php:1789
+#: classes/Election.class.php:858 classes/Election.class.php:1151
+#: classes/Election.class.php:1834
 msgid "Closes"
 msgstr "Zavírá"
 
-#: classes/Election.class.php:833
+#: classes/Election.class.php:833 classes/Election.class.php:864
 msgid "Access Rights"
 msgstr "Přístupová práva"
 
-#: classes/Election.class.php:834
+#: classes/Election.class.php:834 classes/Election.class.php:865
 msgid "Owner"
 msgstr "Majitel"
 
-#: classes/Election.class.php:839
+#: classes/Election.class.php:839 classes/Election.class.php:870
 msgid "Allowed to Vote"
 msgstr "Povoleno hlasovat"
 
-#: classes/Election.class.php:840
+#: classes/Election.class.php:840 classes/Election.class.php:871
 msgid "Allowed to View Results"
 msgstr "Povoleno prohlížet výsledky"
 
-#: classes/Election.class.php:843
+#: classes/Election.class.php:843 classes/Election.class.php:874
 msgid "Save"
 msgstr "Uložit"
 
-#: classes/Election.class.php:844
+#: classes/Election.class.php:844 classes/Election.class.php:875
 msgid "Cancel"
 msgstr "zrušení"
 
-#: classes/Election.class.php:845
+#: classes/Election.class.php:845 classes/Election.class.php:876
 msgid "Date Picker"
 msgstr "Výběr data"
 
-#: classes/Election.class.php:846
+#: classes/Election.class.php:846 classes/Election.class.php:877
 msgid "Time Picker"
 msgstr "Výběr času"
 
-#: classes/Election.class.php:847
+#: classes/Election.class.php:847 classes/Election.class.php:878
 msgid "View your vote"
 msgstr "Zobrazit váš hlas"
 
-#: classes/Election.class.php:849
+#: classes/Election.class.php:849 classes/Election.class.php:881
 msgid "After-voting access for voters"
 msgstr "Přístup po hlasování pro voliče"
 
-#: classes/Election.class.php:851
+#: classes/Election.class.php:851 classes/Election.class.php:883
 msgid "General"
 msgstr "Všeobecné"
 
-#: classes/Election.class.php:852
+#: classes/Election.class.php:852 classes/Election.class.php:884
 msgid "Questions"
 msgstr "Dotazy"
 
-#: classes/Election.class.php:853
+#: classes/Election.class.php:853 classes/Election.class.php:885
 msgid "Permissions"
 msgstr "Oprávnění"
 
 #: classes/Election.class.php:854 classes/Election.class.php:1494
 #: classes/Election.class.php:1497 classes/Views/Results.class.php:209
+#: classes/Election.class.php:1504 classes/Election.class.php:1507
+#: classes/Election.class.php:886 classes/Election.class.php:1531
+#: classes/Election.class.php:1534
 msgid "Back to Listing"
 msgstr "Zpět na výpis"
 
-#: classes/Election.class.php:857
+#: classes/Election.class.php:857 classes/Election.class.php:889
 msgid "Randomize question order?"
 msgstr "Náhodné pořadí otázek?"
 
-#: classes/Election.class.php:858
+#: classes/Election.class.php:858 classes/Election.class.php:890
 msgid "Randomize answer order?"
 msgstr "Náhodné pořadí objednávek?"
 
-#: classes/Election.class.php:859
+#: classes/Election.class.php:859 classes/Election.class.php:891
 msgid "Declares a winner?"
 msgstr "Prohlašuje vítěze?"
 
-#: classes/Election.class.php:862
+#: classes/Election.class.php:862 classes/Election.class.php:894
 msgid "Reset Results"
 msgstr "Obnovit výsledky"
 
-#: classes/Election.class.php:863
+#: classes/Election.class.php:863 classes/Election.class.php:895
 msgid "Reset all results for this election"
 msgstr "Obnovit všechny výsledky těchto voleb"
 
 #: classes/Election.class.php:864 classes/Election.class.php:1132
+#: classes/Election.class.php:896 classes/Election.class.php:1164
 msgid "Reset"
 msgstr "Resetovat"
 
 #: classes/Election.class.php:878 classes/Election.class.php:892
 #: classes/Election.class.php:1471 classes/Views/Results.class.php:211
-#: classes/Views/Results.class.php:242
+#: classes/Views/Results.class.php:242 classes/Election.class.php:1481
+#: classes/Election.class.php:910 classes/Election.class.php:924
+#: classes/Election.class.php:1508
 msgid "Question"
 msgstr "Otázka"
 
-#: classes/Election.class.php:893
+#: classes/Election.class.php:893 classes/Election.class.php:925
 msgid "Answer"
 msgstr "Odpověď"
 
 #: classes/Election.class.php:894 classes/Election.class.php:1517
 #: classes/Views/Results.class.php:204 functions.inc:369 functions.inc:384
+#: classes/Election.class.php:1527 classes/Election.class.php:926
+#: classes/Election.class.php:1554
 msgid "Votes"
 msgstr "Hlasy"
 
-#: classes/Election.class.php:895
+#: classes/Election.class.php:895 classes/Election.class.php:927
 msgid "Remark"
 msgstr "Poznámka"
 
-#: classes/Election.class.php:896
+#: classes/Election.class.php:896 classes/Election.class.php:928
 msgid "Save and Add"
 msgstr "Uložit a přidat"
 
-#: classes/Election.class.php:960
+#: classes/Election.class.php:960 classes/Election.class.php:992
 msgid "A name is required."
 msgstr "Jméno je povinné."
 
 #: classes/Election.class.php:1083 classes/Election.class.php:1544
 #: classes/Views/Results.class.php:220 classes/Views/Results.class.php:229
+#: classes/Election.class.php:1554 classes/Election.class.php:1115
+#: classes/Election.class.php:1581
 msgid "Edit"
 msgstr "Upravit"
 
 #: classes/Election.class.php:1095 classes/Election.class.php:1773
+#: classes/Election.class.php:1783 classes/Election.class.php:1127
+#: classes/Election.class.php:1828
 msgid "Vote Count"
 msgstr "Počet hlasů"
 
 #: classes/Election.class.php:1101 classes/Election.class.php:1264
 #: classes/Election.class.php:1287 classes/Election.class.php:1535
 #: public_html/index.php:138 admin/index.php:104
+#: classes/Election.class.php:1266 classes/Election.class.php:1290
+#: classes/Election.class.php:1545 classes/Election.class.php:1133
+#: classes/Election.class.php:1297 classes/Election.class.php:1321
+#: classes/Election.class.php:1572 public_html/index.php:139
 msgid "Results"
 msgstr "Výsledky"
 
-#: classes/Election.class.php:1107
+#: classes/Election.class.php:1107 classes/Election.class.php:1139
 msgid "Created"
 msgstr "Vytvořeno"
 
-#: classes/Election.class.php:1125
+#: classes/Election.class.php:1125 classes/Election.class.php:1157
 msgid "Status"
 msgstr "Postavení"
 
-#: classes/Election.class.php:1152
+#: classes/Election.class.php:1152 classes/Election.class.php:1184
 msgid ""
 "To modify or delete an election, click on the edit icon of the election."
 msgstr "Chcete-li upravit nebo odstranit volby, klikněte na ikonu úprav voleb."
 
-#: classes/Election.class.php:1153
+#: classes/Election.class.php:1153 classes/Election.class.php:1185
 msgid "To create a new election, click on \"Create New\" above."
 msgstr "Chcete-li vytvořit nové volby, klikněte na \"Vytvořit nový\" výše."
 
 #: classes/Election.class.php:1278 classes/Election.class.php:1505
+#: classes/Election.class.php:1281 classes/Election.class.php:1515
+#: classes/Election.class.php:1312 classes/Election.class.php:1542
 msgid "Vote"
 msgstr "Hlasy"
 
-#: classes/Election.class.php:1304
+#: classes/Election.class.php:1304 classes/Election.class.php:1314
+#: classes/Election.class.php:676
 msgid "Show Vote"
 msgstr "Zobrazit hlas"
 
-#: classes/Election.class.php:1307
+#: classes/Election.class.php:1307 classes/Election.class.php:1317
+#: classes/Election.class.php:1344
 msgid "Results available after closing."
 msgstr "Výsledky dostupné po zavření."
 
-#: classes/Election.class.php:1330
+#: classes/Election.class.php:1330 classes/Election.class.php:1340
+#: classes/Election.class.php:1367
 msgid "Yes"
 msgstr "Ano"
 
-#: classes/Election.class.php:1332
+#: classes/Election.class.php:1332 classes/Election.class.php:1342
+#: classes/Election.class.php:1369
 msgid "No"
 msgstr "Ne"
 
-#: classes/Election.class.php:1359
+#: classes/Election.class.php:1359 classes/Election.class.php:1369
+#: classes/Election.class.php:1396
 msgid "Cannot reset archived elections."
 msgstr "Nelze resetovat archivované volby."
 
-#: classes/Election.class.php:1366
+#: classes/Election.class.php:1366 classes/Election.class.php:1376
+#: classes/Election.class.php:1403
 msgid "Are you sure you want to delete all of the results for this election?"
 msgstr "Opravdu chcete smazat všechny výsledky těchto voleb?"
 
-#: classes/Election.class.php:1375
+#: classes/Election.class.php:1375 classes/Election.class.php:1385
+#: classes/Election.class.php:1412
 msgid "Are you sure you want to delete this Poll?"
 msgstr "Opravdu chcete tuto anketu smazat?"
 
-#: classes/Election.class.php:1376
+#: classes/Election.class.php:1376 classes/Election.class.php:1386
+#: classes/Election.class.php:1413
 msgid ""
 "Are you absolutely sure you want to delete this Poll?  All questions, "
 "answers and comments that are associated with this Poll will also be "
@@ -308,15 +355,18 @@ msgstr ""
 "odpovědi a komentáře spojené s touto anketou budou také trvale smazán z "
 "databáze."
 
-#: classes/Election.class.php:1476
+#: classes/Election.class.php:1476 classes/Election.class.php:1486
+#: classes/Election.class.php:1513
 msgid "Preview - Submissions Disabled"
 msgstr "Náhled - podání zakázáno"
 
-#: classes/Election.class.php:1513
+#: classes/Election.class.php:1513 classes/Election.class.php:1523
+#: classes/Election.class.php:1550
 msgid "Start Voting"
 msgstr "Začněte hlasovat"
 
-#: classes/Election.class.php:1561
+#: classes/Election.class.php:1561 classes/Election.class.php:1571
+#: classes/Election.class.php:1598
 #, php-format
 msgid "This poll has %d more question"
 msgid_plural "This poll has %d more questions"
@@ -324,82 +374,103 @@ msgstr[0] "Tato anketa má ještě %d otázku."
 msgstr[1] "Tato anketa má další %d otázky."
 msgstr[2] "Tato anketa má dalších 6 otázek."
 
-#: classes/Election.class.php:1658
+#: classes/Election.class.php:1658 classes/Election.class.php:1668
+#: classes/Election.class.php:1704
 msgid "There are no questions for this election"
 msgstr "K těmto volbám nejsou žádné dotazy"
 
 #: classes/Election.class.php:1684 classes/Election.class.php:2083
 #: public_html/ajax_handler.php:96 public_html/index.php:109
+#: classes/Election.class.php:1694 classes/Election.class.php:2093
+#: classes/Election.class.php:1730 classes/Election.class.php:2138
 msgid "Your vote has already been recorded."
 msgstr "Váš hlas již byl zaznamenán."
 
 #: classes/Election.class.php:1715 public_html/ajax_handler.php:100
+#: classes/Election.class.php:1301 classes/Election.class.php:1725
+#: classes/Election.class.php:1332 classes/Election.class.php:1769
 msgid "Your vote has been recorded."
 msgstr "Váš hlas byl zaznamenán."
 
-#: classes/Election.class.php:1716
+#: classes/Election.class.php:1716 classes/Election.class.php:1726
+#: classes/Election.class.php:1770
 msgid "Copy your key to a safe location if you wish to verify your vote later."
 msgstr ""
 "Zkopírujte klíč na bezpečné místo, pokud si chcete svůj hlas ověřit později."
 
-#: classes/Election.class.php:1717
+#: classes/Election.class.php:1717 classes/Election.class.php:1727
+#: classes/Election.class.php:1771
 msgid "Your private key is"
 msgstr "Váš soukromý klíč je"
 
-#: classes/Election.class.php:1718
+#: classes/Election.class.php:1718 classes/Election.class.php:1728
+#: classes/Election.class.php:1772
 msgid "Copy to clipboard"
 msgstr "Kopírovat do schránky"
 
-#: classes/Election.class.php:1719
+#: classes/Election.class.php:1719 classes/Election.class.php:1729
+#: classes/Election.class.php:1773
 msgid "Your private key was copied to your clipboard."
 msgstr "Váš soukromý klíč byl zkopírován do vaší schránky."
 
-#: classes/Election.class.php:1720
+#: classes/Election.class.php:1720 classes/Election.class.php:1730
+#: classes/Election.class.php:1774
 msgid "Your private key will not be displayed again."
 msgstr "Váš soukromý klíč se již nezobrazí."
 
-#: classes/Election.class.php:1731
+#: classes/Election.class.php:1731 classes/Election.class.php:1741
+#: classes/Election.class.php:1786
 msgid "There was an error recording your vote, please try again."
 msgstr "Při nahrávání vašeho hlasu došlo k chybě, zkuste to prosím znovu."
 
-#: classes/Election.class.php:1785
+#: classes/Election.class.php:1785 classes/Election.class.php:1795
+#: classes/Election.class.php:1840
 msgid "Action"
 msgstr "Akce"
 
-#: classes/Election.class.php:1791
+#: classes/Election.class.php:1791 classes/Election.class.php:1801
+#: classes/Election.class.php:1846
 msgid "Message"
 msgstr "Zpráva"
 
 #: classes/Election.class.php:1804 public_html/index.php:36
-#: public_html/index.php:193 elections.php:31
+#: public_html/index.php:193 elections.php:31 classes/Election.class.php:1814
+#: classes/Election.class.php:1859 public_html/index.php:203
 msgid "Elections"
 msgstr "Volby"
 
-#: classes/Election.class.php:1838
+#: classes/Election.class.php:1838 classes/Election.class.php:1848
+#: classes/Election.class.php:1893
 msgid "Admin"
 msgstr "Správce"
 
-#: classes/Election.class.php:1841
+#: classes/Election.class.php:1841 classes/Election.class.php:1851
+#: classes/Election.class.php:1896
 msgid "It appears that there are no elections available."
 msgstr "Zdá se, že nejsou k dispozici žádné volby."
 
-#: classes/Election.class.php:1893
+#: classes/Election.class.php:1893 classes/Election.class.php:1903
+#: classes/Election.class.php:1948
 msgid "Your election has been successfully deleted."
 msgstr "Vaše volba byla úspěšně smazána."
 
 #: classes/Election.class.php:1938 classes/Views/Results.class.php:373
+#: classes/Election.class.php:1948 classes/Election.class.php:1993
 msgid "User Name"
 msgstr "Uživatelské jméno"
 
 #: classes/Election.class.php:1943 classes/Views/Results.class.php:378
+#: classes/Election.class.php:1953 classes/Election.class.php:1998
 msgid "IP Address"
 msgstr "IP adresa"
 
 #: classes/Election.class.php:1948 classes/Views/Results.class.php:383
+#: classes/Election.class.php:1958 classes/Election.class.php:2003
 msgid "Date Voted"
 msgstr "Datum hlasování"
 
-#: classes/Election.class.php:2085
+#: classes/Election.class.php:2085 classes/Election.class.php:2095
+#: classes/Election.class.php:2140
 msgid "Election results will be available only after the election has closed."
 msgstr "Výsledky voleb budou k dispozici až po ukončení voleb."
 
@@ -428,28 +499,29 @@ msgid "This election is not open for voting."
 msgstr "Tyto volby nejsou otevřené pro hlasování."
 
 #: public_html/ajax_handler.php:75 public_html/index.php:119
-#: public_html/index.php:172
+#: public_html/index.php:172 public_html/index.php:120
+#: public_html/index.php:182
 msgid "Please answer all remaining questions."
 msgstr "Odpovězte prosím na všechny zbývající otázky."
 
-#: public_html/index.php:151
+#: public_html/index.php:151 public_html/index.php:152
 #, php-format
 msgid "Your vote was recorded as shown at %1$s on %2$s"
 msgstr "Váš hlas byl zaznamenán v %1$s na %2$s"
 
-#: public_html/index.php:161
+#: public_html/index.php:161 public_html/index.php:162
 msgid "An invalid access key was entered."
 msgstr "Byl zadán neplatný přístupový klíč."
 
-#: public_html/index.php:174
+#: public_html/index.php:174 public_html/index.php:184
 msgid "Results were not saved."
 msgstr "Výsledky nebyly uloženy."
 
-#: public_html/index.php:185
+#: public_html/index.php:185 public_html/index.php:195
 msgid "Voting for this election is unavailable."
 msgstr "Hlasování pro tyto volby není k dispozici."
 
-#: public_html/index.php:186
+#: public_html/index.php:186 public_html/index.php:196
 msgid ""
 "Either you've already voted, the election has been removed or you do not "
 "have sufficient permissions."
@@ -601,45 +673,79 @@ msgid "Default Permissions"
 msgstr "Výchozí oprávnění"
 
 #: language/lang_config.php:48 language/lang_config.php:49
+#: language/lang_config.php:72
 msgid "True"
 msgstr "Pravda"
 
 #: language/lang_config.php:49 language/lang_config.php:50
+#: language/lang_config.php:73
 msgid "False"
 msgstr "Nepravda"
 
 #: language/lang_config.php:52 language/lang_config.php:53
+#: language/lang_config.php:76
 msgid "As Submitted"
 msgstr "Jak bylo odesláno"
 
 #: language/lang_config.php:53 language/lang_config.php:54
+#: language/lang_config.php:77
 msgid "By Votes"
 msgstr "Podle hlasů"
 
 #: language/lang_config.php:56 language/lang_config.php:57
+#: language/lang_config.php:80
 msgid "No Access"
 msgstr "Žádný přístup"
 
 #: language/lang_config.php:57 language/lang_config.php:58
+#: language/lang_config.php:81
 msgid "View Vote"
 msgstr "Zobrazit hlas"
 
 #: language/lang_config.php:61 language/lang_config.php:62
+#: language/lang_config.php:85
 msgid "Left Blocks"
 msgstr "Levé bloky"
 
 #: language/lang_config.php:62 language/lang_config.php:63
+#: language/lang_config.php:86
 msgid "Right Blocks"
 msgstr "Pravé bloky"
 
 #: language/lang_config.php:63 language/lang_config.php:64
+#: language/lang_config.php:87
 msgid "Left & Right Blocks"
 msgstr "Levé a pravé bloky"
 
 #: language/lang_config.php:64 language/lang_config.php:65
+#: language/lang_config.php:88
 msgid "None"
 msgstr "Žádné"
 
 #: language/lang_config.php:35
 msgid "Days after which closed elections are archived"
 msgstr "Dny, po kterých jsou archivovány uzavřené volby"
+
+#: classes/Election.class.php:1298 classes/Election.class.php:1329
+msgid "Log in to vote."
+msgstr ""
+
+#: classes/Election.class.php:675
+msgid "Enter Key"
+msgstr "Zadejte klíč"
+
+#: classes/Election.class.php:879
+msgid "Edit your vote"
+msgstr "Upravte svůj hlas"
+
+#: classes/Election.class.php:1775
+msgid "A new private key is generated for each submission."
+msgstr "Pro každé odeslání se vygeneruje nový soukromý klíč."
+
+#: admin/index.php:66
+msgid "List Votes"
+msgstr "Seznam hlasů"
+
+#: language/lang_config.php:82
+msgid "Modify Vote"
+msgstr "Upravit hlasování"

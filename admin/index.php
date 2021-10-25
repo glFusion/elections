@@ -63,7 +63,7 @@ $title = MO::_('Election Administration');
 
 switch ($action) {
 case 'lv' :
-    $title = MO::_('Edit Election');
+    $title = MO::_('List Votes');
     $page .= Election::getInstance($pid)->listVotes();
     break;
 
