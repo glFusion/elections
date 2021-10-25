@@ -65,3 +65,27 @@ $LANG_configSelect[Config::PI_NAME] = array(
         3 => MO::_('None'),
     ),
 );
+
+// Legacy, pre-2.0
+$LANG_configselects[Config::PI_NAME] = array(
+    0 => array(
+        MO::_('True') => 1,
+        MO::_('False') => 2,
+    ),
+    2 => array(
+        MO::_('As Submitted') => 'submitorder',
+        MO::_('By Votes') => 'voteorder',
+    ),
+    3 => array(
+        MO::_('No Access') => 0,
+        MO::_('View Vote') => 1,
+        MO::_('Modify Vote') => 2,
+    ),
+    13 => array(
+        MO::_('Left Blocks') => 0,
+        MO::_('Right Blocks') => 1,
+        MO::_('Left & Right Blocks') => 2,
+        MO::_('None') => 3,
+    ),
+);
+
