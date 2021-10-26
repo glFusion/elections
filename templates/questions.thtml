@@ -3,18 +3,21 @@
 {!!if {disp_mode} == "1" !!}
 	{question}
 {!else}
-    <h3>
+	<h3>
 {!if lang_question_number}
-        {lang_question} {lang_question_number}:
+		{lang_question} {lang_question_number}:
 {!endif}
-        {question}
+		{question}
 	</h3>
 {!endif}
-{!if old_aid}
 	<input type="hidden" name="old_aid[{question_id}]" value="{old_aid}" />
-{!endif}
-    <ul class="uk-list elections_answers">
-        {answers}
-    </ul>
+	<ul class="uk-list elections_answers">
+<!-- BEGIN Answers -->
+		<li class="elections_radio">
+			<input type="radio" {radio_disabled} id="q{question_id}_a{answer_id}_{rnd}" name="aid[{question_id}]" value="{answer_id}"{selected} />&nbsp;<label for="q{question_id}_a{answer_id}_{rnd}">{answer_text}</label>
+		</li>
+<!-- END Answers -->
+<!--		{answers}-->
+	</ul>
 </div>
 {# end {templatelocation} #}

@@ -1497,7 +1497,6 @@ class Election
         if ($nquestions > 0) {
             $T = new \Template(Config::path_template());
             $T->set_file(array(
-                'panswer' => 'answer.thtml',
                 'block' => 'block.thtml',
                 'pquestions' => 'questions.thtml',
                 'comments' => 'comments.thtml',
@@ -1605,8 +1604,13 @@ class Election
                 } else {
                     $T->set_var('lang_question_number', ($j+1));
                 }
+                if (isset($this->_selections[$Q->getQid()])) {
+                    $T->set_var('old_aid', $this->_selections[$Q->getQid()]);
+                }
+
                 $answers = $Q->getAnswers($this->rnd_answers);
                 $nanswers = count($answers);
+                $T->set_block('pquestions', 'Answers', 'panswer');
                 for ($i = 0; $i < $nanswers; $i++) {
                     $Answer = $answers[$i];
                     if (
@@ -1624,9 +1628,6 @@ class Election
                         case 1:
                             $T->set_var('radio_disabled', 'disabled="disabled"');
                             break;
-                        case 2:
-                            $T->set_var('old_aid', $Answer->getAid());
-                            break;
                         }
                     }
                     $T->set_var(array(
@@ -1634,10 +1635,10 @@ class Election
                         'answer_text' => $filterS->filterData($Answer->getAnswer()),
                         'rnd' => $random,
                     ) );
-                    $T->parse('answers', 'panswer', true);
+                    $T->parse('panswer', 'Answers', true);
                 }
                 $T->parse('questions', 'pquestions', true);
-                $T->clear_var('answers');
+                $T->clear_var('panswer');
             }
             $T->set_var('lang_topics', MO::_('Topic'));
             $T->set_var('notification', $notification);
@@ -1724,7 +1725,6 @@ class Election
         global $_USER;
 
         $retval = '';
-
         if ($this->alreadyVoted() && !$this->canUpdate()) {
             if (!COM_isAjax()) {
                 COM_setMsg(MO::_('Your vote has already been recorded.'));
@@ -1748,17 +1748,17 @@ class Election
         } else {
             $vote_id = 0;
         }
-        $Voter = Voter::create($this->pid, $aid, $vote_id);
 
         // Record that this user has voted
+        $Voter = Voter::create($this->pid, $aid, $vote_id);
         if ($Voter !== false) {
             // Increment the vote count for each answer
             $answers = count($aid);
             for ($i = 0; $i < $answers; $i++) {
-                if (isset($old_aid[$i])) {
-                    Answer::decrement($this->pid, $i, $old_aid[$i]);
+                if (array_key_exists($i, $old_aid)) {
+                    Answer::decrement($this->pid, $i, (int)$old_aid[$i]);
                 }
-                Answer::increment($this->pid, $i, $aid[$i]);
+                Answer::increment($this->pid, $i, (int)$aid[$i]);
             }
 
             // Set a return message, if not called via ajax

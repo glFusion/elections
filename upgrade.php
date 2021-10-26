@@ -5,7 +5,7 @@
  * @author      Lee Garner <lee@leegarner.com>
  * @copyright   Copyright (c) 2020-2021 Lee Garner <lee@leegarner.com>
  * @package     shop
- * @version     v0.1.2
+ * @version     v0.1.3
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -27,7 +27,7 @@ function election_upgrade($dvlp=false)
 {
     global $_PLUGIN_INFO;
 
-    $pi_name = Config::get('pi_name');
+    $pi_name = Config::PI_NAME;
     if (isset($_PLUGIN_INFO[$pi_name])) {
         $current_ver = $_PLUGIN_INFO[$pi_name]['pi_version'];
     } else {
@@ -202,6 +202,8 @@ function ELECTION_remove_old_files()
         __DIR__ => array(
             // 0.1.2
             'templates/votes_num.thtml',
+            // 0.1.3
+            'templates/answer.thtml',
         ),
         // public_html/elections
         $_CONF['path_html'] . Config::PI_NAME => array(
