@@ -23,7 +23,7 @@ use Elections\Config;
  * @param   boolean $dvlp   True for development upgrade (ignores errors)
  * @return  boolean     True on success, False on failure
  */
-function election_upgrade($dvlp=false)
+function ELECTIONS_upgrade($dvlp=false)
 {
     global $_PLUGIN_INFO;
 
