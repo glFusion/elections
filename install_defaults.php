@@ -180,18 +180,17 @@ $electionConfigData = array(
         'set' => true,
         'group' => $pi_name,
     ),
-
-    /*array(
-        'name' => 'default_permissions',
-        'default_value' => array (3, 2, 2, 2),
-        'type' => '@select',
+    array(
+        'name' => 'block_num_q',
+        'default_value' => 1,
+        'type' => 'select',
         'subgroup' => 0,
         'fieldset' => 0,
-        'selection_array' => 0,
-        'sort' => 100,
+        'selection_array' => 14,
+        'sort' => 130,
         'set' => true,
         'group' => $pi_name,
-    ),*/
+    ),
 );
 
 

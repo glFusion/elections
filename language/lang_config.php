@@ -33,6 +33,7 @@ $LANG_confignames[Config::PI_NAME] = array(
     'def_results_gid' => MO::_('Default group allowed to view results'),
     'allow_votemod' => MO::_('Default after-voting access'),
     'archive_days' => MO::_('Days after which closed elections are archived'),
+    'block_num_q' => MO::_('Number of questions shown in blocks'),
 );
 
 $LANG_configsubgroups[Config::PI_NAME] = array(
@@ -56,13 +57,17 @@ $LANG_configSelect[Config::PI_NAME] = array(
     3 => array(
         0 => MO::_('No Access'),
         1 => MO::_('View Vote'),
-        //2 => MO::_('Modify Vote'),
+        2 => MO::_('Modify Vote'),
     ),
     13 => array(
         0 => MO::_('Left Blocks'),
         1 => MO::_('Right Blocks'),
         2 => MO::_('Left & Right Blocks'),
         3 => MO::_('None'),
+    ),
+    14 => array(
+        0 => MO::_('Links Only'),
+        1 => MO::_('One Qustoin'),
     ),
 );
 
@@ -86,6 +91,10 @@ $LANG_configselects[Config::PI_NAME] = array(
         MO::_('Right Blocks') => 1,
         MO::_('Left & Right Blocks') => 2,
         MO::_('None') => 3,
+    ),
+    14 => array(
+        MO::_('Links Only') => 0,
+        MO::_('One Qustoin') => 1,
     ),
 );
 

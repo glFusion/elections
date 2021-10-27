@@ -57,6 +57,10 @@ require_once __DIR__ . '/' . Config::PI_NAME . '.php';
 
 require_once __DIR__ . '/language/lang_config.php';
 
+if (file_exists(__DIR__ . '/config.php')) {
+    include_once __DIR__ . '/config.php';
+}
+
 // +---------------------------------------------------------------------------+
 // | glFusion Plugin API Implementations                                       |
 // +---------------------------------------------------------------------------+
@@ -558,16 +562,30 @@ function plugin_enablestatechange_elections($enable)
 * Display the current poll(s) in a side block
 *
 * @return   string  HTML for the poll(s) to be displayed (or an empty string)
-*
 */
 function phpblock_elections()
 {
     $retval = '';
-    $Election = Election::getOpen(Modes::BLOCK);
-    foreach ($Election as $Election) {
-        $retval .= $Election->withDisplaytype(Modes::BLOCK)
-            ->withShowall(0)
-            ->Render();
+    $Elections = Election::getOpen(Modes::BLOCK);
+    if (Config::get('block_num_q') < 1) {
+        foreach ($Elections as $Election) {
+            $retval .= COM_createLink(
+                $Election->getTopic(),
+                Config::get('url') . '/index.php?pid=' . $Election->getId()
+            ) . "<br />\n";
+        }
+        if (count($Elections) > 1) {
+            $retval .= "<br />" . COM_createLink(
+                MO::_('List All'),
+                Config::get('url') . '/index.php'
+            );
+        }
+    } else {
+        foreach ($Elections as $Election) {
+            $retval .= $Election->withDisplaytype(Modes::BLOCK)
+                ->withShowall(0)
+                ->Render();
+        }
     }
     return $retval;
 }
@@ -673,7 +691,7 @@ function plugin_getheadercss_elections()
 function plugin_upgrade_elections()
 {
     require_once __DIR__ . '/upgrade.php';
-    return election_upgrade();
+    return ELECTIONS_upgrade();
 }
 
 
