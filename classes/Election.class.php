@@ -1450,8 +1450,11 @@ class Election
                         ->withDisplayType($this->disp_type)
                         ->Render();
                 } else {
-                    // in a block
-                    return '';
+                    // in a block, just add a link for now
+                    return COM_createLink(
+                        $this->getTopic() . ' (' . MO::_('Results') . ')',
+                        Config::get('url') . '/index.php?results=x&pid=' . $this->getId()
+                    );
                 }
             } else {
                 return $this->msgNoResultsWhileOpen();
@@ -1866,16 +1869,19 @@ class Election
             '_now' => $sql_now_utc,
             'is_admin' => false,
         );
-        $filter = "(status = " . Status::CLOSED . " AND '$sql_now_utc' BETWEEN opens AND closes " .
-                SEC_buildAccessSql('AND', 'group_id') .
-            ") OR (
-                (hideresults = 0 OR status = " . Status::OPEN . " OR closes < '$sql_now_utc')" .
-                SEC_buildAccessSql('AND', 'results_gid') .
-                ')';
-        $count = (int)DB_getItem(DB::table('topics'), 'count(*)', $filter);
+        $filter_ors = array(
+            // Open elections where the user has voting access
+            "(status = " . Status::OPEN .
+                " AND '$sql_now_utc' BETWEEN opens AND closes " .
+                SEC_buildAccessSql('AND', 'group_id') . ')',
+            // Closed elections where the user is allowed to view results
+            "((hideresults = 0 OR status = " . Status::CLOSED . " OR closes < '$sql_now_utc')" .
+                SEC_buildAccessSql('AND', 'results_gid') . ')',
+        );
+        $filter = 'status <> ' . Status::ARCHIVED  . ' AND (' . implode(' OR ', $filter_ors) . ')';
         $sql = "SELECT p.*,
                 (SELECT COUNT(v.id) FROM " . DB::table('voters') . " v WHERE v.pid = p.pid) AS vote_count
-                FROM " . DB::table('topics') . " AS p WHERE " . $filter;
+                FROM " . DB::table('topics') . " AS p WHERE $filter";
         $res = DB_query($sql);
         $count = DB_numRows($res);
         $data_arr = array();
@@ -1891,22 +1897,13 @@ class Election
             'is_admin' => plugin_ismoderator_elections(),
             'admin_url' => Config::get('admin_url') . '/index.php',
             'lang_admin' => MO::_('Admin'),
+            'count' => $count,
             'msg_alert' => $count == 0 ?
                 self::msgAlert(
                     MO::_('It appears that there are no elections available.')
                 ) :
                 '',
             ) );
-
-/*        if (plugin_ismoderator_elections()) {
-            $retval .= '<div class="floatright"><a class="uk-button uk-button-small uk-button-danger" href="' .
-                Config::get('admin_url') . '/index.php">Admin</a></div>' . LB;
-        }*/
-        /*if ($count == 0) {
-            $retval .= self::msgAlert(
-                MO::_('It appears that there are no elections available.')
-            );
-            }*/
         $T->parse('output', 'list');
         return $T->finish($T->get_var('output'));
     }
