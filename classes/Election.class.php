@@ -1645,7 +1645,7 @@ class Election
             }
             $T->set_var('lang_topics', MO::_('Topic'));
             $T->set_var('notification', $notification);
-            if ($this->commentcode >= 0 ) {
+            if (!$preview && $this->commentcode >= 0 ) {
                 USES_lib_comment();
 
                 $num_comments = CMT_getCount(Config::PI_NAME, $this->pid);
@@ -1671,7 +1671,8 @@ class Election
             if (
                 $this->disp_showall &&
                 $this->commentcode >= 0 &&
-                $this->disp_type != Modes::AUTOTAG
+                $this->disp_type != Modes::AUTOTAG &&
+                !$preview
             ) {
                 $delete_option = self::hasRights('edit') ? true : false;
 
