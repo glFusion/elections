@@ -1,3 +1,0 @@
-{# begin {templatelocation} #}
-<br>{item_num}. <a href="{url}">{question}</a> ({votes} {lang_votes}){ending_br}
-{# end {templatelocation} #}

@@ -1,28 +1,29 @@
 {# begin {templatelocation} #}
+{!if print_url}
+<span class="uk-align-right"><a class="uk-button uk-button-success uk-button-small" href="{print_url}">
+	<i class="uk-icon uk-icon-print"></i>&nbsp;{lang_print}
+</a></span>
+{!endif}
 {!if edit_url}
-    <span class="uk-align-right"><a href="{edit_url}" class="uk-aling-right uk-icon uk-icon-edit tm-meta-icon"></a></span>
+<span class="uk-align-right"><a href="{edit_url}" class="uk-align-right uk-icon uk-icon-edit uk-icon-medium tm-meta-icon"></a></span>
 {!endif}
 {!if url}
-    <a class="uk-align-right" href="{url}">{lang_back}</a>
+<a class="uk-button uk-button-primary uk-button-small uk-align-right" href="{url}">{lang_back}</a>
 {!endif}
 {!if topic}
-    <h3>{topic}</h3>
+<h3>{topic}</h3>
 {!endif}
 {!if alert_msg}
-    <div class="uk-alert uk-alert-danger">
-        {alert_msg}
-    </div>
+<div class="uk-alert uk-alert-danger">{alert_msg}</div>
 {!endif}
 {!if isOpen}
-    <div class="uk-alert uk-alert-danger">
-        {lang_is_open}
-    </div>
+<div class="uk-alert uk-alert-danger">{lang_is_open}</div>
 {!endif}
 {!if description}
-  <div class="uk-panel uk-panel-box">{description}</div>
+<div class="uk-panel uk-panel-box">{description}</div>
 {!endif}
 {questions}
 <div class="uk-panel uk-text-small uk-text-truncate uk-margin-bottom">
-    {notification} <a href="{url}">{lang_topics}</a> | {num_votes} {lang_votes} {comments}
+	{notification} <a href="{url}">{lang_topics}</a> | {num_votes} {lang_votes} {comments}
 </div>
 {# end {templatelocation} #}

@@ -159,7 +159,7 @@ class Question
 
 
     /**
-     * Set the answers for this question.
+     * Set the answers for this question and save to the DB.
      *
      * @param   array   $A      Array of anwer strings
      * @return  object  $this
@@ -175,7 +175,6 @@ class Question
                 ->setQid($this->qid)
                 ->setPid($this->pid)
                 ->setAid($i)
-                ->setVotes($A['votes'][$this->qid][$i])
                 ->setRemark($A['remark'][$this->qid][$i])
                 ->Save();
         }
@@ -187,6 +186,12 @@ class Question
     }
 
 
+    /**
+     * Set the question ID.
+     *
+     * @param   integer $qid    Question record ID
+     * @return  object  $this
+     */
     public function setQid($qid)
     {
         $this->qid = (int)$qid;
@@ -236,49 +241,6 @@ class Question
     public static function deleteElection($pid)
     {
         DB_delete(DB::table('questions'), 'pid', $pid);
-    }
-
-
-    /**
-     * Render the question.
-     *
-     * @param   integer $q_num  Sequential question number, e.g. first=1, etc.
-     * @param   integer $num_q  Total number of questions for this quiz
-     * @return  string  HTML for the question form
-     */
-    public function Render($cnt, $aid)
-    {
-        global $_CONF;
-
-        $T = new \Template(__DIR__ . '/../templates/admin/');
-        $T->set_file(array(
-            'question' => 'questions.thtml',
-        ) );
-        $T->set_var('poll_question', $this->getQuestion());
-        $T->set_var('question_id', $cnt);
-        $notification = "";
-        $Answers = $this->getAnswers();
-        $nanswers = count($Answers);
-        for ($i=0; $i < $nanswers; $i++) {
-            $Answer = $Answers[$j];
-            if (($j < count($aid)) && ($aid[$j] == $Answer->getAid())) {
-                $poll->set_var('selected', ' checked="checked"');
-            }
-
-            $T->set_var(array(
-                'answer_id' => $Answer->getAid(),
-                'answer_text' => $this->filterS->filterData($Answer->getAnswer()),
-            ) );
-            $T->set_var('poll_answers', 'panswer',true);
-            $T->clear_var('selected');
-            $poll->parse('poll_questions', 'pquestions', true);
-            $poll->clear_var('poll_answers');
-
-            $T->parse('Answer', 'AnswerRow', true);
-        }
-        $T->parse('output', 'question');
-        $retval .= $T->finish($T->get_var('output'));
-        return $retval;
     }
 
 
@@ -401,5 +363,3 @@ class Question
     }
 
 }
-
-?>

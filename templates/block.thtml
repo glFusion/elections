@@ -2,7 +2,7 @@
 {!if use_ajax}
 <script>
   $(window).load(function() {
-    $( "#electionautotag_{id}" ).on( "click", "#votebutton", function(event) {
+    $( "#electionautotag_{uniqid}" ).on( "click", "#vb_{uniqid}", function(event) {
       event.preventDefault();
       var data = $("#vote{id}").serialize();
       $.ajax({
@@ -13,8 +13,8 @@
         success: function(data) {
           var result = $.parseJSON(data["json"]);
           try {
-            $.UIkit.notify("<i class='uk-icon-check'></i>&nbsp;" + result.statusMessage, {timeout: 1000,pos:'top-center'});
-            $('#electionautotag_{id}').html(result.html);
+			Elections.notify(result.statusMessage, "success");
+            $('#electionautotag_{uniqid}').html(result.html);
           }
           catch(err) {
             alert(result.statusMessage);
@@ -25,8 +25,7 @@
   });
 </script>
 {!endif}
-
-<div id="electionautotag_{id}">
+<div id="electionautotag_{uniqid}">
 {!!if {disp_mode} == 0 !!}
 {!if edit_url}
     <span class="uk-align-right"><a href="{edit_url}" class="uk-aling-right uk-icon uk-icon-edit tm-meta-icon"></a></span>
@@ -34,10 +33,18 @@
     <a class="uk-align-right" href="{back_url}">{lang_back}</a>
 {!endif}
 
+{!!if {disp_mode} == "1" !!}
+	{topic}
+{!else}
 {!if topic}
-    <h3>{topic} {topic_msg}</h3>
+    <h3>{topic}
+{!if topic_msg}
+	<span class="uk-text-danger">{topic_msg}</span>
+{!endif}
+	</h3>
 {!elseif edit_icon}
     <br />
+{!endif}
 {!endif}
 {!if description}
     <div class="uk-panel-box">{description}</div>
@@ -54,7 +61,7 @@
             {lang_login_required}
         </div>
 {!elseif can_submit}
-        <button class="uk-button uk-button-primary" id="votebutton" name="votebutton" type="submit" value="{lang_vote}">{lang_vote}</button>
+        <button class="uk-button uk-button-primary" id="vb_{uniqid}" name="votebutton" type="submit" value="{lang_vote}">{lang_vote}</button>
         {results}
 {!endif}
 

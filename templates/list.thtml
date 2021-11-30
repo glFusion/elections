@@ -1,0 +1,11 @@
+{# begin {templatelocation} #}
+{msg_alert}
+{!if is_admin}
+<div class="floatright">
+	<a class="uk-button uk-button-small uk-button-danger" href="{admin_url}">{lang_admin}</a>
+</div>
+{!endif}
+{!if count}
+{election_list}
+{!endif}
+{# end {templatelocation} #}

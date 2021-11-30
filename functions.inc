@@ -1,37 +1,15 @@
 <?php
-// +--------------------------------------------------------------------------+
-// | Election Plugin - glFusion CMS                                              |
-// +--------------------------------------------------------------------------+
-// | functions.inc                                                            |
-// |                                                                          |
-// +--------------------------------------------------------------------------+
-// | Copyright (C) 2008-2018 by the following authors:                        |
-// |                                                                          |
-// | Mark R. Evans          mark AT glfusion DOT org                          |
-// |                                                                          |
-// | Copyright (C) 2000-2008 by the following authors:                        |
-// |                                                                          |
-// | Authors: Tony Bibbs       - tony AT tonybibbs DOT com                    |
-// |          Tom Willett      - twillett AT users DOT sourceforge DOT net    |
-// |          Blaine Lang      - langmail AT sympatico DOT ca                 |
-// |          Dirk Haun        - dirk AT haun-online DOT de                   |
-// +--------------------------------------------------------------------------+
-// |                                                                          |
-// | This program is free software; you can redistribute it and/or            |
-// | modify it under the terms of the GNU General Public License              |
-// | as published by the Free Software Foundation; either version 2           |
-// | of the License, or (at your option) any later version.                   |
-// |                                                                          |
-// | This program is distributed in the hope that it will be useful,          |
-// | but WITHOUT ANY WARRANTY; without even the implied warranty of           |
-// | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            |
-// | GNU General Public License for more details.                             |
-// |                                                                          |
-// | You should have received a copy of the GNU General Public License        |
-// | along with this program; if not, write to the Free Software Foundation,  |
-// | Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.          |
-// |                                                                          |
-// +--------------------------------------------------------------------------+
+/**
+ * glFusion API functions for the Elections plugin.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2021 Lee Garner
+ * @package     elections
+ * @version     v0.1.2
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 if (!defined ('GVERSION')) {
     die('This file can not be used on its own.');
@@ -79,6 +57,10 @@ require_once __DIR__ . '/' . Config::PI_NAME . '.php';
 
 require_once __DIR__ . '/language/lang_config.php';
 
+if (file_exists(__DIR__ . '/config.php')) {
+    include_once __DIR__ . '/config.php';
+}
+
 // +---------------------------------------------------------------------------+
 // | glFusion Plugin API Implementations                                       |
 // +---------------------------------------------------------------------------+
@@ -103,7 +85,7 @@ function plugin_getmenuitems_elections()
         return false;
     }
     return array(
-        MO::_('Elections') . ' <i class="uk-icon-check-square"></i>' => Config::get('url') . '/index.php',
+        Config::get('pi_display_name') . ' <i class="uk-icon-check-square"></i>' => Config::get('url') . '/index.php',
     );
 }
 
@@ -357,6 +339,21 @@ function plugin_dopluginsearch_comment_elections(
     return $search_c;
 }
 
+
+/**
+ * Get additional Javascript files to import in the header.
+ *
+ * @return  array   Array of filenames to import
+ */
+function plugin_getheaderjs_elections()
+{
+    $files = array(
+        __DIR__ . '/js/util.js',  // uikit v2/v3 compatible notifications
+    );
+    return $files;
+}
+
+
 /**
 * Shows the statistics for the Election plugin on stats.php.
 * If $showsitestats is 1 then we are to only print the overall stats in the
@@ -375,8 +372,9 @@ function plugin_showstats_elections($showsitestats)
     $sql = "SELECT p.pid, p.topic, (
             SELECT COUNT(v.id) FROM " . DB::table('voters') . " v
             WHERE v.pid = p.pid) as voters
-        FROM " . DB::table('topics') . " p WHERE (voters > 0) AND " .
-        Election::getPermSQL() . " ORDER BY voters DESC LIMIT 10";
+        FROM " . DB::table('topics') . " p WHERE " . Election::getPermSQL() .
+        " GROUP BY p.pid HAVING voters > 0
+        ORDER BY voters DESC LIMIT 10";
     $result = DB_query($sql);
     $nrows  = DB_numRows ($result);
     if ($nrows > 0) {
@@ -449,7 +447,7 @@ function plugin_cclabel_elections()
 {
     if (plugin_ismoderator_elections()) {
         return array(
-            ucfirst(Config::get('pi_name')),
+            Config::get('pi_display_name'),
             Config::get('admin_url') . '/index.php',
             plugin_geticon_elections()
         );
@@ -564,16 +562,30 @@ function plugin_enablestatechange_elections($enable)
 * Display the current poll(s) in a side block
 *
 * @return   string  HTML for the poll(s) to be displayed (or an empty string)
-*
 */
 function phpblock_elections()
 {
     $retval = '';
-    $Election = Election::getOpen(Modes::BLOCK);
-    foreach ($Election as $Election) {
-        $retval .= $Election->withDisplaytype(Modes::BLOCK)
-            ->withShowall(0)
-            ->Render();
+    $Elections = Election::getOpen(Modes::BLOCK);
+    if (Config::get('block_num_q') < 1) {
+        foreach ($Elections as $Election) {
+            $retval .= COM_createLink(
+                $Election->getTopic(),
+                Config::get('url') . '/index.php?pid=' . $Election->getId()
+            ) . "<br />\n";
+        }
+        if (count($Elections) > 1) {
+            $retval .= "<br />" . COM_createLink(
+                MO::_('List All'),
+                Config::get('url') . '/index.php'
+            );
+        }
+    } else {
+        foreach ($Elections as $Election) {
+            $retval .= $Election->withDisplaytype(Modes::BLOCK)
+                ->withShowall(0)
+                ->Render();
+        }
     }
     return $retval;
 }
@@ -611,22 +623,14 @@ function plugin_displaycomment_elections($id, $cid, $title, $order, $format, $pa
     $pid = $id;
     $aid = 0;
 
-    $result = DB_query("SELECT status FROM " . DB::table('topics') . " WHERE pid='".DB_escapeString($pid)."'");
-    if ( $result && DB_numRows($result) > 0 ) {
-        $row = DB_fetchArray($result);
-        $status = $row['status'];
-        if ($is_open != 0) {
-            $aid = -1; // poll closed - show result
-        }
-        $Election = Election::getInstance($pid);
-        if (!isset ($_COOKIE['poll-'.$pid]) && !$Election->alreadyVoted() && $aid != -1 ) {
-            //$retval .= ELECTION_pollVote($pid);
-            $retval .= $Election->Render();
-        } else {
-            $retval .= (new Results($Election->getID()))->Render();
-        }
+    $Election = Election::getInstance($pid);
+    if (!$Election->isOpen()) {
+        $aid = -1; // poll closed - show result
+    }
+    if (!isset($_COOKIE['poll-'.$pid]) && !$Election->alreadyVoted() && $aid != -1 ) {
+        $retval .= $Election->Render();
     } else {
-        return false;
+        $retval .= (new Results($Election->getID()))->Render();
     }
     return $retval;
 }
@@ -679,7 +683,7 @@ function plugin_getheadercss_elections()
 function plugin_upgrade_elections()
 {
     require_once __DIR__ . '/upgrade.php';
-    return election_upgrade();
+    return ELECTIONS_upgrade();
 }
 
 
@@ -1049,10 +1053,49 @@ function plugin_runScheduledTask_elections()
 {
     $cutoff = time() - (Config::get('archive_days', 365) * 86400);
     $sql = "UPDATE " . DB::table('topics') .
-        " SET status = 2
-        WHERE closes < $cutoff";
+        " SET status = " . Elections\Models\Status::ARCHIVED .
+        " WHERE closes < $cutoff";
     DB_query($sql, 1);
 }
+
+
+/**
+ * Return information about the plugin's tables.
+ *
+ * @return  array       Array of table_name=>table_info
+ */
+function plugin_getContentTableInfo_elections()
+{
+    global $_DB_table_prefix;
+
+    $contentItems = array(
+        $_DB_table_prefix.'questions' => array(
+            'plugin' => 'elections',
+            'primary_key' => 'pid',
+            'columns' => array(
+                'question'
+            )
+        ),
+        $_DB_table_prefix.'answers' => array(
+            'plugin' => 'elections',
+            'primary_key' => 'pid,qid,aid',
+            'columns' => array(
+                'answer'
+            )
+        ),
+        $_DB_table_prefix.'topics' => array(
+            'plugin' => 'elections',
+            'primary_key' => 'pid,qid',
+            'columns' => array(
+                'topic',
+                'description',
+            )
+        ),
+    );
+    return $contentItems;
+}
+
+
 
 
 /**

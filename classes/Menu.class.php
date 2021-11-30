@@ -49,7 +49,7 @@ class Menu
         );
 
         // Add javascript used on admin pages
-        $T = new \Template(__DIR__ . '/../templates/admin');
+        $T = new \Template(Config::path_template() . 'admin');
         $T->set_file('admin_js', 'js.thtml');
         $T->set_var(array(
             'pi_name' => Config::PI_NAME,
@@ -109,7 +109,7 @@ class Menu
         global $_CONF;
 
         $retval = '';
-        switch (Config::get('displayblocks')) {
+        switch ((int)Config::get('displayblocks')) {
         case 0 : // left only
         case 3 : // none
             $retval .= COM_siteFooter();
@@ -126,7 +126,3 @@ class Menu
     }
 
 }
-
-?>
-
-

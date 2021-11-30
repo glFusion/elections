@@ -28,7 +28,7 @@ var {pi_name}_toggle = function(cbox, id, type, component) {
                 if (result.title != null) {
                     cbox.title = result.title;
                 }
-                $.UIkit.notify("<i class='uk-icon-check'></i>&nbsp;" + result.statusMessage, {timeout: 1000,pos:'top-center'});
+				Elections.notify("<i class='uk-icon-check'></i>&nbsp;" + result.statusMessage, {timeout: 1000,pos:'top-center'});
             }
             catch(err) {
                 alert(result.statusMessage);

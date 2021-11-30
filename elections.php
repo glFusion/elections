@@ -24,11 +24,12 @@ if (!defined ('GVERSION')) {
 }
 use Elections\Config;
 use Elections\DB;
+use Elections\MO;
 
 global $_DB_table_prefix;
 
-Config::set('pi_display_name', 'Elections');
-Config::set('pi_version', '0.1.1');
+Config::set('pi_display_name', MO::_('Elections'));
+Config::set('pi_version', '0.1.2');
 Config::set('gl_version', '1.7.8');
 Config::set('pi_url', 'https://www.glfusion.org');
 

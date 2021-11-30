@@ -242,14 +242,17 @@ class Voter
         // If logged in and the user ID is in the voters table,
         // we can trust that this user has voted.
         if (!COM_isAnonUser()) {
-            if (DB_count(
-                DB::table('voters'),
-                 array('uid', 'pid'),
-                 array((int)$_USER['uid'], DB_escapeString($pid)) ) > 0
+            if (
+                DB_count(
+                    DB::table('voters'),
+                    array('uid', 'pid'),
+                    array((int)$_USER['uid'], DB_escapeString($pid))
+                ) > 0
             ) {
                 return true;
             }
         }
+
         if ($voting_grp != Groups::ALL_USERS) {
             // If a login is required, return false now since there's no need
             // to check for anonymous votes.
@@ -296,8 +299,10 @@ class Voter
      *
      * @param   string  $pid    Election ID
      * @param   array   $aid    Answer data to be encrypted
+     * @param   integer $vote_id    Existing vote record ID, if any
+     * @return  object      Voter object
      */
-    public static function create($pid, $aid)
+    public static function create(string $pid, array $aid, int $vote_id=0) : object
     {
         global $_USER;
 
@@ -307,20 +312,29 @@ class Voter
             $userid = (int)$_USER['uid'];
         }
 
-        $Voter = new self;
+        if ($vote_id > 0) {
+            $Voter = self::getInstance($vote_id);
+            $sql1 = "UPDATE " . DB::table('voters') . " SET ";
+            $sql3 = " WHERE id = " . $Voter->getID();
+        } else {
+            $Voter = new self;
+            $sql1 = "INSERT IGNORE INTO " . DB::table('voters') . " SET ";
+            $sql3 = '';
+        }
         $keys = self::createKeys();
         $data = COM_encrypt(json_encode($aid), $keys['prv_key'] . ':' . $keys['pub_key']);
         $data = DB_escapeString($data);
         $pub_key = DB_escapeString($keys['pub_key']);
 
         // This always does an insert so no need to provide key_field and key_value args
-        $sql = "INSERT IGNORE INTO " . DB::table('voters') . " SET
-            ipaddress = '" . DB_escapeString(Voter::getRealIpAddress()) . "',
+        //$sql = "INSERT IGNORE INTO " . DB::table('voters') . " SET
+        $sql2 = "ipaddress = '" . DB_escapeString(Voter::getRealIpAddress()) . "',
             uid = '$userid',
             date = UNIX_TIMESTAMP(),
             pid = '" . DB_escapeString($pid) . "',
             votedata = '$data',
             pub_key = '$pub_key'";
+        $sql = $sql1 . $sql2 . $sql3;
         DB_query($sql);
         if (!DB_error()) {
             // Set the voter information. Save the private key in a class property
@@ -328,8 +342,10 @@ class Voter
             $Voter->withUid($userid)
                   ->withPrvKey($keys['prv_key'])
                   ->withPubKey($keys['pub_key'])
-                  ->withPid($pid)
-                  ->withId(DB_insertId());
+                  ->withPid($pid);
+            if ($vote_id == 0) {
+                $Voter->withId(DB_insertId());
+            }
             return $Voter;
         } else {
             return false;

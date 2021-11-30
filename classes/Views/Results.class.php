@@ -1,12 +1,12 @@
 <?php
 /**
- * Class to represent the resultset for a poll.
+ * Class to represent the results view for an election.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2020 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2020-2021 Lee Garner <lee@leegarner.com>
  * @package     elections
- * @version     v3.0.0
- * @since       v3.0.0
+ * @version     v0.1.2
+ * @since       v0.1.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -148,11 +148,9 @@ class Results
     public function Render()
     {
         global $_CONF, $_TABLES, $_USER, $_IMAGE_TYPE,
-           $_COM_VERBOSE;
+           $_COM_VERBOSE, $_SYSTEM;
 
         $retval = '';
-        $filter = new \sanitizer();
-        $filter->setPostmode('text');
 
         if ($this->Election->isNew()/* || !$this->Election->canViewResults()*/) {
             // Invalid poll or no access
@@ -164,8 +162,8 @@ class Results
             $this->Election->isOpen()
         ) {
             if (
-                $this->displaytype == Modes::NORMAL
-                &&
+                $this->displaytype == Modes::NORMAL &&
+                !$this->isAdmin &&
                 (
                     !isset($_USER['uid']) ||
                     $_USER['uid'] != $this->Election->getOwnerID() ||
@@ -180,13 +178,15 @@ class Results
             }
         }
 
-        $poll = new \Template(__DIR__ . '/../../templates/');
+        $poll = new \Template(array(
+            Config::path_template() . $_SYSTEM['framework'],
+            Config::path_template(),
+        ) );
         $poll->set_file(array(
             'result' => 'result.thtml',
             'question' => 'question.thtml',
             'comments' => 'comments.thtml',
             'votes_bar' => 'votes_bar.thtml',
-            'votes_num' => 'votes_num.thtml',
         ) );
 
         if ($this->isAdmin) {
@@ -194,8 +194,10 @@ class Results
         } else {
             $list_url = Config::get('url') . '/index.php';
         }
+
+        $filter = new \sanitizer();
+        $filter->setPostmode('text');
         $poll->set_var(array(
-            //'layout_url'    => $_CONF['layout_url'],
             'topic'     => $filter->filterData($this->Election->getTopic()),
             'pid'       => $this->pid,
             'num_votes' => COM_numberFormat($this->Election->numVotes()),
@@ -244,18 +246,18 @@ class Results
             $Answers = Answer::getByScore($Q->getQid(), $this->pid);
             $nanswers = count($Answers);
             $q_totalvotes = 0;
-            $max_votes = -1;
+            $winner_votes = -1;
 
             // If the poll has closed, get the winning scores.
             foreach ($Answers as $idx=>$A) {
                 $q_totalvotes += $A->getVotes();
-                if ($A->getVotes() > $max_votes) {
-                    $max_votes = $A->getVotes();
+                if ($A->getVotes() > $winner_votes) {
+                    $winner_votes = $A->getVotes();
                 }
             }
             // For open polls, the winner is not highlighted.
             if ($this->Election->isOpen()) {
-                $max_votes = -1;
+                $winner_votes = -1;
             }
 
             for ($i=1; $i<=$nanswers; $i++) {
@@ -265,20 +267,15 @@ class Results
                 } else {
                     $percent = $A->getVotes() / $q_totalvotes;
                 }
-                $winner = ($this->Election->declaresWinner()) && ($A->getVotes() == $max_votes);
+                $width = (int)($percent * 100 );
+                $winner = ($this->Election->declaresWinner()) && ($A->getVotes() == $winner_votes);
                 $poll->set_var(array(
-                    'cssida' =>  1,
-                    'cssidb' =>  2,
                     'answer_text' => $filter->filterData($A->getAnswer()),
                     'remark_text' => $filter->filterData($A->getRemark()),
-                    'answer_counter' => $i,
-                    'answer_odd' => (($i - 1) % 2),
-                    'answer_num' => COM_numberFormat($A->getVotes()),
                     'answer_percent' => sprintf('%.2f', $percent * 100),
                     'winner' => $winner,
+                    'bar_width' => $width,
                 ) );
-                $width = (int) ($percent * 100 );
-                $poll->set_var('bar_width', $width);
                 $poll->parse('votes', 'votes_bar', true);
             }
             $poll->parse('questions', 'question', true);
@@ -306,9 +303,10 @@ class Results
 
         $poll->set_var('lang_topics', MO::_('Topics'));
         if ($this->isAdmin && $this->displaytype !== Modes::PRINT) {
-            $retval .= '<a class="uk-button uk-button-success" target="_blank" href="' .
-                Config::get('admin_url') . '/index.php?presults=x&pid=' .
-                urlencode($this->pid) . '">Print</a>' . LB;
+            $poll->set_var(array(
+                'print_url' => Config::get('admin_url') . '/index.php?presults=x&pid=' . urlencode($this->pid),
+                'lang_print' => MO::_('Print'),
+            ) );
         }
         $retval .= $poll->finish($poll->parse('output', 'result' ));
 

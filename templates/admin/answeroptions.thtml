@@ -1,0 +1,25 @@
+{# begin {templatelocation} #}
+<table class="uk-table uk-table-condensed">
+	<tr>
+		<th class="uk-width-2-5">{lang_answer}</th>
+		<th class="uk-width-1-5">{lang_votes}</th>
+		<th class="uk-width-2-5">{lang_remark}</th>
+	</tr>
+<!-- BEGIN AnswerRow -->
+	<tr>
+		<td>
+			<input type="text" name="answer[{question_id}][]" value="{answer_text}" class="uk-input uk-form-small maxlength="255" style="width:100%">
+		</td>
+		<td>
+{!if 0}
+			<input type="text" name="votes[{question_id}][]" value="{answer_votes}" class="uk-input uk-form-small uk-form-width-mini">
+{!endif}
+			{answer_votes}
+		</td>
+		<td>
+			<input type="text" name="remark[{question_id}][]" value="{remark_text}" class="uk-input uk-form-small" maxlength="255" style="width:100%"/>
+		</td>
+	</tr>
+<!-- END AnswerRow -->
+</table>
+{# end {templatelocation} #}

@@ -1,5 +1,11 @@
 # Elections plugin for glFusion - Changelog
 
+## v0.1.2
+Release 2021-11-30
+
+  * Implement phpGettext class for better locale handling on Windows.
+  * Enable vote editing.
+
 ## v0.1.1
 Release 2021-04-06
 

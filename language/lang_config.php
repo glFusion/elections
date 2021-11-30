@@ -32,6 +32,8 @@ $LANG_confignames[Config::PI_NAME] = array(
     'def_voting_gid' => MO::_('Default group allowed to vote'),
     'def_results_gid' => MO::_('Default group allowed to view results'),
     'allow_votemod' => MO::_('Default after-voting access'),
+    'archive_days' => MO::_('Days after which closed elections are archived'),
+    'block_num_q' => MO::_('Number of questions shown in blocks'),
 );
 
 $LANG_configsubgroups[Config::PI_NAME] = array(
@@ -48,10 +50,6 @@ $LANG_configSelect[Config::PI_NAME] = array(
         1 => MO::_('True'),
         0 => MO::_('False'),
     ),
-    1 => array(
-        true => MO::_('True'),
-        false => MO::_('False'),
-    ),
     2 => array(
         'submitorder' => MO::_('As Submitted'),
         'voteorder' => MO::_('By Votes'),
@@ -59,19 +57,7 @@ $LANG_configSelect[Config::PI_NAME] = array(
     3 => array(
         0 => MO::_('No Access'),
         1 => MO::_('View Vote'),
-        //2 => MO::_('Modify Vote'),
-    ),
-    9 => array(
-        'item' => MO::_('Forward to Election'),
-        'list' => MO::_('Display Admin List'),
-        'plugin' => MO::_('Display Public List'),
-        'home' => MO::_('Display Home'),
-        'admin' => MO::_('Display Admin'),
-    ),
-    12 => array(
-        0 => MO::_('No access'),
-        2 => MO::_('Read-Only'),
-        3 => MO::_('Read-Write'),
+        2 => MO::_('Modify Vote'),
     ),
     13 => array(
         0 => MO::_('Left Blocks'),
@@ -79,6 +65,36 @@ $LANG_configSelect[Config::PI_NAME] = array(
         2 => MO::_('Left & Right Blocks'),
         3 => MO::_('None'),
     ),
+    14 => array(
+        0 => MO::_('Links Only'),
+        1 => MO::_('One Qustoin'),
+    ),
 );
 
-?>
+// Legacy, pre-2.0
+$LANG_configselects[Config::PI_NAME] = array(
+    0 => array(
+        MO::_('True') => 1,
+        MO::_('False') => 2,
+    ),
+    2 => array(
+        MO::_('As Submitted') => 'submitorder',
+        MO::_('By Votes') => 'voteorder',
+    ),
+    3 => array(
+        MO::_('No Access') => 0,
+        MO::_('View Vote') => 1,
+        MO::_('Modify Vote') => 2,
+    ),
+    13 => array(
+        MO::_('Left Blocks') => 0,
+        MO::_('Right Blocks') => 1,
+        MO::_('Left & Right Blocks') => 2,
+        MO::_('None') => 3,
+    ),
+    14 => array(
+        MO::_('Links Only') => 0,
+        MO::_('One Qustoin') => 1,
+    ),
+);
+

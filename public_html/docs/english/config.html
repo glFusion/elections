@@ -78,12 +78,7 @@
 
                 <h2>Election Configuration Options</h2>
 
-                <dl id="desc_electionsloginrequired">
-                    <dt>Election Login Required</dt>
-                    <dd>When set to True, only registered users can access the list of recent elections. Please note that Login Required in glFusion's main configuration takes precedence over this setting. So when that is set to True, anonymous users can not access the Election section even when <em>Election Login Required</em> is set to False.</dd>
-                </dl>
-
-                <dl id="desc_hideelectionsmenu">
+                <dl id="desc_hidemenu">
                     <dt>Hide Election Menu Entry</dt>
                     <dd>Whether to hide the &ldquo;Election&rdquo; entry from glFusion's menu bar (when set to True) or to show it (when set to False).</dd>
                 </dl>
@@ -103,30 +98,45 @@
                     <dd>Sort answers by the number of results ('By Votes') or keep the order in which they were entered ('As Submitted').</dd>
                 </dl>
 
-                <dl id="desc_electioncookietime">
+                <dl id="desc_cookietime">
                     <dt>Voter Cookie Valid For</dt>
                     <dd>Number of seconds to set a election answer cookie to time out on.</dd>
                 </dl>
 
-                <dl id="desc_electionaddresstime">
+                <dl id="desc_addresstime">
                     <dt>Voter IP Address Valid For</dt>
                     <dd>Number of seconds to set a election answer IP address to time out on.</dd>
                 </dl>
 
-                <dl id="desc_delete_elections">
+                <dl id="desc_delete_election">
                     <dt>Delete Election with Owner</dt>
                     <dd>Defines what to do when a user is deleted that is the owner of a election. When set to <strong>False</strong>, all elections owned by the deleted user will be assigned to a user of the &ldquo;Root&rdquo; group (i.e. the site admin). When set to <strong>True</strong>, the elections are deleted, including all the comments posted on that election.</dd>
                 </dl>
 
-                <dl id="desc_aftersave">
-                    <dt>After Saving Election</dt>
-                    <dd>Which page to go to after a election has been saved: <br/>* 'item': display the election <br/>* 'list': show admin's list of elections (default) <br/>* 'plugin': display the public list of elections <br/>* 'home': display the site's homepage <br/>* 'admin': go to the &ldquo;Admin Home&rdquo; page, (i.e. Command &amp; Control)</dd>
-                </dl>
+				<dl id="desc_displayblocks">
+					<dt>Display Blocks</dt>
+					<dd>Select which, if any, glFusion blocks to show with the election.</dd>
+				</dl>
 
+				<dl id="desc_voting_gid">
+					<dd>Default group allowed to vote</dd>
+					<dt>Select the group normally allowed to vote in elections. This may be changed for each election.</dt>
+				</dl>
+
+				<dl id="desc_results_gid">
+					<dd>Default group allowed to view results</dd>
+					<dt>Select the group normally allowed to view election results. This may be changed for each election.</dt>
+				</dl>
+	
                 <dl id="desc_allow_votemod">
                     <dt>Default After-Voting Access</dt>
                     <dd>Select whether voters can view their vote using a private key, edit their vote, or have no access to their own vote after it is cast.</dd>
                 </dl>
+
+				<dl id="desc_archive_days">
+					<dt>Archive Days</dt>
+					<dd>Enter the number of days when elections will be viewable. Enter &quot;0&quot; to keep elections indefinitely.</dd>
+				</dl>
 
             </div>
             <div class="tm-push"></div>

@@ -1,39 +1,16 @@
 <?php
-// +--------------------------------------------------------------------------+
-// | Election Plugin - glFusion CMS                                              |
-// +--------------------------------------------------------------------------+
-// | index.php                                                                |
-// |                                                                          |
-// | Display election results and past elections.                                     |
-// +--------------------------------------------------------------------------+
-// | Copyright (C) 2009-2018 by the following authors:                        |
-// |                                                                          |
-// | Mark R. Evans          mark AT glfusion DOT org                          |
-// |                                                                          |
-// | Copyright (C) 2000-2008 by the following authors:                        |
-// |                                                                          |
-// | Authors: Tony Bibbs        - tony AT tonybibbs DOT com                   |
-// |          Mark Limburg      - mlimburg AT users DOT sourceforge DOT net   |
-// |          Jason Whittenburg - jwhitten AT securitygeeks DOT com           |
-// |          Dirk Haun         - dirk AT haun-online DOT de                  |
-// +--------------------------------------------------------------------------+
-// |                                                                          |
-// | This program is free software; you can redistribute it and/or            |
-// | modify it under the terms of the GNU General Public License              |
-// | as published by the Free Software Foundation; either version 2           |
-// | of the License, or (at your option) any later version.                   |
-// |                                                                          |
-// | This program is distributed in the hope that it will be useful,          |
-// | but WITHOUT ANY WARRANTY; without even the implied warranty of           |
-// | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            |
-// | GNU General Public License for more details.                             |
-// |                                                                          |
-// | You should have received a copy of the GNU General Public License        |
-// | along with this program; if not, write to the Free Software Foundation,  |
-// | Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.          |
-// |                                                                          |
-// +--------------------------------------------------------------------------+
-
+/**
+ * Guest-facing entry point for the elections plugin.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2021 Lee Garner <lee@leegarner.com>
+ * @package     election
+ * @version     v0.1.2
+ * @since       v0.1.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 require_once '../lib-common.php';
 use Elections\Election;
 use Elections\Voter;
@@ -128,12 +105,13 @@ switch ($action) {
 case 'votebutton':
     // Get the answer array and check that the number is right, and the user hasn't voted
     $aid = (isset($_POST['aid']) && is_array($_POST['aid'])) ? $_POST['aid'] : array();
-    if ($Election->alreadyVoted()) {
+    if ($Election->alreadyVoted() && !$Election->canUpdate()) {
         COM_setMsg(MO::_('Your vote has already been recorded.'), 'error', true);
         COM_refresh(Config::get('url') . '/index.php');
     } else {
+        $old_aid = isset($_POST['old_aid']) ? $_POST['old_aid'] : array();
         if (count($aid) == $Election->numQuestions()) {
-            if ($Election->saveVote($aid)) {
+            if ($Election->saveVote($aid, $old_aid)) {
                 COM_refresh(Config::get('url') . '/index.php?results=x&pid=' . $Election->getID());
             } else {
                 COM_refresh(Config::get('url') . '/index.php');
@@ -187,6 +165,15 @@ case 'showvote':
     break;
 
 default:
+    if (!isset($Election)) {
+        // Didn't get an election ID in the URL, see if there's one using
+        // COM_buildUrl()
+        COM_setArgNames(array('pid'));
+        $pid = COM_getArgument('pid');
+        if (!empty($pid)) {
+            $Election = Election::getInstance($pid);
+        }
+    }
     if (isset($Election) && !$Election->isNew()) {
         if ($msg > 0) {
             $page .= COM_showMessage($msg, Config::get('pi_name'));

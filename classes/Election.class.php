@@ -153,8 +153,10 @@ class Election
      */
     function __construct($pid = '')
     {
-        $this->Opens = new \Date;
-        $this->Closes = new \Date;
+        global $_CONF;
+
+        $this->Opens = new \Date('now', $_CONF['timezone']);
+        $this->Closes = clone $this->Opens;
         if (is_array($pid)) {
             $this->setVars($pid, true);
         } elseif (!empty($pid)) {
@@ -459,6 +461,17 @@ class Election
 
 
     /**
+     * Check if this election allows votes to be edited.
+     *
+     * @return  boolean     True if updates are allowed, False if not
+     */
+    public function canUpdate() : bool
+    {
+        return ($this->mod_allowed >= 2 && $this->isOpen());
+    }
+
+
+    /**
      * Get the election topic name.
      *
      * @return  string      Topic name
@@ -647,6 +660,27 @@ class Election
 
 
     /**
+     * Get the "Show Vote" button to display with the secret key field.
+     *
+     * @param   string  $pid    Election ID
+     * @return  string      HTML for the button
+     */
+    public static function getShowVoteButton($pid)
+    {
+        $T = new \Template(Config::path_template());
+        $T->set_file('button', 'showvotebutton.thtml');
+        $T->set_var(array(
+            'pid'           => $pid,
+            'action_url'    => Config::get('url'),
+            'lang_enterkey' => MO::_('Enter Key'),
+            'lang_showvote' => MO::_('Show Vote'),
+        ) );
+        $T->parse('output', 'button');
+        return $T->finish($T->get_var('output'));
+    }
+
+
+    /**
      * Read a single election record from the database
      *
      * @return  boolean     True on success, False on error
@@ -692,7 +726,6 @@ class Election
         $this->rnd_questions = isset($A['rnd_questions']) && $A['rnd_questions'] ? 1 : 0;
         $this->rnd_answers = isset($A['rnd_answers']) && $A['rnd_answers'] ? 1 : 0;
         $this->decl_winner = isset($A['decl_winner']) && $A['decl_winner'] ? 1 : 0;
-        //$this->login_required = isset($A['login_required']) && $A['login_required'] ? 1 : 0;
         $this->hideresults = isset($A['hideresults']) && $A['hideresults'] ? 1 : 0;
         $this->commentcode = (int)$A['commentcode'];
         $this->setOwner($A['owner_id']);
@@ -712,19 +745,13 @@ class Election
             $this->setClosingDate($A['closes'], false);
         } else {
             if (empty($A['opens_date'])) {
-                $A['opens_date'] = Dates::MIN_DATE;
+                $A['opens_date'] = Dates::minDateTime();
             }
-            if (empty($A['opens_time'])) {
-                $A['opens_time'] = Dates::MIN_TIME;
-            }
-            $this->setOpenDate($A['opens_date'] . ' ' . $A['opens_time'], true);
+            $this->setOpenDate($A['opens_date'], true);
             if (empty($A['closes_date'])) {
-                $A['closes_date'] = Dates::MAX_DATE;
+                $A['closes_date'] = Dates::maxDateTime();
             }
-            if (empty($A['closes_time'])) {
-                $A['closes_time'] = Dates::MAX_TIME;
-            }
-            $this->setClosingDate($A['closes_date'] . ' ' . $A['closes_time'], true);
+            $this->setClosingDate($A['closes_date'], true);
         }
     }
 
@@ -742,14 +769,14 @@ class Election
 
         $retval = COM_startBlock(
             MO::_('Edit Election'),
-            COM_getBlockTemplate ('_admin_block', 'header')
+            COM_getBlockTemplate('_admin_block', 'header')
         );
 
-        $T = new \Template(__DIR__ . '/../templates/admin/');
+        $T = new \Template(Config::path_template() . 'admin/');
         $T->set_file(array(
             'editor' => 'editor.thtml',
             'question' => 'questions.thtml',
-            'answer' => 'answeroption.thtml',
+            'answer' => 'answeroptions.thtml',
         ) );
 
         if (!empty($this->pid)) {       // if not a new record
@@ -789,21 +816,19 @@ class Election
             $Questions = array();
         }
 
-        $open_date = $this->Opens->format('Y-m-d', true);
-        if ($open_date == Dates::MIN_DATE) {
+        if ($this->old_pid == '') {
+            // creating a new election, use empty date/time fields
             $open_date = '';
-        }
-        $open_time= $this->Opens->format('H:i:s', true);
-        if ($open_time == Dates::MIN_TIME) {
-            $open_time = '';
-        }
-        $close_date = $this->Closes->format('Y-m-d', true);
-        if ($close_date == Dates::MAX_DATE) {
             $close_date = '';
-        }
-        $close_time= $this->Closes->format('H:i:s', true);
-        if ($close_time == Dates::MAX_TIME) {
-            $close_time = '';
+        } else {
+            $open_date = $this->Opens->format('Y-m-d H:i', true);
+            if ($open_date == Dates::MIN_DATE) {
+                $open_date = '';
+            }
+            $close_date = $this->Closes->format('Y-m-d H:i', true);
+            if ($close_date == Dates::MAX_DATE) {
+                $close_date = '';
+            }
         }
         $ownername = COM_getDisplayName($this->owner_id);
         $T->set_var(array(
@@ -832,13 +857,9 @@ class Election
             'lang_opens' => MO::_('Opens'),
             'lang_closes' => MO::_('Closes'),
             'opens_date' => $open_date,
-            'opens_time' => $open_time,
             'closes_date' => $close_date,
-            'closes_time' => $close_time,
             'min_date' => Dates::MIN_DATE,
             'max_date' => Dates::MAX_DATE,
-            'min_time' => Dates::MIN_TIME,
-            'max_time' => Dates::MAX_TIME,
             // user access info
             'lang_accessrights' => MO::_('Access Rights'),
             'lang_owner' => MO::_('Owner'),
@@ -850,12 +871,12 @@ class Election
             'lang_results_group' => MO::_('Allowed to View Results'),
             'group_dropdown' => SEC_getGroupDropdown($this->voting_gid, 3),
             'res_grp_dropdown' => SEC_getGroupDropdown($this->results_gid, 3, 'results_gid'),
-            'lang_answersvotes' => MO::_('Answers / Votes / Remark'),
             'lang_save' => MO::_('Save'),
             'lang_cancel' => MO::_('Cancel'),
             'lang_datepicker' => MO::_('Date Picker'),
             'lang_timepicker' => MO::_('Time Picker'),
             'lang_view' => MO::_('View your vote'),
+            'lang_edit' => MO::_('Edit your vote'),
             'lang_noaccess' => MO::_('Access Denied'),
             'lang_voteaccess' => MO::_('After-voting access for voters'),
             'voteaccess_' . $this->mod_allowed => 'selected="selected"',
@@ -870,8 +891,9 @@ class Election
             'lang_decl_winner' => MO::_('Declares a winner?'),
             'decl_chk' => $this->decl_winner ? 'checked="checked"' : '',
             'timezone' => $_CONF['timezone'],
-            'lang_resetresults' => MO::_('Reset Results'),
+            'lang_resetresults' => $this->old_pid != '' ? MO::_('Reset Results') : '',
             'lang_exp_reset' => MO::_('Reset all results for this election'),
+            'lang_reset' => MO::_('Reset'),
         ) );
 
         $T->set_block('editor','questiontab','qt');
@@ -900,10 +922,14 @@ class Election
                 $T->unset_var('question_text');
             }
             $T->set_var('lang_question', MO::_('Question') . " $display_id");
+            $T->set_var('lang_answer', MO::_('Answer'));
+            $T->set_var('lang_votes', MO::_('Votes'));
+            $T->set_var('lang_remark', MO::_('Remark'));
             $T->set_var('lang_saveaddnew', MO::_('Save and Add'));
 
             $T->parse('qt','questiontab',true);
 
+            $T->set_block('answer', 'AnswerRow', 'AR');
             for ($i = 0; $i < Config::get('maxanswers'); $i++) {
                 if (isset($Answers[$i])) {
                     $T->set_var(array(
@@ -918,9 +944,11 @@ class Election
                         'remark_text' => '',
                     ) );
                 }
-                $T->parse ('answer_option', 'answer', true);
+                $T->parse ('AR', 'AnswerRow', true);
             }
-            $T->parse ('question_list', 'question', true);
+            $T->parse('answer_option', 'answer', true);
+            $T->parse('question_list', 'question', true);
+            $T->clear_var('AR');
             $T->clear_var ('answer_option');
         }
         $token = SEC_createToken();
@@ -1130,7 +1158,7 @@ class Election
                 'field' => 'status',
                 'sort' => true,
                 'align' => 'center',
-                'width' => '35px',
+                //'width' => '35px',
             ),
             array(
                 'text' => MO::_('Reset'),
@@ -1199,6 +1227,7 @@ class Election
         global $_CONF, $_USER;
 
         $retval = '';
+        static $message = '';      // to make sure the variable is set
 
         switch($fieldname) {
         case 'edit':
@@ -1244,7 +1273,7 @@ class Election
             ) {
                 $retval = COM_createLink(
                     $retval,
-                    Config::get('url') . "/index.php?pid={$A['pid']}"
+                    COM_buildUrl(Config::get('url') . "/index.php?pid={$A['pid']}")
                 );
             } elseif (
                 SEC_inGroup($A['results_gid']) &&
@@ -1256,47 +1285,72 @@ class Election
                 );
             }
             break;
-        /*case 'user_action':
-            if (
-                $A['closes'] < $extras['_now'] &&
-                $A['status'] &&
-                !Voter::hasVoted($A['pid']) &&
-                SEC_inGroup($A['group_id'])
-            ) {
-                $retval = COM_createLink(
-                    MO::_('Vote'),
-                    Config::get('url') . "/index.php?pid={$A['pid']}"
-                );
-            } elseif (SEC_inGroup($A['results_gid'])) {
-                $retval = COM_createLink(
-                    MO::_('Results'),
-                    Config::get('url') . "/index.php?results=x&pid={$A['pid']}"
-                );
-            }*/
         case 'user_action':
-            if (Voter::hasVoted($A['pid'], $A['group_id'])) {
-                $retval = '<form action="' . Config::get('url') . '/index.php" method="post">';
-                $retval .= '<input type="text" size="15" placeholder="Enter Key" name="votekey" value="" />';
-                $retval .= '<input type="hidden" name="pid" value="' . $A['pid'] . '" />';
-                $retval .= '<button type="submit" style="float:right;" class="uk-button uk-button-mini uk-button-primary" name="showvote">';
-                $retval .= 'Show Vote</button></form>';
-            } elseif (
-                $A['closes'] < $extras['_now'] &&
-                $A['opens'] < $extras['_now']
+            if (
+                $A['closes'] < $extras['_now'] ||
+                $A['status'] == Status::CLOSED
             ) {
+                // Show the button to see early results, if allowed.
                 $retval = MO::_('Closed');
+                if (SEC_inGroup('results_gid')) {
+                    $retval .= '&nbsp;' . COM_createLink(
+                        MO::_('Results'),
+                        Config::get('url') . '/index.php?pid=' . urlencode($A['pid']),
+                        array(
+                            'class' => 'uk-button uk-button-mini uk-button-primary',
+                            'style' => 'float:right;',
+                        )
+                    );
+                }
             } else {
+                // Election is open. Show the voting link if the user hasn't voted,
+                // otherwise show the early results link if allowed.
                 $retval = MO::_('Open');
-                $retval .= '&nbsp;<a href="' . Config::get('url') . '/index.php?pid=' .
-                    $A['pid'] . '" style="float:right;" class="uk-button uk-button-mini uk-button-success">' .
-                    MO::_('Vote') . '</button>';
+                if (!Voter::hasVoted($A['pid'], $A['group_id'])) {
+                    if (SEC_inGroup($A['group_id'], $_USER['uid'])) {
+                        $retval .= '&nbsp;' . COM_createLink(
+                            MO::_('Vote'),
+                            Config::get('url') . '/index.php?pid=' . urlencode($A['pid']),
+                            array(
+                                'style' => 'float:right;',
+                                'class' => 'uk-button uk-button-mini uk-button-success',
+                            )
+                        );
+                    } elseif (!$A['hideresults'] && SEC_inGroup('results_gid')) {
+                        $retval .= '&nbsp;' . COM_createLink(
+                            MO::_('Results'),
+                            Config::get('url') . '/index.php?results&pid=' . urlencode($A['pid']),
+                            array(
+                                'class' => 'uk-button uk-button-mini uk-button-primary',
+                                'style' => 'float:right;',
+                            )
+                        );
+                    } elseif (COM_isAnonUser()) {
+                        $message = MO::_('Log in to vote.');
+                    }
+                } elseif (!$A['voteaccess']) {
+                    $message = MO::_('Your vote has been recorded.');
+                }
+            }
+            break;
+        case 'user_extra':
+            if ($message != '') {
+                $retval = $message;
+            } elseif (Voter::hasVoted($A['pid'], $A['group_id'])) {
+                if ($A['voteaccess']) {
+                    $retval = self::getShowVoteButton($A['pid']);
+                } else {
+                    // Results available only after election closes
+                    $retval = MO::_('Results available after closing.');
+                }
             }
             break;
         case 'status':
-            if ($fieldvalue == 2) {
+            $fieldvalue = (int)$fieldvalue;
+            if ($fieldvalue == Status::ARCHIVED) {
                 $retval .= MO::_('Archived');
                 break;
-            } elseif ($fieldvalue == 0) {
+            } elseif ($fieldvalue == Status::OPEN) {
                 $switch = 'checked="checked"';
                 $enabled = 1;
             } else {
@@ -1305,7 +1359,7 @@ class Election
             }
             $retval .= "<input type=\"checkbox\" $switch value=\"1\" name=\"ena_check\"
                     id=\"togenabled{$A['pid']}\"
-                    onclick='" . Config::PI_NAME . "_toggle(this,\"{$A['pid']}\",\"status\",".
+                    onclick='" . Config::PI_NAME . "_toggle(this,\"{$A['pid']}\",\"{$fieldname}\",".
                     "\"election\");' />" . LB;
             break;
         case 'display':
@@ -1337,15 +1391,20 @@ class Election
             }
             break;
         case 'reset':
-            $retval = COM_createLink(
-                '<i class="uk-icon-refresh uk-text-danger"></i>',
-                Config::get('admin_url') . "/index.php?resetelection&pid={$A['pid']}",
-                array(
-                    'onclick' => "return confirm('" .
-                    MO::_('Are you sure you want to delete all of the results for this election?') .
-                    "');",
-                )
-            );
+            if ($A['status'] == Status::ARCHIVED) {
+                $retval = '<i class="uk-icon-refresh uk-text-disabled tooltip" title="' .
+                    MO::_('Cannot reset archived elections.') . '"></i>';
+            } else { 
+                $retval = COM_createLink(
+                    '<i class="uk-icon-refresh uk-text-danger"></i>',
+                    Config::get('admin_url') . "/index.php?resetelection&pid={$A['pid']}",
+                    array(
+                        'onclick' => "return confirm('" .
+                        MO::_('Are you sure you want to delete all of the results for this election?') .
+                        "');",
+                    )
+                );
+            }
             break;
         case 'delete':
             $attr['title'] = MO::_('Delete');
@@ -1366,6 +1425,12 @@ class Election
     }
 
 
+    /**
+     * Display the election options.
+     *
+     * @param   boolean $preview    True if previewing by admin
+     * @return  string      HTML for election form
+     */
     public function Render($preview = false)
     {
         if (
@@ -1385,8 +1450,11 @@ class Election
                         ->withDisplayType($this->disp_type)
                         ->Render();
                 } else {
-                    // in a block
-                    return '';
+                    // in a block, just add a link for now
+                    return COM_createLink(
+                        $this->getTopic() . ' (' . MO::_('Results') . ')',
+                        Config::get('url') . '/index.php?results=x&pid=' . $this->getId()
+                    );
                 }
             } else {
                 return $this->msgNoResultsWhileOpen();
@@ -1396,47 +1464,9 @@ class Election
         }
     }
 
-        /*// This is not an admin preview, the user can't vote (maybe already did),
-        // and this is not a voter checking their vote. See if they can view the results.
-        if (!$preview && !$this->canVote()) {
-            if (empty($this->_access_key) || !is_array($this->_selections)) {
-                if ($this->alreadyVoted()) {
-                    if ($this->canViewResults()) {
-                        if ($this->disp_type == Modes::NORMAL) {
-                            // not in a block or autotag, just refresh to the results page
-                            COM_refresh(Config::get('url') . '/index.php?results&pid=' . $this->pid);
-                        } elseif ($this->disp_type == Modes::AUTOTAG) {
-                            // In an autotag
-                            return (new Results($this->pid))
-                                ->withDisplayType($this->disp_type)
-                                ->Render();
-                        } else {
-                            // in a block
-                            return '';
-                        }
-                    } else {
-                        return $this->msgNoResultsWhileOpen();
-                    }
-                                }
-            } elseif (empty($this->_access_key) && $this->canViewResults()) {
-                if ($this->disp_type == Modes::NORMAL) {
-                    // not in a block or autotag, just refresh to the results page
-                    COM_refresh(Config::get('url') . '/index.php?results&pid=' . $this->pid);
-                } elseif ($this->disp_type == Modes::AUTOTAG) {
-                    // In an autotag
-                    return (new Results($this->pid))
-                        ->withDisplayType($this->disp_type)
-                        ->Render();
-                } else {
-                    // in a block, return nothing
-                    return $retval;
-                }
-            }
-        }*/
-
 
     /**
-     * Shows a election form
+     * Shows the election form.
      *
      * Shows an HTML formatted election for the given topic ID
      *
@@ -1468,17 +1498,16 @@ class Election
         $Questions = Question::getByElection($this->pid, $this->rnd_questions, $this->rnd_answers);
         $nquestions = count($Questions);
         if ($nquestions > 0) {
-            $election = new \Template(__DIR__ . '/../templates/');
-            $election->set_file(array(
-                'panswer' => 'answer.thtml',
+            $T = new \Template(Config::path_template());
+            $T->set_file(array(
                 'block' => 'block.thtml',
                 'pquestions' => 'questions.thtml',
                 'comments' => 'comments.thtml',
             ) );
             if ($nquestions > 1) {
-                $election->set_var('lang_topic', MO::_('Topic'));
-                $election->set_var('topic', $filterS->filterData($this->topic));
-                $election->set_var('lang_question', MO::_('Question'));
+                $T->set_var('lang_topic', MO::_('Topic'));
+                $T->set_var('topic', $filterS->filterData($this->topic));
+                $T->set_var('lang_question', MO::_('Question'));
             }
             if ($preview) {
                 $back_url = Config::get('admin_url') . '/index.php';
@@ -1492,9 +1521,10 @@ class Election
 
             // create a random number to ID fields if multiple blocks showing
             $random = rand(0,100);
-            $election->set_var(array(
+            $T->set_var(array(
                 'id' => $this->pid,
                 'old_pid' => $this->old_pid,
+                'uniqid' => uniqid(),
                 'num_votes' => COM_numberFormat($this->_vote_count),
                 'vote_url' => Config::get('url') . '/index.php',
                 'ajax_url' => Config::get('url') . '/ajax_handler.php',
@@ -1511,19 +1541,19 @@ class Election
 
             if ($nquestions == 1 || $this->disp_showall) {
                 // Only one question (block) or showing all (main form)
-                $election->set_var('lang_vote', MO::_('Vote'));
-                $election->set_var('showall',true);
+                $T->set_var('lang_vote', MO::_('Vote'));
+                $T->set_var('showall', true);
                 if ($this->disp_type == Modes::BLOCK) {
-                    $election->set_var('use_ajax', true);
+                    $T->set_var('use_ajax', true);
                 } else {
-                    $election->unset_var('use_ajax');
+                    $T->unset_var('use_ajax');
                 }
             } else {
-                $election->set_var('lang_vote', MO::_('Start Voting'));
-                $election->unset_var('showall');
-                $election->unset_var('autotag');
+                $T->set_var('lang_vote', MO::_('Start Voting'));
+                $T->unset_var('showall');
+                $T->unset_var('autotag');
             }
-            $election->set_var('lang_votes', MO::_('Votes'));
+            $T->set_var('lang_votes', MO::_('Votes'));
 
             $results = '';
             if (
@@ -1546,22 +1576,22 @@ class Election
                         . '&amp;aid=-1'
                 );
             }
-            $election->set_var('results', $results);
+            $T->set_var('results', $results);
 
             if (self::hasRights('edit')) {
                 $editlink = COM_createLink(
                     MO::_('Edit'),
                     Config::get('admin_url') . '/index.php?edit=x&amp;pid=' . $this->pid
                 );
-                $election->set_var('edit_link', $editlink);
-                $election->set_var('edit_icon', $editlink);
-                $election->set_var('edit_url', Config::get('admin_url').'/index.php?edit=x&amp;pid=' . $this->pid);
+                $T->set_var('edit_link', $editlink);
+                $T->set_var('edit_icon', $editlink);
+                $T->set_var('edit_url', Config::get('admin_url').'/index.php?edit=x&amp;pid=' . $this->pid);
             }
 
             for ($j = 0; $j < $nquestions; $j++) {
                 $Q = $Questions[$j];
-                $election->set_var('question', $filterS->filterData($Q->getQuestion()));
-                $election->set_var('question_id', $j);
+                $T->set_var('question', $filterS->filterData($Q->getQuestion()));
+                $T->set_var('question_id', $j);
                 $notification = "";
                 if (!$this->disp_showall) {
                     $nquestions--;
@@ -1575,41 +1605,52 @@ class Election
                     );
                     $nquestions = 1;
                 } else {
-                    $election->set_var('lang_question_number', ($j+1));
+                    $T->set_var('lang_question_number', ($j+1));
                 }
+                if (isset($this->_selections[$Q->getQid()])) {
+                    $T->set_var('old_aid', $this->_selections[$Q->getQid()]);
+                }
+
                 $answers = $Q->getAnswers($this->rnd_answers);
                 $nanswers = count($answers);
+                $T->set_block('pquestions', 'Answers', 'panswer');
                 for ($i = 0; $i < $nanswers; $i++) {
                     $Answer = $answers[$i];
                     if (
                         isset($this->_selections[$j]) &&
                         (int)$this->_selections[$j] == $Answer->getAid()
                     ) {
-                        $election->set_var('selected', 'checked="checked"');
+                        $T->set_var('selected', 'checked="checked"');
                     } else {
-                        $election->clear_var('selected');
+                        $T->clear_var('selected');
                     }
-                    if ($this->mod_allowed < 2 && $this->_access_key != '') {
-                        $election->set_var('radio_disabled', 'disabled="disabled"');
+
+                    if (!empty($this->_access_key)) {
+                        switch ($this->mod_allowed) {
+                        case 0:
+                        case 1:
+                            $T->set_var('radio_disabled', 'disabled="disabled"');
+                            break;
+                        }
                     }
-                    $election->set_var(array(
+                    $T->set_var(array(
                         'answer_id' =>$Answer->getAid(),
                         'answer_text' => $filterS->filterData($Answer->getAnswer()),
                         'rnd' => $random,
                     ) );
-                    $election->parse('answers', 'panswer', true);
+                    $T->parse('panswer', 'Answers', true);
                 }
-                $election->parse('questions', 'pquestions', true);
-                $election->clear_var('answers');
+                $T->parse('questions', 'pquestions', true);
+                $T->clear_var('panswer');
             }
-            $election->set_var('lang_topics', MO::_('Topic'));
-            $election->set_var('notification', $notification);
-            if ($this->commentcode >= 0 ) {
+            $T->set_var('lang_topics', MO::_('Topic'));
+            $T->set_var('notification', $notification);
+            if (!$preview && $this->commentcode >= 0 ) {
                 USES_lib_comment();
 
                 $num_comments = CMT_getCount(Config::PI_NAME, $this->pid);
-                $election->set_var('num_comments',COM_numberFormat($num_comments));
-                $election->set_var('lang_comments', MO::_('Comments'));
+                $T->set_var('num_comments',COM_numberFormat($num_comments));
+                $T->set_var('lang_comments', MO::_('Comments'));
 
                 $comment_link = CMT_getCommentLinkWithCount(
                     Config::PI_NAME,
@@ -1619,18 +1660,19 @@ class Election
                     0
                 );
 
-                $election->set_var('comments_url', $comment_link['link_with_count']);
-                $election->parse('comments', 'comments', true);
+                $T->set_var('comments_url', $comment_link['link_with_count']);
+                $T->parse('comments', 'comments', true);
             } else {
-                $election->set_var('comments', '');
-                $election->set_var('comments_url', '');
+                $T->set_var('comments', '');
+                $T->set_var('comments_url', '');
             }
-            $retval = $election->finish($election->parse('output', 'block')) . LB;
+            $retval = $T->finish($T->parse('output', 'block')) . LB;
 
             if (
                 $this->disp_showall &&
                 $this->commentcode >= 0 &&
-                $this->disp_type != Modes::AUTOTAG
+                $this->disp_type != Modes::AUTOTAG &&
+                !$preview
             ) {
                 $delete_option = self::hasRights('edit') ? true : false;
 
@@ -1662,8 +1704,12 @@ class Election
                 );
             }
         } else {
-            COM_setMsg(MO::_("There are no questions for this election"), 'error');
-            COM_refresh(Config::get('url') . '/index.php');
+            if ($this->disp_showall) {
+                // not in a block, safe to return to the list
+                COM_setMsg(MO::_("There are no questions for this election"), 'error');
+                COM_refresh(Config::get('url') . '/index.php');
+            }
+            // else, nothing is returned to avoid a redirect loop
         }
         return $retval;
     }
@@ -1678,13 +1724,12 @@ class Election
      * @param    array    $aid   selected answers
      * @return   string   HTML for election results
      */
-    public function saveVote($aid)
+    public function saveVote(array $aid, array $old_aid = array()) : string
     {
         global $_USER;
 
         $retval = '';
-
-        if ($this->alreadyVoted()) {
+        if ($this->alreadyVoted() && !$this->canUpdate()) {
             if (!COM_isAjax()) {
                 COM_setMsg(MO::_('Your vote has already been recorded.'));
             }
@@ -1702,19 +1747,27 @@ class Election
         if (isset($_POST['aftervote_url'])) {
             $this->_aftervoteUrl = $_POST['aftervote_url'];
         }
+        if (isset($_POST['vid']) && !empty($_POST['vid'])) {
+            $vote_id = COM_decrypt($_POST['vid']);
+        } else {
+            $vote_id = 0;
+        }
 
         // Record that this user has voted
-        $Voter = Voter::create($this->pid, $aid);
+        $Voter = Voter::create($this->pid, $aid, $vote_id);
         if ($Voter !== false) {
             // Increment the vote count for each answer
             $answers = count($aid);
             for ($i = 0; $i < $answers; $i++) {
-                Answer::increment($this->pid, $i, $aid[$i]);
+                if (array_key_exists($i, $old_aid)) {
+                    Answer::decrement($this->pid, $i, (int)$old_aid[$i]);
+                }
+                Answer::increment($this->pid, $i, (int)$aid[$i]);
             }
 
             // Set a return message, if not called via ajax
             if (!COM_isAjax()) {
-                $T = new \Template(__DIR__ . '/../templates/');
+                $T = new \Template(Config::path_template());
                 $T->set_file('msg', 'votesaved.thtml');
                 $T->set_var(array(
                     'lang_votesaved' => MO::_('Your vote has been recorded.'),
@@ -1723,6 +1776,7 @@ class Election
                     'lang_copyclipboard' => MO::_('Copy to clipboard'),
                     'lang_copy_success' => MO::_('Your private key was copied to your clipboard.'),
                     'lang_keyonetime' => MO::_('Your private key will not be displayed again.'),
+                    'lang_newkey' => MO::_('A new private key is generated for each submission.'),
                     'prv_key' => $Voter->getId() . ':' . $Voter->getPrvKey(),
                     'mod_allowed' => $this->mod_allowed,
                     'url' => Config::get('url') . '/index.php',
@@ -1747,6 +1801,9 @@ class Election
      */
     public function alreadyVoted()
     {
+        if (Voter::hasVoted($this->pid, $this->voting_gid)) {
+        //    var_dump($this);die;
+        }
         return Voter::hasVoted($this->pid, $this->voting_gid);
     }
 
@@ -1760,7 +1817,8 @@ class Election
     {
         global $_CONF, $_USER;
 
-        $retval = '';
+        $T = new \Template(Config::path_template());
+        $T->set_file('list', 'list.thtml');
 
         USES_lib_admin();
 
@@ -1777,20 +1835,20 @@ class Election
                 'align' => 'center',
             ),
             array(
-                'text' => MO::_('Opens'),
-                'field' => 'opens',
-                'sort' => true,
-                'align' => 'center',
-            ),
-            array(
                 'text' => MO::_('Closes'),
                 'field' => 'closes',
                 'sort' => true,
                 'align' => 'center',
             ),
             array(
-                'text' => MO::_('Message'),
+                'text' => MO::_('Action'),
                 'field' => 'user_action',
+                'sort' => true,
+                'align' => 'center',
+            ),
+            array(
+                'text' => MO::_('Message'),
+                'field' => 'user_extra',
                 'sort' => true,
                 'align' => 'center',
             ),
@@ -1812,27 +1870,19 @@ class Election
             '_now' => $sql_now_utc,
             'is_admin' => false,
         );
-        $filter = "WHERE (status = " . Status::CLOSED . " AND '$sql_now_utc' BETWEEN opens AND closes " .
-                SEC_buildAccessSql('AND', 'group_id') .
-            ") OR (
-                (hideresults = 0 OR status = " . Status::OPEN . " OR closes < '$sql_now_utc')" .
-                SEC_buildAccessSql('AND', 'results_gid') .
-            ')';
-        $sql = "SELECT COUNT(*) AS count FROM " . DB::table('topics') . ' ' . $filter;
-        //echo $sql;die;
-        $count = 0;
-        $res = DB_query("SELECT COUNT(*) AS count FROM " . DB::table('topics') . ' ' . $filter);
-        if ($res) {
-            $A = DB_fetchArray($res, false);
-            $count = (int)$A['count'];
-        }
-        if (plugin_ismoderator_elections()) {
-            $retval .= '<div class="floatright"><a class="uk-button uk-button-small uk-button-danger" href="' .
-                Config::get('admin_url') . '/index.php">Admin</a></div>' . LB;
-        }
+        $filter_ors = array(
+            // Open elections where the user has voting access
+            "(status = " . Status::OPEN .
+                " AND '$sql_now_utc' BETWEEN opens AND closes " .
+                SEC_buildAccessSql('AND', 'group_id') . ')',
+            // Closed elections where the user is allowed to view results
+            "((hideresults = 0 OR status = " . Status::CLOSED . " OR closes < '$sql_now_utc')" .
+                SEC_buildAccessSql('AND', 'results_gid') . ')',
+        );
+        $filter = 'status <> ' . Status::ARCHIVED  . ' AND (' . implode(' OR ', $filter_ors) . ')';
         $sql = "SELECT p.*,
                 (SELECT COUNT(v.id) FROM " . DB::table('voters') . " v WHERE v.pid = p.pid) AS vote_count
-                FROM " . DB::table('topics') . " AS p " . $filter;
+                FROM " . DB::table('topics') . " AS p WHERE $filter";
         $res = DB_query($sql);
         $count = DB_numRows($res);
         $data_arr = array();
@@ -1840,32 +1890,23 @@ class Election
             $A['has_voted'] = Voter::hasVoted($A['pid'], $A['group_id']);
             $data_arr[] = $A;
         }
-        $retval .= ADMIN_simpleList(
-            array(__CLASS__, 'getListField'), $header_arr, $text_arr, $data_arr, '', '', $extras
-        );
-        /*$query_arr = array(
-            'table' => DB::key('topics'),
-            'sql' => "SELECT p.*,
-                (SELECT COUNT(v.id) FROM " . DB::table('voters') . " v WHERE v.pid = p.pid) AS vote_count
-                FROM " . DB::table('topics') . " p",
-            'query_fields' => array('topic'),
-            'default_filter' => "WHERE status = 1 AND ('$sql_now_utc' BETWEEN opens AND closes " .
-                SEC_buildAccessSql('AND', 'group_id') .
-                ") OR (closes < '$sql_now_utc' " . SEC_buildAccessSql('AND', 'results_gid') . ')',
-            'query' => '',
-            'query_limit' => 0,
-        );
-        $retval .= ADMIN_list(
-            Config::PI_NAME . '_' . __FUNCTION__,
-            array(__CLASS__, 'getListField'),
-            $header_arr, $text_arr, $query_arr, $defsort_arr, '', $extras
-        );*/
-        if ($count == 0) {
-            $retval .= self::msgAlert(
-                MO::_('It appears that there are no polls on this site or no one has ever voted.')
-            );
-        }
-        return $retval;
+        $T->set_var(array(
+            'election_list' => ADMIN_simpleList(
+                array(__CLASS__, 'getListField'),
+                $header_arr, $text_arr, $data_arr, '', '', $extras
+                ),
+            'is_admin' => plugin_ismoderator_elections(),
+            'admin_url' => Config::get('admin_url') . '/index.php',
+            'lang_admin' => MO::_('Admin'),
+            'count' => $count,
+            'msg_alert' => $count == 0 ?
+                self::msgAlert(
+                    MO::_('It appears that there are no elections available.')
+                ) :
+                '',
+            ) );
+        $T->parse('output', 'list');
+        return $T->finish($T->get_var('output'));
     }
 
 
@@ -1923,7 +1964,7 @@ class Election
     public static function deleteVotes($pid)
     {
         $Election = new self($pid);
-        if (!$Election->isNew()) {
+        if (!$Election->isNew() && $Election->getStatus() < Status::ARCHIVED) {
             Answer::resetElection($Election->getID());
             Voter::deleteElection($Election->getID());
         }
@@ -2075,7 +2116,7 @@ class Election
      */
     public static function msgAlert($msg)
     {
-        $T = new \Template(__DIR__ . '/../templates/');
+        $T = new \Template(Config::path_template());
         $T->set_file('alert', 'alert_msg.thtml');
         $T->set_var('message', $msg);
         $T->parse('output', 'alert');

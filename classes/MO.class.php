@@ -12,6 +12,7 @@
  * @filesource
  */
 namespace Elections;
+use Elections\phpGettext\phpGettext;
 
 
 /**
@@ -84,13 +85,19 @@ class MO
         }
         // Set the locale for messages.
         // This is the only part that's needed here.
-        $results = setlocale(
+        /*$results = setlocale(
             LC_MESSAGES,
             $locale.'.utf8', $locale
         );
         if ($results) {
             $dom = bind_textdomain_codeset(self::$domain, 'UTF-8');
             $dom = bindtextdomain(self::$domain, __DIR__ . "/../locale");
+        }*/
+        $results = phpGettext::_setlocale(LC_MESSAGES, $locale);
+        if ($results) {
+            $dom = phpGettext::_bindtextdomain(self::$domain, __DIR__ . "/../locale");
+            $dom = phpGettext::_bind_textdomain_codeset(self::$domain, 'UTF-8');
+            phpGettext::_textdomain(self::$domain);
         }
     }
 
@@ -138,7 +145,8 @@ class MO
         if (!self::$domain) {
             self::init();
         }
-        return \dngettext(self::$domain, $single, $plural, $number);
+        //return \dngettext(self::$domain, $single, $plural, $number);
+        return phpGettext::_dngettext(self::$domain, $single, $plural, $number);
     }
     public static function _n($single, $plural, $number)
     {
@@ -157,7 +165,8 @@ class MO
         if (!self::$domain) {
             self::init();
         }
-        return \dgettext(self::$domain, $txt);
+        //return \dgettext(self::$domain, $txt);
+        return phpGettext::_dgettext(self::$domain, $txt);
     }
     public static function _($txt)
     {
@@ -191,5 +200,3 @@ function _($txt)
 {
     return MO::dgettext($txt);
 }
-
-?>
