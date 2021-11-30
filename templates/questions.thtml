@@ -1,5 +1,5 @@
 {# begin {templatelocation} #}
-<div class="uk-panel uk-panel-box uk-panel-box-primary uk-margin">
+<div class="uk-panel-box uk-panel-box-primary uk-margin">
 {!!if {disp_mode} == "1" !!}
 	{question}
 {!else}
