@@ -623,22 +623,14 @@ function plugin_displaycomment_elections($id, $cid, $title, $order, $format, $pa
     $pid = $id;
     $aid = 0;
 
-    $result = DB_query("SELECT status FROM " . DB::table('topics') . " WHERE pid='".DB_escapeString($pid)."'");
-    if ( $result && DB_numRows($result) > 0 ) {
-        $row = DB_fetchArray($result);
-        $status = $row['status'];
-        if ($is_open != 0) {
-            $aid = -1; // poll closed - show result
-        }
-        $Election = Election::getInstance($pid);
-        if (!isset ($_COOKIE['poll-'.$pid]) && !$Election->alreadyVoted() && $aid != -1 ) {
-            //$retval .= ELECTION_pollVote($pid);
-            $retval .= $Election->Render();
-        } else {
-            $retval .= (new Results($Election->getID()))->Render();
-        }
+    $Election = Election::getInstance($pid);
+    if (!$Election->isOpen()) {
+        $aid = -1; // poll closed - show result
+    }
+    if (!isset($_COOKIE['poll-'.$pid]) && !$Election->alreadyVoted() && $aid != -1 ) {
+        $retval .= $Election->Render();
     } else {
-        return false;
+        $retval .= (new Results($Election->getID()))->Render();
     }
     return $retval;
 }
