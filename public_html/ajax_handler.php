@@ -94,7 +94,7 @@ function ELECTION_saveVote_AJAX($pid, $aid)
         $retval['html'] = Election::listElections();
     } elseif ($Election->alreadyVoted()) {
         $retval['statusMessage'] = MO::_('Your vote has already been recorded.');
-        $retval['html'] = (new Results($pid))->Render();
+        $retval['html'] = '';
     } else {
         if ((new Election($pid))->saveVote($aid)) {
             $eMsg = MO::_('Your vote has been recorded.') .
@@ -103,9 +103,8 @@ function ELECTION_saveVote_AJAX($pid, $aid)
             $eMsg = MO::_('There was an error recording your vote.');
         }
         $retval['statusMessage'] = $eMsg;
-        $retval['html'] = (new Results($pid))->Render();
+        $retval['html'] = MO::_('Your vote has been recorded.');
+        //$retval['html'] = (new Results($pid))->Render();
     }
     return $retval;
 }
-
-?>
