@@ -106,16 +106,17 @@ class Election
     private $disp_type = Modes::NORMAL;
 
     /** Modifications allowed by the voter after voting.
-     * 0 = None, 1 = View Vote, 2 = Change Vote
+     * 0 = None, 1 = View Vote, 2 = Change Vote.
      * @var integer */
     private $mod_allowed = 0;
 
-    /** Randomize questions as displayed?
+    /** Randomize questions when displayed?
      * @var boolean */
     private $rnd_questions = 0;
 
-    /** Randomize answers as displayed?
-     * @var boolean */
+    /** How to sort answers when displayed.
+     * 0 = none, 1 = random, 2 = alphabetically.
+     * @var integer */
     private $rnd_answers = 0;
 
     /** Declare a winner, or just use as a poll?
@@ -155,18 +156,7 @@ class Election
     {
         global $_CONF;
 
-        $this->Opens = new \Date('now', $_CONF['timezone']);
-        $this->Closes = clone $this->Opens;
-        if (is_array($pid)) {
-            $this->setVars($pid, true);
-        } elseif (!empty($pid)) {
-            $pid = COM_sanitizeID($pid);
-            $this->setID($pid);
-            if ($this->Read()) {
-                $this->isNew = false;
-                $this->old_pid = $this->pid;
-            }
-        } else {
+        if (empty($pid)) {
             // Creating a new election, set the default groups based on the
             // global login-required setting.
             $this->voting_gid = Config::get('def_voting_gid');
@@ -174,8 +164,23 @@ class Election
             $this->setID(COM_makeSid());
             $this->setOwner();
             $this->mod_allowed = (int)Config::get('allow_votemod');
+            $this->Opens = new \Date('now', $_CONF['timezone']);
+            $this->Closes = clone $this->Opens;
+        } else {
+            if (is_array($pid)) {
+                // Got a record from the database
+                $this->setVars($pid, true);
+            } else {
+                // Got an election ID string
+                $pid = COM_sanitizeID($pid);
+                $this->setID($pid);
+                if ($this->Read()) {
+                    $this->isNew = false;
+                    $this->old_pid = $this->pid;
+                }
+            }
+            $this->_Questions = Question::getByElection($this->pid, $this->rnd_questions, $this->rnd_answers);
         }
-        $this->_Questions = Question::getByElection($this->pid);
     }
 
 
@@ -724,7 +729,7 @@ class Election
         $this->inblock = isset($A['display']) && $A['display'] ? 1 : 0;
         $this->status = (int)$A['status'];
         $this->rnd_questions = isset($A['rnd_questions']) && $A['rnd_questions'] ? 1 : 0;
-        $this->rnd_answers = isset($A['rnd_answers']) && $A['rnd_answers'] ? 1 : 0;
+        $this->rnd_answers = isset($A['rnd_answers']) ? (int)$A['rnd_answers'] : 0;
         $this->decl_winner = isset($A['decl_winner']) && $A['decl_winner'] ? 1 : 0;
         $this->hideresults = isset($A['hideresults']) && $A['hideresults'] ? 1 : 0;
         $this->commentcode = (int)$A['commentcode'];
@@ -886,8 +891,12 @@ class Election
             'lang_back' => MO::_('Back to Listing'),
             'rndq_chk' => $this->rnd_questions ? 'checked="checked"' : '',
             'rnda_chk' => $this->rnd_answers ? 'checked="checked"' : '',
+            'rnda_ck_' . $this->rnd_answers => 'selected="selected"',
             'lang_rnd_q' => MO::_('Randomize question order?'),
-            'lang_rnd_a' => MO::_('Randomize answer order?'),
+            'lang_rnd_a' => MO::_('Sort displayed answers'),
+            'lang_as_entered' => MO::_('As Entered'),
+            'lang_random' => MO::_('Randomly'),
+            'lang_alpha' => MO::_('Alphabetically'),
             'lang_decl_winner' => MO::_('Declares a winner?'),
             'decl_chk' => $this->decl_winner ? 'checked="checked"' : '',
             'timezone' => $_CONF['timezone'],

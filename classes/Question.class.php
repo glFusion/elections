@@ -32,9 +32,9 @@ class Question
      * @var string */
     private $question = '';
 
-    /** Flag indicating if answers should be randomized.
+    /** Flag indicating how answers should be sorted for display.
      * @var boolean */
-    private $rnd_answers = false;
+    private $ans_sort = 0;
 
     /** Flage to delete the question.
      * Used if the poll is edited and a question is removed.
@@ -55,16 +55,16 @@ class Question
      *
      * @param   array   $A      Optional data record
      */
-    public function __construct($A=NULL, $rnd_a=false)
+    public function __construct($A=NULL, $ans_sort=0)
     {
         global $_USER;
 
         if (is_array($A)) {
             $this->setVars($A, true);
         }
-        $this->rnd_answers = $rnd_a ? true : false;
+        $this->ans_sort = (int)$ans_sort;
         if ($this->qid > -1 && !empty($this->pid)) {
-            $this->Answers = Answer::getByQuestion($this->qid, $this->pid, $this->rnd_answers);
+            $this->Answers = Answer::getByQuestion($this->qid, $this->pid, $this->ans_sort);
         }
     }
 
@@ -92,10 +92,10 @@ class Question
      *
      * @param   string  $pid    Election ID
      * @param   boolean $rnd_q  True to randomize question order
-     * @param   boolean $rnd_a  True to randomize answer order
+     * @param   boolean $ans_sort   Flag indicating how to sort answers
      * @return  array       Array of Question objects
      */
-    public static function getByElection($pid, $rnd_q=false, $rnd_a=false)
+    public static function getByElection($pid, $rnd_q=false, $ans_sort=0)
     {
         $retval = array();
         $sql = "SELECT * FROM " . DB::table('questions') . "
@@ -107,7 +107,7 @@ class Question
         }
         $res = DB_query($sql, 1);
         while ($A = DB_fetchArray($res, false)) {
-            $retval[] = new self($A, $rnd_a);
+            $retval[] = new self($A, $ans_sort);
         }
         return $retval;
      }

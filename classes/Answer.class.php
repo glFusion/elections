@@ -20,6 +20,10 @@ namespace Elections;
  */
 class Answer
 {
+    const SORT_NONE = 0;
+    const SORT_RAND = 1;
+    const SORT_ALPHA = 2;
+
     /** Election record ID. (deprecate?)
      * @var string */
     private $pid = '';
@@ -71,16 +75,22 @@ class Answer
      * @param   boolean $rnd        True to get in random order
      * @return  array       Array of Answer objects
      */
-    public static function getByQuestion($q_id, $pid, $rnd=false)
+    public static function getByQuestion(int $q_id, string $pid, int $rnd = 0) : array
     {
         $q_id = (int)$q_id;
         $retval = array();
         $sql = "SELECT * FROM " . DB::table('answers') . "
             WHERE qid = '{$q_id}' AND pid = '" . DB_escapeString($pid) . "' ";
-        if ($rnd) {
-            $sql .= 'ORDER BY RAND()';
-        } else {
+        switch ($rnd) {
+        case self::SORT_NONE:
             $sql .= 'ORDER BY aid ASC';
+            break;
+        case self::SORT_RAND:
+            $sql .= 'ORDER BY RAND()';
+            break;
+        case self::SORT_ALPHA:
+            $sql .= 'ORDER BY answer ASC';
+            break;
         }
         $res = DB_query($sql);
         if ($res) {

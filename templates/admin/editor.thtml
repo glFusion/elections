@@ -41,7 +41,7 @@
 				<div class="uk-form-row uk-margin">
 					<label class="uk-form-label" for="commentcode">{lang_mode}</label>
 					<div class="uk-form-controls uk-form-controls-text">
-						<select class="uk-select uk-form-small uk-form-width-medium" name="commentcode" id="commentcode">
+						<select class="uk-select uk-form-width-medium" name="commentcode" id="commentcode">
 							{comment_options}
 						</select>
 					</div>
@@ -54,28 +54,32 @@
 					</div>
 				</div>
 
-				<div class="uk-form-row uk-margin" style="clear:both;">
+				<div class="uk-form-row uk-margin">
 					<label class="uk-form-label" for="rnd_a">{lang_rnd_a}</label>
 					<div class="uk-form-controls uk-form-controls-text">
-						<input class="uk-checkbox" type="checkbox" id="rnd_a" name="rnd_answers" value="1" {rnda_chk} />
+						<select class="uk-select uk-form-width-medium" name="rnd_answers">
+							<option value="0" {rnda_ck_0}>{lang_as_entered}</option>
+							<option value="1" {rnda_ck_1}>{lang_random}</option>
+							<option value="2" {rnda_ck_2}>{lang_alpha}</option>
+						</select>
 					</div>
 				</div>
 
-				<div class="uk-form-row uk-margin" style="clear:both;">
+				<div class="uk-form-row uk-margin">
 					<label class="uk-form-label" for="decl_winner">{lang_decl_winner}</label>
 					<div class="uk-form-controls uk-form-controls-text">
 						<input class="uk-checkbox" type="checkbox" id="decl_winner" name="decl_winner" value="1" {decl_chk} />
 					</div>
 				</div>
 
-				<div class="uk-form-row uk-margin" style="clear:both;">
+				<div class="uk-form-row uk-margin">
 					<label class="uk-form-label" for="mainpage">{lang_appearsonhomepage}</label>
 					<div class="uk-form-controls uk-form-controls-text">
 						<input class="uk-checkbox" type="checkbox" id="mainpage" name="display" value="1" {display} />
 					</div>
 				</div>
 
-				<div class="uk-form-row uk-margin" style="clear:both;">
+				<div class="uk-form-row uk-margin">
 					<label class="uk-form-label" for="hideresults">{lang_hideresults}</label>
 					<div class="uk-form-controls uk-form-controls-text">
 						<input class="uk-checkbox" type="checkbox" id="hideresults" name="hideresults" value="1" {hideresults}> <span class="uk-text-small">{hideresults_explain}</span>
@@ -85,7 +89,7 @@
 				<div class="uk-form-row uk-margin">
 					<label class="uk-form-label" for="open">{lang_status}</label>
 					<div class="uk-form-controls uk-form-controls-text">
-						<select class="uk-select uk-form-small uk-form-width-medium" name="status">
+						<select class="uk-select uk-form-width-medium" name="status">
 							<option value="0" {open_0}>{lang_open}</option>
 							<option value="1" {open_1}>{lang_closed}</option>
 							<option value="2" {open_2}>{lang_archived}</option>
@@ -95,8 +99,8 @@
 
 				<div class="uk-form-row uk-margin">
 					<label class="uk-form-label">{lang_opens}</label>
-					<div class="uk-form-controls">
-						<input class="uk-input uk-form-small uk-form-width-medium popupcal" type="text" id="opens_dt" name="opens_date" value="{opens_date}" />
+					<div class="uk-form-controls uk-form-controls-text">
+						<input class="uk-input uk-form-width-medium popupcal" type="text" id="opens_dt" name="opens_date" value="{opens_date}" />
 						<i class="uk-icon uk-icon-remove uk-text-danger tooltip"
 							onclick="$('#opens_dt').val('');"
 							title="{lang_reset}"
@@ -107,8 +111,8 @@
 
 				<div class="uk-form-row uk-margin">
 					<label class="uk-form-label">{lang_closes}</label>
-					<div class="uk-form-controls">
-						<input class="uk-input uk-form-small uk-form-width-medium popupcal" type="text" id="closes_dt" name="closes_date" value="{closes_date}" />
+					<div class="uk-form-controls uk-form-controls-text">
+						<input class="uk-input uk-form-width-medium popupcal" type="text" id="closes_dt" name="closes_date" value="{closes_date}" />
 						<i class="uk-icon uk-icon-remove uk-text-danger tooltip"
 							title="{lang_reset}"
 							onclick="$('#closes_dt').val('');"
@@ -170,7 +174,6 @@
 							<option value="0" {voteaccess_0}>{lang_noaccess}</option>
 							<option value="1" {voteaccess_1}>{lang_view}</option>
 							<option value="2" {voteaccess_2}>{lang_edit}</option>
-							<!--<option value="2" {voteaccess_0}>{lang_noaccess}</option>-->
 						</select>
 					</div>
 				</div>
