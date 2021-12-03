@@ -1,15 +1,17 @@
 # Elections plugin for glFusion - Changelog
 
+## v0.1.3
+Release TBD
+  * Option to display answer remarks on the election form.
+
 ## v0.1.2
 Release 2021-11-30
-
   * Implement phpGettext class for better locale handling on Windows.
   * Enable vote editing.
   * Add "alphabetically" as an option to sort answers when displayed.
 
 ## v0.1.1
 Release 2021-04-06
-
   * Add missing Voter::anonymize() function to handle user deletion.
 
 ## v0.1.0

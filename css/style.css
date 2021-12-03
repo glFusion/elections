@@ -1,0 +1,9 @@
+.elections-answer-text {
+	margin-left: 10px;
+}
+li.elections-answer:nth-child(n+1) {
+	margin-top: 8px;
+}
+span.elections-answer-remark {
+	font-style: italic;
+}

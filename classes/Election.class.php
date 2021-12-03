@@ -123,6 +123,11 @@ class Election
      * @var boolean */
     private $decl_winner = 1;
 
+    /** Flag to show the answer remark on the election form.
+     * The remark is always shown on the results view.
+     * @var boolean */
+    private $show_remarks = 0;
+
     /** Number of votes cast.
      * @var integer */
     private $_vote_count = 0;
@@ -731,6 +736,7 @@ class Election
         $this->rnd_questions = isset($A['rnd_questions']) && $A['rnd_questions'] ? 1 : 0;
         $this->rnd_answers = isset($A['rnd_answers']) ? (int)$A['rnd_answers'] : 0;
         $this->decl_winner = isset($A['decl_winner']) && $A['decl_winner'] ? 1 : 0;
+        $this->show_remarks = isset($A['show_remarks']) && $A['show_remarks'] ? 1 : 0;
         $this->hideresults = isset($A['hideresults']) && $A['hideresults'] ? 1 : 0;
         $this->commentcode = (int)$A['commentcode'];
         $this->setOwner($A['owner_id']);
@@ -898,7 +904,9 @@ class Election
             'lang_random' => MO::_('Randomly'),
             'lang_alpha' => MO::_('Alphabetically'),
             'lang_decl_winner' => MO::_('Declares a winner?'),
+            'lang_show_remarks' => MO::_('Show Answer Remarks on Election Form?'),
             'decl_chk' => $this->decl_winner ? 'checked="checked"' : '',
+            'remark_chk' => $this->show_remarks ? 'checked="checked"' : '',
             'timezone' => $_CONF['timezone'],
             'lang_resetresults' => $this->old_pid != '' ? MO::_('Reset Results') : '',
             'lang_exp_reset' => MO::_('Reset all results for this election'),
@@ -1039,7 +1047,8 @@ class Election
             voteaccess = " . (int)$this->mod_allowed . ",
             rnd_questions = " . (int)$this->rnd_questions . ",
             rnd_answers = " . (int)$this->rnd_answers . ",
-            decl_winner = " . (int)$this->decl_winner;
+            decl_winner = " . (int)$this->decl_winner . ",
+            show_remarks = " . (int)$this->show_remarks;
         $sql = $sql1 . $sql2 . $sql3;
         //echo $sql;die;
         DB_query($sql, 1);
@@ -1642,9 +1651,11 @@ class Election
                             break;
                         }
                     }
+
                     $T->set_var(array(
                         'answer_id' =>$Answer->getAid(),
                         'answer_text' => $filterS->filterData($Answer->getAnswer()),
+                        'answer_remark' => $this->showRemarks() ? $Answer->getRemark() : '',
                         'rnd' => $random,
                     ) );
                     $T->parse('panswer', 'Answers', true);
@@ -2175,6 +2186,17 @@ class Election
         } else {
             return Config::get('url') . '/index.php';
         }
+    }
+
+
+    /**
+     * See if the answer remarks should be shown on the elections form.
+     *
+     * @return  boolean     True to show the remark for each answer.
+     */
+    public function showRemarks() : bool
+    {
+        return $this->show_remarks != 0;
     }
 
 }

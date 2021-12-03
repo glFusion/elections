@@ -73,6 +73,13 @@
 				</div>
 
 				<div class="uk-form-row uk-margin">
+					<label class="uk-form-label" for="show_remarks">{lang_show_remarks}</label>
+					<div class="uk-form-controls uk-form-controls-text">
+						<input class="uk-checkbox" type="checkbox" id="show-remarks" name="show_remarks" value="1" {remarks_chk} />
+					</div>
+				</div>
+
+				<div class="uk-form-row uk-margin">
 					<label class="uk-form-label" for="mainpage">{lang_appearsonhomepage}</label>
 					<div class="uk-form-controls uk-form-controls-text">
 						<input class="uk-checkbox" type="checkbox" id="mainpage" name="display" value="1" {display} />
