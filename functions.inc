@@ -664,12 +664,16 @@ function plugin_getheadercss_elections()
     global $_CONF;
 
     $styles = array();
-    $file = '/' . Config::get('pi_name') . '/style.css';
+    $file = 'style.css';
+    $paths = array (
+        __DIR__  . '/css/',
+        $_CONF['path_layout'] . 'plugins/' . Config::PI_NAME . '/',
+    );
 
-    if (@file_exists($_CONF['path_layout'].'plugins' . $file)) {
-        $styles[] = $_CONF['path_layout'].'plugins/' . $file;
-    } else {
-        $styles[] = $_CONF['path_html'] . $file;
+    foreach ($paths as $path) {
+        if (@file_exists($path . $file)) {
+            $styles[] = $path . $file;
+        }
     }
     return $styles;
 }
