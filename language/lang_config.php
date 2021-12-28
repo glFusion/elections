@@ -67,7 +67,7 @@ $LANG_configSelect[Config::PI_NAME] = array(
     ),
     14 => array(
         0 => MO::_('Links Only'),
-        1 => MO::_('One Qustoin'),
+        1 => MO::_('One Question'),
     ),
 );
 
@@ -94,7 +94,7 @@ $LANG_configselects[Config::PI_NAME] = array(
     ),
     14 => array(
         MO::_('Links Only') => 0,
-        MO::_('One Qustoin') => 1,
+        MO::_('One Question') => 1,
     ),
 );
 
