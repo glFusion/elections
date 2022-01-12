@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-25 12:12-0700\n"
+"POT-Creation-Date: 2021-12-28 11:33-0800\n"
 "PO-Revision-Date: 2020-10-05 09:43-0700\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -18,7 +18,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Generator: Poedit 2.0.6\n"
 
-#: classes/Menu.class.php:38
+#: classes/Menu.class.php:38 functions.inc:579
 msgid "List All"
 msgstr "Tout lister"
 
@@ -35,28 +35,32 @@ msgid "Elections Administration"
 msgstr "Administration des élections"
 
 #: classes/Election.class.php:740 admin/index.php:66 admin/index.php:83
-#: classes/Election.class.php:771
+#: classes/Election.class.php:771 classes/Election.class.php:782
 msgid "Edit Election"
 msgstr "Modifier l'élection"
 
 #: classes/Election.class.php:755 classes/Election.class.php:848
 #: admin/ajax.php:25 classes/Election.class.php:786
-#: classes/Election.class.php:880
+#: classes/Election.class.php:880 classes/Election.class.php:797
+#: classes/Election.class.php:891
 msgid "Access Denied"
 msgstr "Accès refusé"
 
 #: classes/Election.class.php:757 classes/Election.class.php:2098
 #: classes/Election.class.php:2108 classes/Election.class.php:788
-#: classes/Election.class.php:2153
+#: classes/Election.class.php:2153 classes/Election.class.php:799
+#: classes/Election.class.php:2171
 msgid "You are trying to access a poll that you do not have rights to."
 msgstr ""
 "Vous essayez d'accéder à un sondage sur lequel vous n'avez pas les droits."
 
 #: classes/Election.class.php:758 classes/Election.class.php:789
+#: classes/Election.class.php:800
 msgid "This attempt has been logged."
 msgstr "Cette tentative a été enregistrée."
 
 #: classes/Election.class.php:760 classes/Election.class.php:791
+#: classes/Election.class.php:802
 msgid "Please go back to the poll administration screen."
 msgstr "Veuillez retourner à l'écran d'administration du sondage."
 
@@ -64,15 +68,19 @@ msgstr "Veuillez retourner à l'écran d'administration du sondage."
 #: classes/Election.class.php:1138 classes/Election.class.php:1373
 #: classes/Election.class.php:1383 classes/Election.class.php:799
 #: classes/Election.class.php:806 classes/Election.class.php:1170
-#: classes/Election.class.php:1410
+#: classes/Election.class.php:1410 classes/Election.class.php:810
+#: classes/Election.class.php:817 classes/Election.class.php:1188
+#: classes/Election.class.php:1428
 msgid "Delete"
 msgstr "Effacer"
 
 #: classes/Election.class.php:805 classes/Election.class.php:836
+#: classes/Election.class.php:847
 msgid "Election ID"
 msgstr "ID élection"
 
 #: classes/Election.class.php:808 classes/Election.class.php:839
+#: classes/Election.class.php:850
 msgid "Do not use spaces."
 msgstr "Ne pas utiliser d'espaces."
 
@@ -82,51 +90,62 @@ msgstr "Ne pas utiliser d'espaces."
 #: classes/Election.class.php:1606 classes/Election.class.php:1778
 #: classes/Election.class.php:840 classes/Election.class.php:1122
 #: classes/Election.class.php:1506 classes/Election.class.php:1642
-#: classes/Election.class.php:1823
+#: classes/Election.class.php:1823 classes/Election.class.php:851
+#: classes/Election.class.php:1140 classes/Election.class.php:1526
+#: classes/Election.class.php:1666 classes/Election.class.php:1847
 msgid "Topic"
 msgstr "Sujet"
 
 #: classes/Election.class.php:811 classes/Election.class.php:1603
 #: classes/Views/Results.class.php:289 classes/Election.class.php:1613
 #: classes/Election.class.php:842 classes/Election.class.php:1649
+#: classes/Election.class.php:853 classes/Election.class.php:1673
 msgid "Comments"
 msgstr "Commentaires"
 
 #: classes/Election.class.php:813 classes/Election.class.php:844
+#: classes/Election.class.php:855
 msgid "Description"
 msgstr "Description"
 
 #: classes/Election.class.php:815 classes/Election.class.php:846
+#: classes/Election.class.php:857
 msgid "Appears on Election Block"
 msgstr "Apparaît lors du blocage des élections"
 
 #: classes/Election.class.php:816 classes/Election.class.php:847
+#: classes/Election.class.php:858
 msgid "Voting Status"
 msgstr "Statut du vote"
 
 #: classes/Election.class.php:817 classes/Election.class.php:1275
 #: classes/Election.class.php:1277 classes/Election.class.php:848
-#: classes/Election.class.php:1308
+#: classes/Election.class.php:1308 classes/Election.class.php:859
+#: classes/Election.class.php:1326
 msgid "Open"
 msgstr "Ouvert"
 
 #: classes/Election.class.php:818 classes/Election.class.php:1261
 #: classes/Election.class.php:1263 classes/Election.class.php:849
-#: classes/Election.class.php:1294
+#: classes/Election.class.php:1294 classes/Election.class.php:860
+#: classes/Election.class.php:1312
 msgid "Closed"
 msgstr "Fermé"
 
 #: classes/Election.class.php:819 classes/Election.class.php:1314
 #: classes/Election.class.php:1324 classes/Election.class.php:850
-#: classes/Election.class.php:1351
+#: classes/Election.class.php:1351 classes/Election.class.php:861
+#: classes/Election.class.php:1369
 msgid "Archived"
 msgstr "Archivé"
 
 #: classes/Election.class.php:821 classes/Election.class.php:852
+#: classes/Election.class.php:863
 msgid "Hide results while open?"
 msgstr "Masquer les résultats à l'ouverture?"
 
 #: classes/Election.class.php:822 classes/Election.class.php:853
+#: classes/Election.class.php:864
 msgid ""
 "While the election is open, only the owner and administrators can see the "
 "results."
@@ -135,70 +154,86 @@ msgstr ""
 "administrateurs peuvent voir le résultats."
 
 #: classes/Election.class.php:823 classes/Election.class.php:854
+#: classes/Election.class.php:865
 msgid "The topic will be only displayed if there is more than 1 question."
 msgstr "Le sujet ne sera affiché que s'il y a plus d'une question."
 
 #: classes/Election.class.php:826 classes/Election.class.php:1113
 #: classes/Election.class.php:857 classes/Election.class.php:1145
+#: classes/Election.class.php:868 classes/Election.class.php:1163
 msgid "Opens"
 msgstr "Ouvre"
 
 #: classes/Election.class.php:827 classes/Election.class.php:1119
 #: classes/Election.class.php:1779 classes/Election.class.php:1789
 #: classes/Election.class.php:858 classes/Election.class.php:1151
-#: classes/Election.class.php:1834
+#: classes/Election.class.php:1834 classes/Election.class.php:869
+#: classes/Election.class.php:1169 classes/Election.class.php:1858
 msgid "Closes"
 msgstr "Se ferme"
 
 #: classes/Election.class.php:833 classes/Election.class.php:864
+#: classes/Election.class.php:875
 msgid "Access Rights"
 msgstr "Des droits d'accès"
 
 #: classes/Election.class.php:834 classes/Election.class.php:865
+#: classes/Election.class.php:876
 msgid "Owner"
 msgstr "Propriétaire"
 
 #: classes/Election.class.php:839 classes/Election.class.php:870
+#: classes/Election.class.php:881
 msgid "Allowed to Vote"
 msgstr "Autorisé à voter"
 
 #: classes/Election.class.php:840 classes/Election.class.php:871
+#: classes/Election.class.php:882
 msgid "Allowed to View Results"
 msgstr "Autorisé à afficher les résultats"
 
 #: classes/Election.class.php:843 classes/Election.class.php:874
+#: classes/Election.class.php:885
 msgid "Save"
 msgstr "Sauver"
 
 #: classes/Election.class.php:844 classes/Election.class.php:875
+#: classes/Election.class.php:886
 msgid "Cancel"
 msgstr "Annuler"
 
 #: classes/Election.class.php:845 classes/Election.class.php:876
+#: classes/Election.class.php:887
 msgid "Date Picker"
 msgstr "Sélecteur de date"
 
 #: classes/Election.class.php:846 classes/Election.class.php:877
+#: classes/Election.class.php:888
 msgid "Time Picker"
 msgstr "Sélecteur de temps"
 
 #: classes/Election.class.php:847 classes/Election.class.php:878
+#: classes/Election.class.php:889
 msgid "View your vote"
 msgstr "Afficher votre vote"
 
 #: classes/Election.class.php:849 classes/Election.class.php:881
+#: classes/Election.class.php:892
 msgid "After-voting access for voters"
 msgstr "Accès après le vote pour les électeurs"
 
 #: classes/Election.class.php:851 classes/Election.class.php:883
+#: classes/Election.class.php:894
 msgid "General"
 msgstr "Général"
 
 #: classes/Election.class.php:852 classes/Election.class.php:884
+#: classes/Election.class.php:895
 msgid "Questions"
 msgstr "Des questions"
 
 #: classes/Election.class.php:853 classes/Election.class.php:885
+#: classes/Election.class.php:896
 msgid "Permissions"
 msgstr "Autorisations"
 
@@ -206,11 +241,13 @@ msgstr "Autorisations"
 #: classes/Election.class.php:1497 classes/Views/Results.class.php:209
 #: classes/Election.class.php:1504 classes/Election.class.php:1507
 #: classes/Election.class.php:886 classes/Election.class.php:1531
-#: classes/Election.class.php:1534
+#: classes/Election.class.php:1534 classes/Election.class.php:897
+#: classes/Election.class.php:1551 classes/Election.class.php:1554
 msgid "Back to Listing"
 msgstr "Retour à la liste"
 
 #: classes/Election.class.php:857 classes/Election.class.php:889
+#: classes/Election.class.php:901
 msgid "Randomize question order?"
 msgstr "Ordre aléatoire des questions ?"
 
@@ -219,19 +256,23 @@ msgid "Randomize answer order?"
 msgstr "Ordre de réponse aléatoire ?"
 
 #: classes/Election.class.php:859 classes/Election.class.php:891
+#: classes/Election.class.php:906
 msgid "Declares a winner?"
 msgstr "Déclare un gagnant ?"
 
 #: classes/Election.class.php:862 classes/Election.class.php:894
+#: classes/Election.class.php:911
 msgid "Reset Results"
 msgstr "Réinitialiser les résultats"
 
 #: classes/Election.class.php:863 classes/Election.class.php:895
+#: classes/Election.class.php:912
 msgid "Reset all results for this election"
 msgstr "Réinitialiser tous les résultats de cette élection"
 
 #: classes/Election.class.php:864 classes/Election.class.php:1132
 #: classes/Election.class.php:896 classes/Election.class.php:1164
+#: classes/Election.class.php:913 classes/Election.class.php:1182
 msgid "Reset"
 msgstr "Réinitialiser"
 
@@ -239,43 +280,51 @@ msgstr "Réinitialiser"
 #: classes/Election.class.php:1471 classes/Views/Results.class.php:211
 #: classes/Views/Results.class.php:242 classes/Election.class.php:1481
 #: classes/Election.class.php:910 classes/Election.class.php:924
-#: classes/Election.class.php:1508
+#: classes/Election.class.php:1508 classes/Election.class.php:927
+#: classes/Election.class.php:941 classes/Election.class.php:1528
 msgid "Question"
 msgstr "Question"
 
 #: classes/Election.class.php:893 classes/Election.class.php:925
+#: classes/Election.class.php:942
 msgid "Answer"
 msgstr "Répondre"
 
 #: classes/Election.class.php:894 classes/Election.class.php:1517
 #: classes/Views/Results.class.php:204 functions.inc:369 functions.inc:384
 #: classes/Election.class.php:1527 classes/Election.class.php:926
-#: classes/Election.class.php:1554
+#: classes/Election.class.php:1554 classes/Election.class.php:943
+#: classes/Election.class.php:1574 functions.inc:388
 msgid "Votes"
 msgstr "Votes"
 
 #: classes/Election.class.php:895 classes/Election.class.php:927
+#: classes/Election.class.php:944
 msgid "Remark"
 msgstr "Remarque"
 
 #: classes/Election.class.php:896 classes/Election.class.php:928
+#: classes/Election.class.php:945
 msgid "Save and Add"
 msgstr "Enregistrer et ajouter"
 
 #: classes/Election.class.php:960 classes/Election.class.php:992
+#: classes/Election.class.php:1009
 msgid "A name is required."
 msgstr "Un nom est requis."
 
 #: classes/Election.class.php:1083 classes/Election.class.php:1544
 #: classes/Views/Results.class.php:220 classes/Views/Results.class.php:229
 #: classes/Election.class.php:1554 classes/Election.class.php:1115
-#: classes/Election.class.php:1581
+#: classes/Election.class.php:1581 classes/Election.class.php:1133
+#: classes/Election.class.php:1601
 msgid "Edit"
 msgstr "Éditer"
 
 #: classes/Election.class.php:1095 classes/Election.class.php:1773
 #: classes/Election.class.php:1783 classes/Election.class.php:1127
-#: classes/Election.class.php:1828
+#: classes/Election.class.php:1828 classes/Election.class.php:1145
+#: classes/Election.class.php:1852
 msgid "Vote Count"
 msgstr "Décompte des votes"
 
@@ -286,18 +335,24 @@ msgstr "Décompte des votes"
 #: classes/Election.class.php:1545 classes/Election.class.php:1133
 #: classes/Election.class.php:1297 classes/Election.class.php:1321
 #: classes/Election.class.php:1572 public_html/index.php:139
+#: classes/Election.class.php:1151 classes/Election.class.php:1315
+#: classes/Election.class.php:1339 classes/Election.class.php:1473
+#: classes/Election.class.php:1592
 msgid "Results"
 msgstr "Résultats"
 
 #: classes/Election.class.php:1107 classes/Election.class.php:1139
+#: classes/Election.class.php:1157
 msgid "Created"
 msgstr "Créé"
 
 #: classes/Election.class.php:1125 classes/Election.class.php:1157
+#: classes/Election.class.php:1175
 msgid "Status"
 msgstr "Statut"
 
 #: classes/Election.class.php:1152 classes/Election.class.php:1184
+#: classes/Election.class.php:1202
 msgid ""
 "To modify or delete an election, click on the edit icon of the election."
 msgstr ""
@@ -305,6 +360,7 @@ msgstr ""
 "l'élection."
 
 #: classes/Election.class.php:1153 classes/Election.class.php:1185
+#: classes/Election.class.php:1203
 msgid "To create a new election, click on \"Create New\" above."
 msgstr ""
 "Pour créer une nouvelle élection, cliquez sur \"Créer un nouveau\" ci-dessus."
@@ -312,47 +368,48 @@ msgstr ""
 #: classes/Election.class.php:1278 classes/Election.class.php:1505
 #: classes/Election.class.php:1281 classes/Election.class.php:1515
 #: classes/Election.class.php:1312 classes/Election.class.php:1542
+#: classes/Election.class.php:1330 classes/Election.class.php:1562
 msgid "Vote"
 msgstr "Vote"
 
 #: classes/Election.class.php:1304 classes/Election.class.php:1314
-#: classes/Election.class.php:676
+#: classes/Election.class.php:676 classes/Election.class.php:686
 msgid "Show Vote"
 msgstr "Afficher le vote"
 
 #: classes/Election.class.php:1307 classes/Election.class.php:1317
-#: classes/Election.class.php:1344
+#: classes/Election.class.php:1344 classes/Election.class.php:1362
 msgid "Results available after closing."
 msgstr "Résultats disponibles après la fermeture."
 
 #: classes/Election.class.php:1330 classes/Election.class.php:1340
-#: classes/Election.class.php:1367
+#: classes/Election.class.php:1367 classes/Election.class.php:1385
 msgid "Yes"
 msgstr "Oui"
 
 #: classes/Election.class.php:1332 classes/Election.class.php:1342
-#: classes/Election.class.php:1369
+#: classes/Election.class.php:1369 classes/Election.class.php:1387
 msgid "No"
 msgstr "Non"
 
 #: classes/Election.class.php:1359 classes/Election.class.php:1369
-#: classes/Election.class.php:1396
+#: classes/Election.class.php:1396 classes/Election.class.php:1414
 msgid "Cannot reset archived elections."
 msgstr "Impossible de réinitialiser les élections archivées."
 
 #: classes/Election.class.php:1366 classes/Election.class.php:1376
-#: classes/Election.class.php:1403
+#: classes/Election.class.php:1403 classes/Election.class.php:1421
 msgid "Are you sure you want to delete all of the results for this election?"
 msgstr ""
 "Êtes-vous sûr de vouloir supprimer tous les résultats de cette élection?"
 
 #: classes/Election.class.php:1375 classes/Election.class.php:1385
-#: classes/Election.class.php:1412
+#: classes/Election.class.php:1412 classes/Election.class.php:1430
 msgid "Are you sure you want to delete this Poll?"
 msgstr "Êtes-vous sûr de vouloir supprimer cette élection?"
 
 #: classes/Election.class.php:1376 classes/Election.class.php:1386
-#: classes/Election.class.php:1413
+#: classes/Election.class.php:1413 classes/Election.class.php:1431
 msgid ""
 "Are you absolutely sure you want to delete this Poll?  All questions, "
 "answers and comments that are associated with this Poll will also be "
@@ -363,17 +420,17 @@ msgstr ""
 "également définitivement supprimé de la base de données."
 
 #: classes/Election.class.php:1476 classes/Election.class.php:1486
-#: classes/Election.class.php:1513
+#: classes/Election.class.php:1513 classes/Election.class.php:1533
 msgid "Preview - Submissions Disabled"
 msgstr "Aperçu - Soumissions désactivées"
 
 #: classes/Election.class.php:1513 classes/Election.class.php:1523
-#: classes/Election.class.php:1550
+#: classes/Election.class.php:1550 classes/Election.class.php:1570
 msgid "Start Voting"
 msgstr "Commencer à voter"
 
 #: classes/Election.class.php:1561 classes/Election.class.php:1571
-#: classes/Election.class.php:1598
+#: classes/Election.class.php:1598 classes/Election.class.php:1618
 #, php-format
 msgid "This poll has %d more question"
 msgid_plural "This poll has %d more questions"
@@ -381,7 +438,7 @@ msgstr[0] "Ce sondage a% d autres questions"
 msgstr[1] "Ce sondage a% d autres questions"
 
 #: classes/Election.class.php:1658 classes/Election.class.php:1668
-#: classes/Election.class.php:1704
+#: classes/Election.class.php:1704 classes/Election.class.php:1729
 msgid "There are no questions for this election"
 msgstr "Il n'y a pas de questions pour cette élection"
 
@@ -389,97 +446,104 @@ msgstr "Il n'y a pas de questions pour cette élection"
 #: public_html/ajax_handler.php:96 public_html/index.php:109
 #: classes/Election.class.php:1694 classes/Election.class.php:2093
 #: classes/Election.class.php:1730 classes/Election.class.php:2138
+#: classes/Election.class.php:1754 classes/Election.class.php:2156
 msgid "Your vote has already been recorded."
 msgstr "Votre vote a déjà été enregistré."
 
 #: classes/Election.class.php:1715 public_html/ajax_handler.php:100
 #: classes/Election.class.php:1301 classes/Election.class.php:1725
 #: classes/Election.class.php:1332 classes/Election.class.php:1769
+#: classes/Election.class.php:1350 classes/Election.class.php:1793
+#: public_html/ajax_handler.php:106
 msgid "Your vote has been recorded."
 msgstr "Votre vote a été enregistré."
 
 #: classes/Election.class.php:1716 classes/Election.class.php:1726
-#: classes/Election.class.php:1770
+#: classes/Election.class.php:1770 classes/Election.class.php:1794
 msgid "Copy your key to a safe location if you wish to verify your vote later."
 msgstr ""
 "Copiez votre clé dans un endroit sûr si vous souhaitez vérifier votre vote "
 "plus tard."
 
 #: classes/Election.class.php:1717 classes/Election.class.php:1727
-#: classes/Election.class.php:1771
+#: classes/Election.class.php:1771 classes/Election.class.php:1795
 msgid "Your private key is"
 msgstr "Votre clé privée est"
 
 #: classes/Election.class.php:1718 classes/Election.class.php:1728
-#: classes/Election.class.php:1772
+#: classes/Election.class.php:1772 classes/Election.class.php:1796
 msgid "Copy to clipboard"
 msgstr "Copier dans le presse-papiers"
 
 #: classes/Election.class.php:1719 classes/Election.class.php:1729
-#: classes/Election.class.php:1773
+#: classes/Election.class.php:1773 classes/Election.class.php:1797
 msgid "Your private key was copied to your clipboard."
 msgstr "Votre clé privée a été copiée dans votre presse-papiers."
 
 #: classes/Election.class.php:1720 classes/Election.class.php:1730
-#: classes/Election.class.php:1774
+#: classes/Election.class.php:1774 classes/Election.class.php:1798
 msgid "Your private key will not be displayed again."
 msgstr "Votre clé privée ne sera plus affichée."
 
 #: classes/Election.class.php:1731 classes/Election.class.php:1741
-#: classes/Election.class.php:1786
+#: classes/Election.class.php:1786 classes/Election.class.php:1810
 msgid "There was an error recording your vote, please try again."
 msgstr ""
 "Une erreur s'est produite lors de l'enregistrement de votre vote, veuillez "
 "réessayer."
 
 #: classes/Election.class.php:1785 classes/Election.class.php:1795
-#: classes/Election.class.php:1840
+#: classes/Election.class.php:1840 classes/Election.class.php:1864
 msgid "Action"
 msgstr "Action"
 
 #: classes/Election.class.php:1791 classes/Election.class.php:1801
-#: classes/Election.class.php:1846
+#: classes/Election.class.php:1846 classes/Election.class.php:1870
 msgid "Message"
 msgstr "Message"
 
 #: classes/Election.class.php:1804 public_html/index.php:36
 #: public_html/index.php:193 elections.php:31 classes/Election.class.php:1814
 #: classes/Election.class.php:1859 public_html/index.php:203
+#: classes/Election.class.php:1883
 msgid "Elections"
 msgstr "Élections"
 
 #: classes/Election.class.php:1838 classes/Election.class.php:1848
-#: classes/Election.class.php:1893
+#: classes/Election.class.php:1893 classes/Election.class.php:1920
 msgid "Admin"
 msgstr "Admin"
 
 #: classes/Election.class.php:1841 classes/Election.class.php:1851
-#: classes/Election.class.php:1896
+#: classes/Election.class.php:1896 classes/Election.class.php:1924
 msgid "It appears that there are no elections available."
 msgstr "Il semble qu'il n'y ait pas d'élections disponibles."
 
 #: classes/Election.class.php:1893 classes/Election.class.php:1903
-#: classes/Election.class.php:1948
+#: classes/Election.class.php:1948 classes/Election.class.php:1966
 msgid "Your election has been successfully deleted."
 msgstr "Votre choix a été supprimé avec succès."
 
 #: classes/Election.class.php:1938 classes/Views/Results.class.php:373
 #: classes/Election.class.php:1948 classes/Election.class.php:1993
+#: classes/Election.class.php:2011
 msgid "User Name"
 msgstr "Nom d'utilisateur"
 
 #: classes/Election.class.php:1943 classes/Views/Results.class.php:378
 #: classes/Election.class.php:1953 classes/Election.class.php:1998
+#: classes/Election.class.php:2016
 msgid "IP Address"
 msgstr "Adresse IP"
 
 #: classes/Election.class.php:1948 classes/Views/Results.class.php:383
 #: classes/Election.class.php:1958 classes/Election.class.php:2003
+#: classes/Election.class.php:2021
 msgid "Date Voted"
 msgstr "Date du vote"
 
 #: classes/Election.class.php:2085 classes/Election.class.php:2095
-#: classes/Election.class.php:2140
+#: classes/Election.class.php:2140 classes/Election.class.php:2158
 msgid "Election results will be available only after the election has closed."
 msgstr ""
 "Les résultats des élections ne seront disponibles qu'après la clôture des "
@@ -570,34 +634,35 @@ msgstr "Veuillez saisir un identifiant d'élection."
 msgid "Ignored possibly manipulated request to delete a election."
 msgstr "Demande éventuellement manipulée ignorée pour supprimer une élection."
 
-#: functions.inc:145
+#: functions.inc:145 functions.inc:149
 msgid "Preview"
 msgstr "Aperçu"
 
-#: functions.inc:328
+#: functions.inc:328 functions.inc:332
 msgid "Comment"
 msgstr "Commentaire"
 
-#: functions.inc:364 functions.inc:379
+#: functions.inc:364 functions.inc:379 functions.inc:383
 msgid "Election Topic"
 msgstr "Sujet de l'élection"
 
 #: functions.inc:378 functions.inc:395 functions.inc:393 functions.inc:410
+#: functions.inc:397 functions.inc:414
 msgid "Top 10 Elections"
 msgstr "Top 10 des élections"
 
-#: functions.inc:399 functions.inc:414
+#: functions.inc:399 functions.inc:414 functions.inc:418
 msgid ""
 "It appears that there are no elections on this site or no one has ever voted."
 msgstr ""
 "Il semble qu'il n'y ait pas d'élections sur ce site ou que personne n'ait "
 "jamais voté."
 
-#: functions.inc:420 functions.inc:435
+#: functions.inc:420 functions.inc:435 functions.inc:439
 msgid "Elections in the system"
 msgstr "Élections dans le système"
 
-#: functions.inc:691 functions.inc:706
+#: functions.inc:691 functions.inc:706 functions.inc:720
 msgid ""
 "HTML: renders a voting block for a Election on this site.  usage: "
 "[election_vote:<i>election_id</i>"
@@ -605,7 +670,7 @@ msgstr ""
 "HTML: affiche un blocage de vote pour une élection sur ce site. Utilisation: "
 "[vote_élection: <i>id_élection</i>"
 
-#: functions.inc:694 functions.inc:709
+#: functions.inc:694 functions.inc:709 functions.inc:723
 msgid ""
 "HTML: renders the results of a Election on this site.  usage: "
 "[election_result:<i>election_id</i>]"
@@ -613,7 +678,7 @@ msgstr ""
 "HTML: rend les résultats d'une élection sur ce site. Utilisation: "
 "[résultat_élection: <i>id_élection</i>]"
 
-#: functions.inc:697 functions.inc:712
+#: functions.inc:697 functions.inc:712 functions.inc:726
 msgid ""
 "Link: to a Election on this site.  link_text defaults to the Election "
 "topic.  usage: [election:<i>election_id</i> {link_text}]"
@@ -674,64 +739,77 @@ msgid "Default after-voting access"
 msgstr "Accès après vote par défaut"
 
 #: language/lang_config.php:38 language/lang_config.php:39
+#: language/lang_config.php:40
 msgid "Main Settings"
 msgstr "Réglages principaux"
 
 #: language/lang_config.php:42 language/lang_config.php:43
+#: language/lang_config.php:44
 msgid "General Settings"
 msgstr "Paramètres généraux des sondages"
 
 #: language/lang_config.php:43 language/lang_config.php:44
+#: language/lang_config.php:45
 msgid "Default Permissions"
 msgstr "Autorisations par défaut"
 
 #: language/lang_config.php:48 language/lang_config.php:49
-#: language/lang_config.php:72
+#: language/lang_config.php:72 language/lang_config.php:50
+#: language/lang_config.php:77
 msgid "True"
 msgstr "Vrai"
 
 #: language/lang_config.php:49 language/lang_config.php:50
-#: language/lang_config.php:73
+#: language/lang_config.php:73 language/lang_config.php:51
+#: language/lang_config.php:78
 msgid "False"
 msgstr "Faux"
 
 #: language/lang_config.php:52 language/lang_config.php:53
-#: language/lang_config.php:76
+#: language/lang_config.php:76 language/lang_config.php:54
+#: language/lang_config.php:81
 msgid "As Submitted"
 msgstr "Tel que soumis"
 
 #: language/lang_config.php:53 language/lang_config.php:54
-#: language/lang_config.php:77
+#: language/lang_config.php:77 language/lang_config.php:55
+#: language/lang_config.php:82
 msgid "By Votes"
 msgstr "Par Votes"
 
 #: language/lang_config.php:56 language/lang_config.php:57
-#: language/lang_config.php:80
+#: language/lang_config.php:80 language/lang_config.php:58
+#: language/lang_config.php:85
 msgid "No Access"
 msgstr "Pas d'accès"
 
 #: language/lang_config.php:57 language/lang_config.php:58
-#: language/lang_config.php:81
+#: language/lang_config.php:81 language/lang_config.php:59
+#: language/lang_config.php:86
 msgid "View Vote"
 msgstr "Voir le vote"
 
 #: language/lang_config.php:61 language/lang_config.php:62
-#: language/lang_config.php:85
+#: language/lang_config.php:85 language/lang_config.php:63
+#: language/lang_config.php:90
 msgid "Left Blocks"
 msgstr "Blocs de gauche"
 
 #: language/lang_config.php:62 language/lang_config.php:63
-#: language/lang_config.php:86
+#: language/lang_config.php:86 language/lang_config.php:64
+#: language/lang_config.php:91
 msgid "Right Blocks"
 msgstr "Blocs droits"
 
 #: language/lang_config.php:63 language/lang_config.php:64
-#: language/lang_config.php:87
+#: language/lang_config.php:87 language/lang_config.php:65
+#: language/lang_config.php:92
 msgid "Left & Right Blocks"
 msgstr "Blocs gauche et droit"
 
 #: language/lang_config.php:64 language/lang_config.php:65
-#: language/lang_config.php:88
+#: language/lang_config.php:88 language/lang_config.php:66
+#: language/lang_config.php:93
 msgid "None"
 msgstr "Aucun"
 
@@ -740,18 +818,19 @@ msgid "Days after which closed elections are archived"
 msgstr "Jours après lesquels les élections fermées sont archivées"
 
 #: classes/Election.class.php:1298 classes/Election.class.php:1329
+#: classes/Election.class.php:1347
 msgid "Log in to vote."
 msgstr "Connectez-vous pour voter."
 
-#: classes/Election.class.php:675
+#: classes/Election.class.php:675 classes/Election.class.php:685
 msgid "Enter Key"
 msgstr "La touche Entrée"
 
-#: classes/Election.class.php:879
+#: classes/Election.class.php:879 classes/Election.class.php:890
 msgid "Edit your vote"
 msgstr "Modifier votre vote"
 
-#: classes/Election.class.php:1775
+#: classes/Election.class.php:1775 classes/Election.class.php:1799
 msgid "A new private key is generated for each submission."
 msgstr "Une nouvelle clé privée est générée pour chaque soumission."
 
@@ -759,6 +838,39 @@ msgstr "Une nouvelle clé privée est générée pour chaque soumission."
 msgid "List Votes"
 msgstr "Liste des votes"
 
-#: language/lang_config.php:82
+#: language/lang_config.php:82 language/lang_config.php:60
+#: language/lang_config.php:87
 msgid "Modify Vote"
 msgstr "Modifier le vote"
+
+#: classes/Election.class.php:902
+msgid "Sort displayed answers"
+msgstr "Trier les réponses affichées"
+
+#: classes/Election.class.php:903
+msgid "As Entered"
+msgstr "Comme entré"
+
+#: classes/Election.class.php:904
+msgid "Randomly"
+msgstr "Aléatoirement"
+
+#: classes/Election.class.php:905
+msgid "Alphabetically"
+msgstr "Alphabétiquement"
+
+#: classes/Election.class.php:907
+msgid "Show Answer Remarks on Election Form?"
+msgstr "Afficher les remarques de réponse sur le formulaire d'élection ?"
+
+#: language/lang_config.php:36
+msgid "Number of questions shown in blocks"
+msgstr "Nombre de questions affichées dans les blocs"
+
+#: language/lang_config.php:69 language/lang_config.php:96
+msgid "Links Only"
+msgstr "Liens uniquement"
+
+#: language/lang_config.php:70 language/lang_config.php:97
+msgid "One Question"
+msgstr "Une question"

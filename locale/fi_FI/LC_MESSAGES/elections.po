@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-25 12:14-0700\n"
+"POT-Creation-Date: 2021-12-28 11:33-0800\n"
 "PO-Revision-Date: 2020-10-05 09:36-0700\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -18,7 +18,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 2.0.6\n"
 
-#: classes/Menu.class.php:38
+#: classes/Menu.class.php:38 functions.inc:579
 msgid "List All"
 msgstr "Listaa kaikki"
 
@@ -35,27 +35,31 @@ msgid "Elections Administration"
 msgstr "Vaalien hallinto"
 
 #: classes/Election.class.php:740 admin/index.php:66 admin/index.php:83
-#: classes/Election.class.php:771
+#: classes/Election.class.php:771 classes/Election.class.php:782
 msgid "Edit Election"
 msgstr "Muokkaa vaaleja"
 
 #: classes/Election.class.php:755 classes/Election.class.php:848
 #: admin/ajax.php:25 classes/Election.class.php:786
-#: classes/Election.class.php:880
+#: classes/Election.class.php:880 classes/Election.class.php:797
+#: classes/Election.class.php:891
 msgid "Access Denied"
 msgstr "Pääsy estetty"
 
 #: classes/Election.class.php:757 classes/Election.class.php:2098
 #: classes/Election.class.php:2108 classes/Election.class.php:788
-#: classes/Election.class.php:2153
+#: classes/Election.class.php:2153 classes/Election.class.php:799
+#: classes/Election.class.php:2171
 msgid "You are trying to access a poll that you do not have rights to."
 msgstr "Yrität käyttää kyselyä, johon sinulla ei ole oikeuksia."
 
 #: classes/Election.class.php:758 classes/Election.class.php:789
+#: classes/Election.class.php:800
 msgid "This attempt has been logged."
 msgstr "Tämä yritys on tallennettu."
 
 #: classes/Election.class.php:760 classes/Election.class.php:791
+#: classes/Election.class.php:802
 msgid "Please go back to the poll administration screen."
 msgstr "Palaa kyselynhallintanäyttöön."
 
@@ -63,15 +67,19 @@ msgstr "Palaa kyselynhallintanäyttöön."
 #: classes/Election.class.php:1138 classes/Election.class.php:1373
 #: classes/Election.class.php:1383 classes/Election.class.php:799
 #: classes/Election.class.php:806 classes/Election.class.php:1170
-#: classes/Election.class.php:1410
+#: classes/Election.class.php:1410 classes/Election.class.php:810
+#: classes/Election.class.php:817 classes/Election.class.php:1188
+#: classes/Election.class.php:1428
 msgid "Delete"
 msgstr "Poista"
 
 #: classes/Election.class.php:805 classes/Election.class.php:836
+#: classes/Election.class.php:847
 msgid "Election ID"
 msgstr "Vaalitunnus"
 
 #: classes/Election.class.php:808 classes/Election.class.php:839
+#: classes/Election.class.php:850
 msgid "Do not use spaces."
 msgstr "Älä käytä välilyöntejä."
 
@@ -81,51 +89,62 @@ msgstr "Älä käytä välilyöntejä."
 #: classes/Election.class.php:1606 classes/Election.class.php:1778
 #: classes/Election.class.php:840 classes/Election.class.php:1122
 #: classes/Election.class.php:1506 classes/Election.class.php:1642
-#: classes/Election.class.php:1823
+#: classes/Election.class.php:1823 classes/Election.class.php:851
+#: classes/Election.class.php:1140 classes/Election.class.php:1526
+#: classes/Election.class.php:1666 classes/Election.class.php:1847
 msgid "Topic"
 msgstr "Aihe"
 
 #: classes/Election.class.php:811 classes/Election.class.php:1603
 #: classes/Views/Results.class.php:289 classes/Election.class.php:1613
 #: classes/Election.class.php:842 classes/Election.class.php:1649
+#: classes/Election.class.php:853 classes/Election.class.php:1673
 msgid "Comments"
 msgstr "Kommentit"
 
 #: classes/Election.class.php:813 classes/Election.class.php:844
+#: classes/Election.class.php:855
 msgid "Description"
 msgstr "Kuvaus"
 
 #: classes/Election.class.php:815 classes/Election.class.php:846
+#: classes/Election.class.php:857
 msgid "Appears on Election Block"
 msgstr "Esiintyy vaalilohkossa"
 
 #: classes/Election.class.php:816 classes/Election.class.php:847
+#: classes/Election.class.php:858
 msgid "Voting Status"
 msgstr "Äänestyksen tila"
 
 #: classes/Election.class.php:817 classes/Election.class.php:1275
 #: classes/Election.class.php:1277 classes/Election.class.php:848
-#: classes/Election.class.php:1308
+#: classes/Election.class.php:1308 classes/Election.class.php:859
+#: classes/Election.class.php:1326
 msgid "Open"
 msgstr "Avaa"
 
 #: classes/Election.class.php:818 classes/Election.class.php:1261
 #: classes/Election.class.php:1263 classes/Election.class.php:849
-#: classes/Election.class.php:1294
+#: classes/Election.class.php:1294 classes/Election.class.php:860
+#: classes/Election.class.php:1312
 msgid "Closed"
 msgstr "Suljettu"
 
 #: classes/Election.class.php:819 classes/Election.class.php:1314
 #: classes/Election.class.php:1324 classes/Election.class.php:850
-#: classes/Election.class.php:1351
+#: classes/Election.class.php:1351 classes/Election.class.php:861
+#: classes/Election.class.php:1369
 msgid "Archived"
 msgstr "Arkistoitu"
 
 #: classes/Election.class.php:821 classes/Election.class.php:852
+#: classes/Election.class.php:863
 msgid "Hide results while open?"
 msgstr "Piilotetaanko tulokset auki ollessaan?"
 
 #: classes/Election.class.php:822 classes/Election.class.php:853
+#: classes/Election.class.php:864
 msgid ""
 "While the election is open, only the owner and administrators can see the "
 "results."
@@ -133,70 +152,86 @@ msgstr ""
 "Vaalien ollessa avoinna vain omistaja ja ylläpitäjät voivat nähdä tuloksia."
 
 #: classes/Election.class.php:823 classes/Election.class.php:854
+#: classes/Election.class.php:865
 msgid "The topic will be only displayed if there is more than 1 question."
 msgstr "Aihe näytetään vain, jos kysymyksiä on enemmän kuin yksi."
 
 #: classes/Election.class.php:826 classes/Election.class.php:1113
 #: classes/Election.class.php:857 classes/Election.class.php:1145
+#: classes/Election.class.php:868 classes/Election.class.php:1163
 msgid "Opens"
 msgstr "Avautuu"
 
 #: classes/Election.class.php:827 classes/Election.class.php:1119
 #: classes/Election.class.php:1779 classes/Election.class.php:1789
 #: classes/Election.class.php:858 classes/Election.class.php:1151
-#: classes/Election.class.php:1834
+#: classes/Election.class.php:1834 classes/Election.class.php:869
+#: classes/Election.class.php:1169 classes/Election.class.php:1858
 msgid "Closes"
 msgstr "Sulkeutuu"
 
 #: classes/Election.class.php:833 classes/Election.class.php:864
+#: classes/Election.class.php:875
 msgid "Access Rights"
 msgstr "Käyttöoikeudet"
 
 #: classes/Election.class.php:834 classes/Election.class.php:865
+#: classes/Election.class.php:876
 msgid "Owner"
 msgstr "Omistaja"
 
 #: classes/Election.class.php:839 classes/Election.class.php:870
+#: classes/Election.class.php:881
 msgid "Allowed to Vote"
 msgstr "Salli äänestää"
 
 #: classes/Election.class.php:840 classes/Election.class.php:871
+#: classes/Election.class.php:882
 msgid "Allowed to View Results"
 msgstr "Saa tarkastella tuloksia"
 
 #: classes/Election.class.php:843 classes/Election.class.php:874
+#: classes/Election.class.php:885
 msgid "Save"
 msgstr "Tallenna"
 
 #: classes/Election.class.php:844 classes/Election.class.php:875
+#: classes/Election.class.php:886
 msgid "Cancel"
 msgstr "Peruuta"
 
 #: classes/Election.class.php:845 classes/Election.class.php:876
+#: classes/Election.class.php:887
 msgid "Date Picker"
 msgstr "Päivämäärän valitsin"
 
 #: classes/Election.class.php:846 classes/Election.class.php:877
+#: classes/Election.class.php:888
 msgid "Time Picker"
 msgstr "Ajanvalitsin"
 
 #: classes/Election.class.php:847 classes/Election.class.php:878
+#: classes/Election.class.php:889
 msgid "View your vote"
 msgstr "Näytä äänesi"
 
 #: classes/Election.class.php:849 classes/Election.class.php:881
+#: classes/Election.class.php:892
 msgid "After-voting access for voters"
 msgstr "Äänestäjien äänioikeus"
 
 #: classes/Election.class.php:851 classes/Election.class.php:883
+#: classes/Election.class.php:894
 msgid "General"
 msgstr "Yleistä"
 
 #: classes/Election.class.php:852 classes/Election.class.php:884
+#: classes/Election.class.php:895
 msgid "Questions"
 msgstr "Kysymyksiä"
 
 #: classes/Election.class.php:853 classes/Election.class.php:885
+#: classes/Election.class.php:896
 msgid "Permissions"
 msgstr "Käyttöoikeudet"
 
@@ -204,11 +239,13 @@ msgstr "Käyttöoikeudet"
 #: classes/Election.class.php:1497 classes/Views/Results.class.php:209
 #: classes/Election.class.php:1504 classes/Election.class.php:1507
 #: classes/Election.class.php:886 classes/Election.class.php:1531
-#: classes/Election.class.php:1534
+#: classes/Election.class.php:1534 classes/Election.class.php:897
+#: classes/Election.class.php:1551 classes/Election.class.php:1554
 msgid "Back to Listing"
 msgstr "Takaisin luetteloon"
 
 #: classes/Election.class.php:857 classes/Election.class.php:889
+#: classes/Election.class.php:901
 msgid "Randomize question order?"
 msgstr "Satunnaistetaanko kysymysjärjestys?"
 
@@ -217,19 +254,23 @@ msgid "Randomize answer order?"
 msgstr "Satunnaistetaanko vastausjärjestys?"
 
 #: classes/Election.class.php:859 classes/Election.class.php:891
+#: classes/Election.class.php:906
 msgid "Declares a winner?"
 msgstr "Julistetaan voittajaksi?"
 
 #: classes/Election.class.php:862 classes/Election.class.php:894
+#: classes/Election.class.php:911
 msgid "Reset Results"
 msgstr "Palauta tulokset"
 
 #: classes/Election.class.php:863 classes/Election.class.php:895
+#: classes/Election.class.php:912
 msgid "Reset all results for this election"
 msgstr "Nollaa kaikki tämän vaalien tulokset"
 
 #: classes/Election.class.php:864 classes/Election.class.php:1132
 #: classes/Election.class.php:896 classes/Election.class.php:1164
+#: classes/Election.class.php:913 classes/Election.class.php:1182
 msgid "Reset"
 msgstr "Palauta"
 
@@ -237,43 +278,51 @@ msgstr "Palauta"
 #: classes/Election.class.php:1471 classes/Views/Results.class.php:211
 #: classes/Views/Results.class.php:242 classes/Election.class.php:1481
 #: classes/Election.class.php:910 classes/Election.class.php:924
-#: classes/Election.class.php:1508
+#: classes/Election.class.php:1508 classes/Election.class.php:927
+#: classes/Election.class.php:941 classes/Election.class.php:1528
 msgid "Question"
 msgstr "Kysymys"
 
 #: classes/Election.class.php:893 classes/Election.class.php:925
+#: classes/Election.class.php:942
 msgid "Answer"
 msgstr "Vastaus"
 
 #: classes/Election.class.php:894 classes/Election.class.php:1517
 #: classes/Views/Results.class.php:204 functions.inc:369 functions.inc:384
 #: classes/Election.class.php:1527 classes/Election.class.php:926
-#: classes/Election.class.php:1554
+#: classes/Election.class.php:1554 classes/Election.class.php:943
+#: classes/Election.class.php:1574 functions.inc:388
 msgid "Votes"
 msgstr "ääntä"
 
 #: classes/Election.class.php:895 classes/Election.class.php:927
+#: classes/Election.class.php:944
 msgid "Remark"
 msgstr "Huomautus"
 
 #: classes/Election.class.php:896 classes/Election.class.php:928
+#: classes/Election.class.php:945
 msgid "Save and Add"
 msgstr "Tallenna ja lisää"
 
 #: classes/Election.class.php:960 classes/Election.class.php:992
+#: classes/Election.class.php:1009
 msgid "A name is required."
 msgstr "Nimi vaaditaan."
 
 #: classes/Election.class.php:1083 classes/Election.class.php:1544
 #: classes/Views/Results.class.php:220 classes/Views/Results.class.php:229
 #: classes/Election.class.php:1554 classes/Election.class.php:1115
-#: classes/Election.class.php:1581
+#: classes/Election.class.php:1581 classes/Election.class.php:1133
+#: classes/Election.class.php:1601
 msgid "Edit"
 msgstr "Muokkaa"
 
 #: classes/Election.class.php:1095 classes/Election.class.php:1773
 #: classes/Election.class.php:1783 classes/Election.class.php:1127
-#: classes/Election.class.php:1828
+#: classes/Election.class.php:1828 classes/Election.class.php:1145
+#: classes/Election.class.php:1852
 msgid "Vote Count"
 msgstr "Äänien määrä"
 
@@ -284,70 +333,78 @@ msgstr "Äänien määrä"
 #: classes/Election.class.php:1545 classes/Election.class.php:1133
 #: classes/Election.class.php:1297 classes/Election.class.php:1321
 #: classes/Election.class.php:1572 public_html/index.php:139
+#: classes/Election.class.php:1151 classes/Election.class.php:1315
+#: classes/Election.class.php:1339 classes/Election.class.php:1473
+#: classes/Election.class.php:1592
 msgid "Results"
 msgstr "Tulokset"
 
 #: classes/Election.class.php:1107 classes/Election.class.php:1139
+#: classes/Election.class.php:1157
 msgid "Created"
 msgstr "Luotu"
 
 #: classes/Election.class.php:1125 classes/Election.class.php:1157
+#: classes/Election.class.php:1175
 msgid "Status"
 msgstr "Tila"
 
 #: classes/Election.class.php:1152 classes/Election.class.php:1184
+#: classes/Election.class.php:1202
 msgid ""
 "To modify or delete an election, click on the edit icon of the election."
 msgstr ""
 "Jos haluat muuttaa tai poistaa vaaleja, napsauta vaalien muokkauskuvaketta."
 
 #: classes/Election.class.php:1153 classes/Election.class.php:1185
+#: classes/Election.class.php:1203
 msgid "To create a new election, click on \"Create New\" above."
 msgstr "Jos haluat luoda uudet vaalit, napsauta \"Luo uusi\" yllä."
 
 #: classes/Election.class.php:1278 classes/Election.class.php:1505
 #: classes/Election.class.php:1281 classes/Election.class.php:1515
 #: classes/Election.class.php:1312 classes/Election.class.php:1542
+#: classes/Election.class.php:1330 classes/Election.class.php:1562
 msgid "Vote"
 msgstr "Äänestä"
 
 #: classes/Election.class.php:1304 classes/Election.class.php:1314
-#: classes/Election.class.php:676
+#: classes/Election.class.php:676 classes/Election.class.php:686
 msgid "Show Vote"
 msgstr "Näytä ääni"
 
 #: classes/Election.class.php:1307 classes/Election.class.php:1317
-#: classes/Election.class.php:1344
+#: classes/Election.class.php:1344 classes/Election.class.php:1362
 msgid "Results available after closing."
 msgstr "Tuloksia saatavilla sulkemisen jälkeen."
 
 #: classes/Election.class.php:1330 classes/Election.class.php:1340
-#: classes/Election.class.php:1367
+#: classes/Election.class.php:1367 classes/Election.class.php:1385
 msgid "Yes"
 msgstr "Kyllä"
 
 #: classes/Election.class.php:1332 classes/Election.class.php:1342
-#: classes/Election.class.php:1369
+#: classes/Election.class.php:1369 classes/Election.class.php:1387
 msgid "No"
 msgstr "Ei"
 
 #: classes/Election.class.php:1359 classes/Election.class.php:1369
-#: classes/Election.class.php:1396
+#: classes/Election.class.php:1396 classes/Election.class.php:1414
 msgid "Cannot reset archived elections."
 msgstr "Arkistoituja vaaleja ei voi nollata."
 
 #: classes/Election.class.php:1366 classes/Election.class.php:1376
-#: classes/Election.class.php:1403
+#: classes/Election.class.php:1403 classes/Election.class.php:1421
 msgid "Are you sure you want to delete all of the results for this election?"
 msgstr "Haluatko varmasti poistaa kaikki vaalien tulokset?"
 
 #: classes/Election.class.php:1375 classes/Election.class.php:1385
-#: classes/Election.class.php:1412
+#: classes/Election.class.php:1412 classes/Election.class.php:1430
 msgid "Are you sure you want to delete this Poll?"
 msgstr "Haluatko varmasti poistaa tämän kyselyn?"
 
 #: classes/Election.class.php:1376 classes/Election.class.php:1386
-#: classes/Election.class.php:1413
+#: classes/Election.class.php:1413 classes/Election.class.php:1431
 msgid ""
 "Are you absolutely sure you want to delete this Poll?  All questions, "
 "answers and comments that are associated with this Poll will also be "
@@ -358,17 +415,17 @@ msgstr ""
 "pysyvästi tietokannasta."
 
 #: classes/Election.class.php:1476 classes/Election.class.php:1486
-#: classes/Election.class.php:1513
+#: classes/Election.class.php:1513 classes/Election.class.php:1533
 msgid "Preview - Submissions Disabled"
 msgstr "Esikatselu - Lähetykset poistettu käytöstä"
 
 #: classes/Election.class.php:1513 classes/Election.class.php:1523
-#: classes/Election.class.php:1550
+#: classes/Election.class.php:1550 classes/Election.class.php:1570
 msgid "Start Voting"
 msgstr "Beginna la voting"
 
 #: classes/Election.class.php:1561 classes/Election.class.php:1571
-#: classes/Election.class.php:1598
+#: classes/Election.class.php:1598 classes/Election.class.php:1618
 #, php-format
 msgid "This poll has %d more question"
 msgid_plural "This poll has %d more questions"
@@ -376,7 +433,7 @@ msgstr[0] "Tässä kyselyssä on %d kysymys lisää"
 msgstr[1] "Tässä kyselyssä on vielä %d kysymystä"
 
 #: classes/Election.class.php:1658 classes/Election.class.php:1668
-#: classes/Election.class.php:1704
+#: classes/Election.class.php:1704 classes/Election.class.php:1729
 msgid "There are no questions for this election"
 msgstr "Ei ole kysymyksiä näihin vaaleihin"
 
@@ -384,96 +441,103 @@ msgstr "Ei ole kysymyksiä näihin vaaleihin"
 #: public_html/ajax_handler.php:96 public_html/index.php:109
 #: classes/Election.class.php:1694 classes/Election.class.php:2093
 #: classes/Election.class.php:1730 classes/Election.class.php:2138
+#: classes/Election.class.php:1754 classes/Election.class.php:2156
 msgid "Your vote has already been recorded."
 msgstr "Äänesi on jo tallennettu."
 
 #: classes/Election.class.php:1715 public_html/ajax_handler.php:100
 #: classes/Election.class.php:1301 classes/Election.class.php:1725
 #: classes/Election.class.php:1332 classes/Election.class.php:1769
+#: classes/Election.class.php:1350 classes/Election.class.php:1793
+#: public_html/ajax_handler.php:106
 msgid "Your vote has been recorded."
 msgstr "Äänesi on tallennettu."
 
 #: classes/Election.class.php:1716 classes/Election.class.php:1726
-#: classes/Election.class.php:1770
+#: classes/Election.class.php:1770 classes/Election.class.php:1794
 msgid "Copy your key to a safe location if you wish to verify your vote later."
 msgstr ""
 "Kopioi avaimesi turvalliseen paikkaan, jos haluat vahvistaa äänesi myöhemmin."
 
 #: classes/Election.class.php:1717 classes/Election.class.php:1727
-#: classes/Election.class.php:1771
+#: classes/Election.class.php:1771 classes/Election.class.php:1795
 msgid "Your private key is"
 msgstr "Yksityinen avaimesi on"
 
 #: classes/Election.class.php:1718 classes/Election.class.php:1728
-#: classes/Election.class.php:1772
+#: classes/Election.class.php:1772 classes/Election.class.php:1796
 msgid "Copy to clipboard"
 msgstr "Kopioi leikepöydälle"
 
 #: classes/Election.class.php:1719 classes/Election.class.php:1729
-#: classes/Election.class.php:1773
+#: classes/Election.class.php:1773 classes/Election.class.php:1797
 msgid "Your private key was copied to your clipboard."
 msgstr "Yksityinen avaimesi kopioitiin leikepöydällesi."
 
 #: classes/Election.class.php:1720 classes/Election.class.php:1730
-#: classes/Election.class.php:1774
+#: classes/Election.class.php:1774 classes/Election.class.php:1798
 msgid "Your private key will not be displayed again."
 msgstr "Yksityistä avaintasi ei näytetä uudelleen."
 
 #: classes/Election.class.php:1731 classes/Election.class.php:1741
-#: classes/Election.class.php:1786
+#: classes/Election.class.php:1786 classes/Election.class.php:1810
 msgid "There was an error recording your vote, please try again."
 msgstr "Äänesi tallentamisessa tapahtui virhe, yritä uudelleen."
 
 #: classes/Election.class.php:1785 classes/Election.class.php:1795
-#: classes/Election.class.php:1840
+#: classes/Election.class.php:1840 classes/Election.class.php:1864
 msgid "Action"
 msgstr "Toiminta"
 
 #: classes/Election.class.php:1791 classes/Election.class.php:1801
-#: classes/Election.class.php:1846
+#: classes/Election.class.php:1846 classes/Election.class.php:1870
 msgid "Message"
 msgstr "Viesti"
 
 #: classes/Election.class.php:1804 public_html/index.php:36
 #: public_html/index.php:193 elections.php:31 classes/Election.class.php:1814
 #: classes/Election.class.php:1859 public_html/index.php:203
+#: classes/Election.class.php:1883
 msgid "Elections"
 msgstr "Vaalit"
 
 #: classes/Election.class.php:1838 classes/Election.class.php:1848
-#: classes/Election.class.php:1893
+#: classes/Election.class.php:1893 classes/Election.class.php:1920
 msgid "Admin"
 msgstr "Järjestelmänvalvoja"
 
 #: classes/Election.class.php:1841 classes/Election.class.php:1851
-#: classes/Election.class.php:1896
+#: classes/Election.class.php:1896 classes/Election.class.php:1924
 msgid "It appears that there are no elections available."
 msgstr ""
 "Näyttää siltä että sivustolla ei ole yhtään pollia tai kukaan ei ole "
 "äänestänyt."
 
 #: classes/Election.class.php:1893 classes/Election.class.php:1903
-#: classes/Election.class.php:1948
+#: classes/Election.class.php:1948 classes/Election.class.php:1966
 msgid "Your election has been successfully deleted."
 msgstr "Valintasi on poistettu."
 
 #: classes/Election.class.php:1938 classes/Views/Results.class.php:373
 #: classes/Election.class.php:1948 classes/Election.class.php:1993
+#: classes/Election.class.php:2011
 msgid "User Name"
 msgstr "Käyttäjänimi"
 
 #: classes/Election.class.php:1943 classes/Views/Results.class.php:378
 #: classes/Election.class.php:1953 classes/Election.class.php:1998
+#: classes/Election.class.php:2016
 msgid "IP Address"
 msgstr "IP -osoite"
 
 #: classes/Election.class.php:1948 classes/Views/Results.class.php:383
 #: classes/Election.class.php:1958 classes/Election.class.php:2003
+#: classes/Election.class.php:2021
 msgid "Date Voted"
 msgstr "Äänestyspäivä"
 
 #: classes/Election.class.php:2085 classes/Election.class.php:2095
-#: classes/Election.class.php:2140
+#: classes/Election.class.php:2140 classes/Election.class.php:2158
 msgid "Election results will be available only after the election has closed."
 msgstr "Vaalitulokset ovat saatavilla vasta vaalien päätyttyä."
 
@@ -561,34 +625,35 @@ msgstr "Anna vaalitunnus."
 msgid "Ignored possibly manipulated request to delete a election."
 msgstr "Ohitettu mahdollisesti manipuloitu pyyntö poistaa vaalit."
 
-#: functions.inc:145
+#: functions.inc:145 functions.inc:149
 msgid "Preview"
 msgstr "Esikatselu"
 
-#: functions.inc:328
+#: functions.inc:328 functions.inc:332
 msgid "Comment"
 msgstr "Kommentti"
 
-#: functions.inc:364 functions.inc:379
+#: functions.inc:364 functions.inc:379 functions.inc:383
 msgid "Election Topic"
 msgstr "Vaalien aihe"
 
 #: functions.inc:378 functions.inc:395 functions.inc:393 functions.inc:410
+#: functions.inc:397 functions.inc:414
 msgid "Top 10 Elections"
 msgstr "Top 10 vaalit"
 
-#: functions.inc:399 functions.inc:414
+#: functions.inc:399 functions.inc:414 functions.inc:418
 msgid ""
 "It appears that there are no elections on this site or no one has ever voted."
 msgstr ""
 "Näyttää siltä, että tällä sivustolla ei ole vaaleja tai kukaan ei ole "
 "koskaan äänestänyt."
 
-#: functions.inc:420 functions.inc:435
+#: functions.inc:420 functions.inc:435 functions.inc:439
 msgid "Elections in the system"
 msgstr "Järjestelmän vaalit"
 
-#: functions.inc:691 functions.inc:706
+#: functions.inc:691 functions.inc:706 functions.inc:720
 msgid ""
 "HTML: renders a voting block for a Election on this site.  usage: "
 "[election_vote:<i>election_id</i>"
@@ -596,7 +661,7 @@ msgstr ""
 "HTML: tekee tämän sivuston vaalien äänestyksen. Käyttö: [vaaleja_vote: "
 "<i>vaalitunnus</i>"
 
-#: functions.inc:694 functions.inc:709
+#: functions.inc:694 functions.inc:709 functions.inc:723
 msgid ""
 "HTML: renders the results of a Election on this site.  usage: "
 "[election_result:<i>election_id</i>]"
@@ -604,7 +669,7 @@ msgstr ""
 "HTML: hahmottaa vaalitulokset tällä sivustolla. Use: [vaalitulos: "
 "<i>vaalitunnus</i>]"
 
-#: functions.inc:697 functions.inc:712
+#: functions.inc:697 functions.inc:712 functions.inc:726
 msgid ""
 "Link: to a Election on this site.  link_text defaults to the Election "
 "topic.  usage: [election:<i>election_id</i> {link_text}]"
@@ -665,64 +730,77 @@ msgid "Default after-voting access"
 msgstr ""
 
 #: language/lang_config.php:38 language/lang_config.php:39
+#: language/lang_config.php:40
 msgid "Main Settings"
 msgstr "Pääasetukset"
 
 #: language/lang_config.php:42 language/lang_config.php:43
+#: language/lang_config.php:44
 msgid "General Settings"
 msgstr "Yleiset asetukset"
 
 #: language/lang_config.php:43 language/lang_config.php:44
+#: language/lang_config.php:45
 msgid "Default Permissions"
 msgstr "Oikeudet"
 
 #: language/lang_config.php:48 language/lang_config.php:49
-#: language/lang_config.php:72
+#: language/lang_config.php:72 language/lang_config.php:50
+#: language/lang_config.php:77
 msgid "True"
 msgstr "Totta"
 
 #: language/lang_config.php:49 language/lang_config.php:50
-#: language/lang_config.php:73
+#: language/lang_config.php:73 language/lang_config.php:51
+#: language/lang_config.php:78
 msgid "False"
 msgstr "Väärä"
 
 #: language/lang_config.php:52 language/lang_config.php:53
-#: language/lang_config.php:76
+#: language/lang_config.php:76 language/lang_config.php:54
+#: language/lang_config.php:81
 msgid "As Submitted"
 msgstr "Kuten toimitettu"
 
 #: language/lang_config.php:53 language/lang_config.php:54
-#: language/lang_config.php:77
+#: language/lang_config.php:77 language/lang_config.php:55
+#: language/lang_config.php:82
 msgid "By Votes"
 msgstr "By Äänet"
 
 #: language/lang_config.php:56 language/lang_config.php:57
-#: language/lang_config.php:80
+#: language/lang_config.php:80 language/lang_config.php:58
+#: language/lang_config.php:85
 msgid "No Access"
 msgstr "Ei pääsyä"
 
 #: language/lang_config.php:57 language/lang_config.php:58
-#: language/lang_config.php:81
+#: language/lang_config.php:81 language/lang_config.php:59
+#: language/lang_config.php:86
 msgid "View Vote"
 msgstr "Näytä ääni"
 
 #: language/lang_config.php:61 language/lang_config.php:62
-#: language/lang_config.php:85
+#: language/lang_config.php:85 language/lang_config.php:63
+#: language/lang_config.php:90
 msgid "Left Blocks"
 msgstr "Vasen lohko"
 
 #: language/lang_config.php:62 language/lang_config.php:63
-#: language/lang_config.php:86
+#: language/lang_config.php:86 language/lang_config.php:64
+#: language/lang_config.php:91
 msgid "Right Blocks"
 msgstr "Oikeat lohkot"
 
 #: language/lang_config.php:63 language/lang_config.php:64
-#: language/lang_config.php:87
+#: language/lang_config.php:87 language/lang_config.php:65
+#: language/lang_config.php:92
 msgid "Left & Right Blocks"
 msgstr "Vasen ja oikea lohko"
 
 #: language/lang_config.php:64 language/lang_config.php:65
-#: language/lang_config.php:88
+#: language/lang_config.php:88 language/lang_config.php:66
+#: language/lang_config.php:93
 msgid "None"
 msgstr "Ei mitään"
 
@@ -731,18 +809,19 @@ msgid "Days after which closed elections are archived"
 msgstr "Päivät, joiden jälkeen suljetut vaalit arkistoidaan"
 
 #: classes/Election.class.php:1298 classes/Election.class.php:1329
+#: classes/Election.class.php:1347
 msgid "Log in to vote."
 msgstr "Kirjaudu sisään äänestääksesi."
 
-#: classes/Election.class.php:675
+#: classes/Election.class.php:675 classes/Election.class.php:685
 msgid "Enter Key"
 msgstr "Enter-näppäin"
 
-#: classes/Election.class.php:879
+#: classes/Election.class.php:879 classes/Election.class.php:890
 msgid "Edit your vote"
 msgstr "Muokkaa ääntäsi"
 
-#: classes/Election.class.php:1775
+#: classes/Election.class.php:1775 classes/Election.class.php:1799
 msgid "A new private key is generated for each submission."
 msgstr "Jokaiselle lähetykselle luodaan uusi yksityinen avain."
 
@@ -750,6 +829,39 @@ msgstr "Jokaiselle lähetykselle luodaan uusi yksityinen avain."
 msgid "List Votes"
 msgstr "Listaa äänet"
 
-#: language/lang_config.php:82
+#: language/lang_config.php:82 language/lang_config.php:60
+#: language/lang_config.php:87
 msgid "Modify Vote"
 msgstr "Muokkaa äänestystä"
+
+#: classes/Election.class.php:902
+msgid "Sort displayed answers"
+msgstr "Lajittele näytetyt vastaukset"
+
+#: classes/Election.class.php:903
+msgid "As Entered"
+msgstr "Syötettynä"
+
+#: classes/Election.class.php:904
+msgid "Randomly"
+msgstr "Satunnaisesti"
+
+#: classes/Election.class.php:905
+msgid "Alphabetically"
+msgstr "Aakkosjärjestyksessä"
+
+#: classes/Election.class.php:907
+msgid "Show Answer Remarks on Election Form?"
+msgstr "Näytä vastaushuomautukset vaalilomakkeella?"
+
+#: language/lang_config.php:36
+msgid "Number of questions shown in blocks"
+msgstr "Kysymysten lukumäärä lohkoissa"
+
+#: language/lang_config.php:69 language/lang_config.php:96
+msgid "Links Only"
+msgstr "Vain linkit"
+
+#: language/lang_config.php:70 language/lang_config.php:97
+msgid "One Question"
+msgstr "Yksi kysymys"
