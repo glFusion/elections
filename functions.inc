@@ -855,7 +855,7 @@ function plugin_getiteminfo_elections($id, $what, $uid = 0, $options = array())
         switch ($p) {
             case 'date-modified':
             case 'date' :
-                $fields[] = 'UNIX_TIMESTAMP(date) AS unixdate';
+                $fields[] = 'UNIX_TIMESTAMP(created) AS unixdate';
                 break;
             case 'id':
                 $fields[] = 'pid';
