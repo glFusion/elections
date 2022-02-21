@@ -16,6 +16,9 @@ if (!defined ('GVERSION')) {
 use Elections\DB;
 use Elections\Config;
 
+/** Include the table creation strings */
+require_once __DIR__ . "/sql/mysql_install.php";
+
 
 /**
  * Upgrade the plugin to the current version.
@@ -35,16 +38,22 @@ function ELECTIONS_upgrade($dvlp=false)
     }
     $installed_ver = plugin_chkVersion_elections();
 
+    if (!COM_checkVersion($current_ver, '0.2.0')) {
+        $current_ver = '0.2.0';
+        if (!ELECTIONS_do_upgrade_sql($current_ver, $dvlp)) return false;
+        if (!ELECTIONS_do_set_version($current_ver)) return false;
+    }
+
     // Check and set the version if not already up to date.
     // For updates with no SQL changes
     if (!COM_checkVersion($current_ver, $installed_ver)) {
-        if (!ELECTION_do_set_version($installed_ver)) return false;
+        if (!ELECTIONS_do_set_version($installed_ver)) return false;
         $current_ver = $installed_ver;
     }
     USES_lib_install();
     require_once __DIR__ . '/install_defaults.php';
     _update_config($pi_name, $electionConfigData);
-    ELECTION_remove_old_files();
+    ELECTIONS_remove_old_files();
     return true;
 }
 
@@ -58,7 +67,7 @@ function ELECTIONS_upgrade($dvlp=false)
  * @param   boolean $ignore_error   True to ignore SQL errors.
  * @return  boolean     True on success, False on failure
  */
-function ELECTION_do_upgrade_sql($version, $ignore_error = false)
+function ELECTIONS_do_upgrade_sql($version, $ignore_error = false)
 {
     global $_TABLES, $ELECTION_UPGRADE, $_DB_dbms, $_VARS;
 
@@ -113,7 +122,7 @@ function ELECTION_do_upgrade_sql($version, $ignore_error = false)
  * @param   string  $ver    New version to set
  * @return  boolean         True on success, False on failure
  */
-function ELECTION_do_set_version($ver)
+function ELECTIONS_do_set_version($ver)
 {
     global $_TABLES, $_PLUGIN_INFO;
 
@@ -143,31 +152,6 @@ function ELECTION_do_set_version($ver)
  *
  * @param   string  $dir    Directory name
  */
-function ELECTION_rmdir($dir)
-{
-    if (is_dir($dir)) {
-        $objects = scandir($dir);
-        foreach ($objects as $object) {
-            if ($object != "." && $object != "..") {
-                if (is_dir($dir . '/' . $object)) {
-                    ELECTION_rmdir($dir . '/' . $object);
-                } else {
-                    @unlink($dir . '/' . $object);
-                }
-            }
-        }
-        @rmdir($dir);
-    } elseif (is_file($dir)) {
-        @unlink($dir);
-    }
-}
-
-
-/**
- * Remove a file, or recursively remove a directory.
- *
- * @param   string  $dir    Directory name
- */
 function ELECTIONS_rmdir($dir)
 {
     if (is_dir($dir)) {
@@ -176,7 +160,6 @@ function ELECTIONS_rmdir($dir)
             if ($object != "." && $object != "..") {
                 if (is_dir($dir . '/' . $object)) {
                     ELECTIONS_rmdir($dir . '/' . $object);
-                    @rmdir($dir . '/' . $object);
                 } else {
                     @unlink($dir . '/' . $object);
                 }
@@ -193,7 +176,7 @@ function ELECTIONS_rmdir($dir)
  * Remove deprecated files
  * Errors in unlink() and rmdir() are ignored.
  */
-function ELECTION_remove_old_files()
+function ELECTIONS_remove_old_files()
 {
     global $_CONF;
 

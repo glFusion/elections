@@ -19,6 +19,8 @@
 if (!defined ('GVERSION')) {
     die ('This file can not be used on its own.');
 }
+global $_SQL, $ELECTION_UPGRADE;
+
 use Elections\DB;
 
 $_SQL[DB::key('answers')] = "CREATE TABLE " . DB::table('answers') . " (
@@ -58,10 +60,12 @@ $_SQL[DB::key('topics')] = "CREATE TABLE " . DB::table('topics') . " (
   `rnd_questions` tinyint(1) unsigned NOT NULL DEFAULT 0,
   `rnd_answers` tinyint(1) unsigned NOT NULL DEFAULT 0,
   `decl_winner` tinyint(1) unsigned NOT NULL DEFAULT 1,
+  `show_remarks` tinyint(1) unsigned NOT NULL DEFAULT 0,
   PRIMARY KEY (`pid`),
-  KEY `idx_created` (`created`),
-  KEY `idx_display` (`display`),
-  KEY `idx_commentcode` (`commentcode`),
+  KEY `questions_qid` (`pid`),
+  KEY `questions_date` (`created`),
+  KEY `questions_display` (`display`),
+  KEY `questions_commentcode` (`commentcode`),
   KEY `idx_enabled` (`status`)
 ) ENGINE=MyISAM
 ";
@@ -80,4 +84,7 @@ $_SQL[DB::key('voters')] = "CREATE TABLE " . DB::table('voters') . " (
 ";
 
 $ELECTION_UPGRADE = array(
+    '0.2.0' => array(
+        'ALTER TABLE ' . DB::table('topics') . ' ADD show_remarks tinyint(1) unsigned NOT NULL DEFAULT 0 AFTER decl_winner',
+    ),
 );
