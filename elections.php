@@ -5,7 +5,7 @@
  * definitions, or are items that don't lend themselves well to the
  * glFusion configuration system, such as allowed file types.
  *
- * @copyright   Copyright (c) 2000-2021 The following authors:
+ * @copyright   Copyright (c) 2000-2022 The following authors:
  * @author      Mark R. Evans <mark AT glfusion DOT org>
  * @author      Tony Bibbs <tony AT tonybibbs DOT com>
  * @author      Tom Willett <twillett AT users DOT sourceforge DOT net>
@@ -13,7 +13,7 @@
  * @author      Dirk Haun <dirk AT haun-online DOT de>
  * @author      Lee Garner <lee@leegarner.com>
  * @package     elections
- * @version     v0.1.2
+ * @version     v0.1.3
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -29,7 +29,7 @@ use Elections\MO;
 global $_DB_table_prefix;
 
 Config::set('pi_display_name', MO::_('Elections'));
-Config::set('pi_version', '0.1.2');
+Config::set('pi_version', '0.1.3');
 Config::set('gl_version', '1.7.8');
 Config::set('pi_url', 'https://www.glfusion.org');
 

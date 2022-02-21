@@ -3,9 +3,9 @@
  * Class to represent a election.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2021 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2021-2022 Lee Garner <lee@leegarner.com>
  * @package     election
- * @version     v0.1.0
+ * @version     v0.1.3
  * @since       v0.1.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
@@ -755,6 +755,22 @@ class Election
             $this->setOpenDate($A['opens'], false);
             $this->setClosingDate($A['closes'], false);
         } else {
+            if (GVERSION < '2.0.0') {
+                $A['opens_date'] = sprintf('%04d-%02d-%02d %02d:%02d',
+                    $A['opens_date_year'],
+                    $A['opens_date_month'],
+                    $A['opens_date_day'],
+                    $A['opens_date_hour'],
+                    $A['opens_date_minute']
+                );
+                $A['closes_date'] = sprintf('%04d-%02d-%02d %02d:%02d',
+                    $A['closes_date_year'],
+                    $A['closes_date_month'],
+                    $A['closes_date_day'],
+                    $A['closes_date_hour'],
+                    $A['closes_date_minute']
+                );
+            }
             if (empty($A['opens_date'])) {
                 $A['opens_date'] = Dates::minDateTime();
             }
@@ -827,10 +843,10 @@ class Election
             $Questions = array();
         }
 
-        if ($this->old_pid == '') {
+        /*if ($this->old_pid == '') {
             // creating a new election, use empty date/time fields
-            $open_date = '';
-            $close_date = '';
+            $open_date = $_CONF['_now']->toMySQL(true);
+            $close_date = $open_date;
         } else {
             $open_date = $this->Opens->format('Y-m-d H:i', true);
             if ($open_date == Dates::MIN_DATE) {
@@ -840,7 +856,7 @@ class Election
             if ($close_date == Dates::MAX_DATE) {
                 $close_date = '';
             }
-        }
+        }*/
         $ownername = COM_getDisplayName($this->owner_id);
         $T->set_var(array(
             'action_url' => Config::get('admin_url') . '/index.php',
@@ -867,8 +883,6 @@ class Election
             'hideresults' => $this->hideresults ? 'checked="checked"' : '',
             'lang_opens' => MO::_('Opens'),
             'lang_closes' => MO::_('Closes'),
-            'opens_date' => $open_date,
-            'closes_date' => $close_date,
             'min_date' => Dates::MIN_DATE,
             'max_date' => Dates::MAX_DATE,
             // user access info
@@ -912,6 +926,28 @@ class Election
             'lang_exp_reset' => MO::_('Reset all results for this election'),
             'lang_reset' => MO::_('Reset'),
         ) );
+        if (GVERSION >= '2.0.0') {
+            $T->set_var(array(
+                'opens_date' => $this->Opens->format('Y-m-d H:i', true),
+                'closes_date' => $this->Closes->format('Y-m-d H:i', true),
+                'gl200' => true,
+            ) );
+        } else {
+            $T->set_var(array(
+                'opens_date_month_options' => COM_getMonthFormOptions($this->Opens->format('m', true)),
+                'opens_date_day_options' => COM_getDayFormOptions($this->Opens->format('d', true)),
+                'opens_date_year_options' => COM_getYearFormOptions($this->Opens->format('Y', true)),
+                'opens_date_hour_options' => COM_getHourFormOptions($this->Opens->format('H', true)),
+                'opens_date_minute_options' => COM_getMinuteFormOptions($this->Opens->format('i', true)),
+                'opens_date_ampm_selection' => COM_getAmPmFormSelection('opens_date_ampm'),
+                'closes_date_month_options' => COM_getMonthFormOptions($this->Closes->format('m', true)),
+                'closes_date_day_options' => COM_getDayFormOptions($this->Closes->format('d', true)),
+                'closes_date_year_options' => COM_getYearFormOptions($this->Closes->format('Y', true)),
+                'closes_date_hour_options' => COM_getHourFormOptions($this->Closes->format('H', true)),
+                'closes_date_minute_options' => COM_getMinuteFormOptions($this->Closes->format('i', true)),
+                'closes_date_ampm_selection' => COM_getAmPmFormSelection('closes_date_ampm'),
+            ) );
+        }
 
         $T->set_block('editor','questiontab','qt');
         $maxQ = Config::get('maxquestions');
