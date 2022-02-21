@@ -699,7 +699,7 @@ class Election
     {
         $this->Questions = array();
 
-        $sql = "SELECT p.*, count(*) as vote_count FROM " . DB::table('topics') . " p
+        $sql = "SELECT p.*, count(v.pid) as vote_count FROM " . DB::table('topics') . " p
             LEFT JOIN " . DB::table('voters') . " v
             ON v.pid = p.pid
             WHERE p.pid = '" . DB_escapeString($this->pid) . "'";
@@ -920,7 +920,7 @@ class Election
             'lang_decl_winner' => MO::_('Declares a winner?'),
             'lang_show_remarks' => MO::_('Show Answer Remarks on Election Form?'),
             'decl_chk' => $this->decl_winner ? 'checked="checked"' : '',
-            'remark_chk' => $this->show_remarks ? 'checked="checked"' : '',
+            'remarks_chk' => $this->show_remarks ? 'checked="checked"' : '',
             'timezone' => $_CONF['timezone'],
             'lang_resetresults' => $this->old_pid != '' ? MO::_('Reset Results') : '',
             'lang_exp_reset' => MO::_('Reset all results for this election'),

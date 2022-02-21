@@ -5,6 +5,7 @@ Release 2022-02-21
   * Option to display answer remarks on the election form.
   * Fix date selectors for glFusion 1.x/2.x differences.
   * Add option to display answer comments on election forms.
+  * Fix getting the vote count when reading an election topic.
 
 ## v0.1.2
 Release 2021-11-30
