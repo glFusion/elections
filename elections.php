@@ -29,7 +29,7 @@ use Elections\MO;
 global $_DB_table_prefix;
 
 Config::set('pi_display_name', MO::_('Elections'));
-Config::set('pi_version', '0.1.3');
+Config::set('pi_version', '0.2.0');
 Config::set('gl_version', '1.7.8');
 Config::set('pi_url', 'https://www.glfusion.org');
 
