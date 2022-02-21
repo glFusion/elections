@@ -1,7 +1,7 @@
 # Elections plugin for glFusion - Changelog
 
 ## v0.2.0
-Release TBD
+Release 2022-02-21
   * Option to display answer remarks on the election form.
   * Fix date selectors for glFusion 1.x/2.x differences.
   * Add option to display answer comments on election forms.
