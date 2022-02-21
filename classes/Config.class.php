@@ -140,7 +140,7 @@ final class Config
      */
     public static function path()
     {
-        return self::_get('path');
+        return self::get('path');
     }
 
 
