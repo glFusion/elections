@@ -18,7 +18,7 @@ require_once '../../../lib-common.php';
 
 if (!SEC_inGroup('Root')) {
     // Someone is trying to illegally access this page
-    COM_errorLog("Someone has tried to access the Elections Development Code Upgrade Routine without proper permissions.  User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: " . $_SERVER['REMOTE_ADDR'],1);
+    COM_accessLog("Someone has tried to access the Elections Development Code Upgrade Routine without proper permissions.  User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: " . $_SERVER['REMOTE_ADDR']);
     $display  = COM_siteHeader();
     $display .= COM_startBlock($LANG27[12]);
     $display .= $LANG27[12];
