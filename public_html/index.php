@@ -111,7 +111,10 @@ case 'votebutton':
     } else {
         $old_aid = isset($_POST['old_aid']) ? $_POST['old_aid'] : array();
         if (count($aid) == $Election->numQuestions()) {
-            if ($Election->saveVote($aid, $old_aid)) {
+            if (
+                $Election->saveVote($aid, $old_aid) &&
+                !$Election->hideResults()
+            ) {
                 COM_refresh(Config::get('url') . '/index.php?results=x&pid=' . $Election->getID());
             } else {
                 COM_refresh(Config::get('url') . '/index.php');
@@ -141,7 +144,7 @@ case 'results':
 
 case 'showvote':
     $Voter = Voter::getInstance($_POST['votekey']);
-    $data = $Voter->decodeData();
+    $data = $Voter->getVoteRecords();
     if (
         $data !== false &&
         $Voter->getPid() == $pid    // verify right election is selected
@@ -154,7 +157,7 @@ case 'showvote':
                 $Voter->getDate($_CONF['dateonly'])
             )
         );
-        $page .= $Election->withKey($Voter->getPrvKey())
+        $page .= $Election->withAccessKey($Voter->getPrvKey())
                       ->withVoteId($Voter->getId())
                       ->withSelections($data)
                       ->Render();
