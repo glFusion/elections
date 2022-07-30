@@ -1,10 +1,14 @@
 # Elections plugin for glFusion - Changelog
 
+## v0.3.0
+Release TBD
+  * Required glFusion 2.0+, PHP 7.4+.
+  * Save vote data in separate table to facilitate auditing.
+
 ## v0.2.0
 Release 2022-02-21
   * Option to display answer remarks on the election form.
   * Fix date selectors for glFusion 1.x/2.x differences.
-  * Add option to display answer comments on election forms.
   * Fix getting the vote count when reading an election topic.
 
 ## v0.1.2
