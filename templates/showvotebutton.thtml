@@ -1,6 +1,6 @@
 {# begin {templatelocation} #}
 <form action="{action_url}/index.php" method="post">
-	<input type="text" size="15" placeholder="{lang_enterkey}" name="votekey" value="" />
+	<input type="text" autocomplete="off" size="15" placeholder="{lang_enterkey}" name="votekey" value="" />
     <input type="hidden" name="pid" value="{pid}" />
     <button type="submit" style="float:right;" class="uk-button uk-button-mini uk-button-primary" name="showvote">
 		{lang_showvote}
