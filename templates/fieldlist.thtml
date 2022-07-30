@@ -1,0 +1,43 @@
+{# general admin field types #}
+<!-- BEGIN field-refresh-disabled -->
+    <i class="uk-icon uk-icon-hover uk-icon-justifiy uk-icon-refresh uk-text-disabled"></i>
+<!-- END field-refresh-disabled -->
+
+<!-- BEGIN field-refresh -->
+    <a href="{url}"
+    <!-- BEGIN attr -->
+        {name}="{value}"
+    <!-- END attr -->
+    ><i class="uk-icon uk-icon-hover uk-icon-justifiy uk-icon-refresh uk-text-danger"></i></a>
+<!-- END field-refresh -->
+
+<!-- BEGIN field-buttonlink -->
+{!!if {style} == 'success' !!}
+{!!set btn_style 'uk-button-success' !!}
+{!!elseif {style} == 'primary' !!}
+{!!set btn_style 'uk-button-primary' !!}
+{!!elseif {style} == 'danger' !!}
+{!!set btn_style 'uk-button-danger' !!}
+{!else}
+{!!set btn_style 'uk-button-default' !!}
+{!endif}
+{!!if {size} == 'mini' !!}
+{!!set btn_size 'uk-button-mini' !!}
+{!else}
+{!!set btn_size '' !!}
+{!endif}
+	<a href="{url}" class="uk-button {btn_size} {btn_style} {other_cls}"
+	<!-- BEGIN attr -->
+		{name}="{value}"
+	<!-- END attr -->
+	>{text}</a>
+<!-- END field-buttonlink -->
+
+<!-- BEGIN field-resultslink -->
+    <a href="{url}"
+    <!-- BEGIN attr -->
+        {name}="{value}"
+    <!-- END attr -->
+    ><i class="uk-icon-bar-chart"></i></a>
+<!-- END field-resultslink -->
+{# end admin fields #}
