@@ -3,15 +3,17 @@
  * Class to describe question answers.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2021 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2021-2022 Lee Garner <lee@leegarner.com>
  * @package     elections
- * @version     v0.1.0
+ * @version     v0.3.0
  * @since       v0.1.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
  */
 namespace Elections;
+use glFusion\Database\Database;
+use glFusion\Log\Log;
 
 
 /**
@@ -77,24 +79,36 @@ class Answer
      */
     public static function getByQuestion(int $q_id, string $pid, int $rnd = 0) : array
     {
-        $q_id = (int)$q_id;
         $retval = array();
-        $sql = "SELECT * FROM " . DB::table('answers') . "
-            WHERE qid = '{$q_id}' AND pid = '" . DB_escapeString($pid) . "' ";
+        $db = Database::getInstance();
+        $qb = $db->conn->createQueryBuilder();
+        $qb->select('a.*', 'count(v.aid) as total_votes')
+           ->from(DB::table('answers'), 'a')
+           ->leftJoin('a', DB::table('votes'), 'v', 'v.pid=a.pid AND v.qid=a.qid AND v.aid=a.aid')
+           ->where('a.qid = :q_id')
+           ->andWhere('a.pid = :pid')
+           ->groupBy('a.qid, a.aid')
+           ->setParameter('q_id', $q_id, Database::INTEGER)
+           ->setParameter('pid', $pid, Database::STRING);
         switch ($rnd) {
         case self::SORT_NONE:
-            $sql .= 'ORDER BY aid ASC';
+            $qb->orderBy('a.aid', 'ASC');
             break;
         case self::SORT_RAND:
-            $sql .= 'ORDER BY RAND()';
+            $qb->orderBy('RAND()');
             break;
         case self::SORT_ALPHA:
-            $sql .= 'ORDER BY answer ASC';
+            $qb->orderBy('a.answer', 'ASC');
             break;
         }
-        $res = DB_query($sql);
-        if ($res) {
-            while ($A = DB_fetchArray($res, false)) {
+        try {
+            $data = $qb->execute()->fetchAllAssociative();
+        } catch (\Exception $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+            $data = NULL;
+        }
+        if (is_array($data)) {
+            foreach ($data as $A) {
                 $retval[] = new self($A);
             }
         }
@@ -113,12 +127,21 @@ class Answer
     {
         $q_id = (int)$q_id;
         $retval = array();
-        $sql = "SELECT * FROM " . DB::table('answers') . "
-            WHERE qid = '{$q_id}' AND pid = '" . DB_escapeString($pid) . "'
-            ORDER BY votes DESC";
-        $res = DB_query($sql);
-        if ($res) {
-            while ($A = DB_fetchArray($res, false)) {
+        $db = Database::getInstance();
+        try {
+            $data = $db->conn->executeQuery(
+                "SELECT * FROM " . DB::table('answers') . "
+                WHERE qid = ? AND pid = ?
+                ORDER BY votes DESC",
+                array($q_id, $pid),
+                array(Database::INTEGER, Database::STRING)
+            );
+        } catch (\Excepton $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+            $data = NULL;
+        }
+        if (is_array($data)) {
+            foreach ($data as $A) {
                 $retval[] = new self($A);
             }
         }
@@ -142,7 +165,7 @@ class Answer
         $this->pid = $A['pid'];
         $this->qid = (int)$A['qid'];
         $this->aid = (int)$A['aid'];
-        $this->votes = (int)$A['votes'];
+        $this->votes = (int)$A['total_votes'];
         $this->answer = $A['answer'];
         $this->remark = $A['remark'];
         return $this;
@@ -157,35 +180,71 @@ class Answer
      */
     public function Save()
     {
-        $answer = DB_escapeString($this->answer);
-        $remark = DB_escapeString($this->remark);
-        $sql = "INSERT INTO " . DB::table('answers'). " SET
-                pid = '" . DB_escapeString($this->getPid()) . "',
-                qid = '{$this->getQid()}',
-                aid = '{$this->getAid()}',
-                answer = '$answer',
-                remark = '$remark'
-            ON DUPLICATE KEY UPDATE
-                answer = '$answer',
-                remark = '$remark'";
-                //votes = {$this->getVotes()}
-        //echo $sql;die;
-        DB_query($sql);
-        if (DB_error()) {
+        $db = Database::getInstance();
+        try {
+            $db->conn->insert(
+                DB::table('answers'),
+                array(
+                    'pid' => $this->getPid(),
+                    'qid' => $this->getQid(),
+                    'aid' => $this->getAid(),
+                    'answer' => $this->answer,
+                    'remark' => $this->remark,
+                ),
+                array(
+                    Database::STRING,
+                    Database::INTEGER,
+                    Database::INTEGER,
+                    Database::STRING,
+                    Database::STRING,
+                )
+            );
+            return 0;
+        } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException $k) {
+            $db->conn->update(
+                DB::table('answers'),
+                array(
+                    'answer' => $this->answer,
+                    'remark' => $this->remark,
+                ),
+                array(
+                    'pid' => $this->getPid(),
+                    'qid' => $this->getQid(),
+                    'aid' => $this->getAid(),
+                ),
+                array(
+                    Database::STRING,
+                    Database::STRING,
+                    Database::STRING,
+                    Database::INTEGER,
+                    Database::INTEGER,
+                )
+            );
+            return 0;
+        } catch (\Exception $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
             return 6;
         }
-        return 0;
     }
 
 
     /**
-     * Delete the current question definition.
+     * Delete the current answer from the question.
      *
      * @return  object  $this;
      */
     public function Delete()
     {
-        DB_delete(DB::table('answers'), 'aid', (int)$this->aid);
+        $db = Database::getInstance();
+        try {
+            $db->conn->delete(
+                DB::table('answers'),
+                array('pid' => $this->pid, 'qid' => $this->qid, 'aid' => $this->aid),
+                array(Database::STRING, Database::INTEGER, Database::INTEGER)
+            );
+        } catch (\Throwable $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+        }
         $this->aid = 0;
         $this->qid = 0;
         $this->pid = '';
@@ -194,59 +253,74 @@ class Answer
 
 
     /**
-     * Delete all the answers for a poll.
-     * Called when a poll is deleted or the ID is changed.
+     * Delete all the answers for an election.
+     * Called when an election is deleted or the ID is changed.
      *
      * @param   string  $pid    Election ID
      */
     public static function deleteElection($pid)
     {
-        DB_delete(DB::table('answers'), 'pid', $pid);
+        $db = Database::getInstance();
+        try {
+            $db->conn->delete(
+                DB::table('answers'),
+                array('pid' => $pid),
+                array(Database::STRING)
+            );
+        } catch (\Throwable $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+        }
     }
 
 
     /**
-     * Reset all answers to zero votes for a poll.
+     * Reset all answers to zero votes for an election.
      *
      * @param   string  $pid    Election ID
      */
     public static function resetElection($pid)
     {
-        DB_query(
-            "UPDATE " . DB::table('answers') .
-            " SET votes = 0
-            WHERE pid = '" . DB_escapeString($pid) . "'"
-        );
+        $db = Database::getInstance();
+        try {
+            $db->conn->update(
+                DB::table('answers'),
+                array('votes' => 0),
+                array('pid' => $pid),
+                array(Database::INTEGER, Database::STRING)
+            );
+        } catch (\Throwable $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+        }
     }
 
 
     /**
-     * Set the poll ID.
+     * Set the election ID.
      *
      * @param   string  $pid    Election ID
      * @return  object  $this
      */
-    public function setPid($pid)
+    public function setPid(string $pid) : self
     {
         $this->pid = $pid;
         return $this;
     }
 
-    public function getPid()
+    public function getPid() : string
     {
         return $this->pid;
     }
 
 
     /**
-     * Set the question ID.
+     * Set the question ID value for this answer.
      *
-     * @param   integer $q_id   Question ID
+     * @param   integer $qid    Question ID
      * @return  object  $this
      */
-    public function setQid($q_id)
+    public function setQid(int $qid) : self
     {
-        $this->qid = (int)$q_id;
+        $this->qid = (int)$qid;
         return $this;
     }
 
@@ -256,7 +330,7 @@ class Answer
      *
      * @return  integer     Question record ID
      */
-    public function getQid()
+    public function getQid() : int
     {
         return (int)$this->qid;
     }
@@ -268,7 +342,7 @@ class Answer
      * @param   integer $a_id   Answer ID
      * @return  object  $this
      */
-    public function setAid($a_id)
+    public function setAid(int $a_id) : self
     {
         $this->aid = (int)$a_id;
         return $this;
@@ -280,7 +354,7 @@ class Answer
      *
      * @return  integer     Answer ID
      */
-    public function getAid()
+    public function getAid() : int
     {
         return (Int)$this->aid;
     }
@@ -293,7 +367,7 @@ class Answer
      * @param   integer $val    Number of votes
      * @return  object  $this
      */
-    public function setVotes($val)
+    public function setVotes(int $val) : self
     {
         $this->votes = (int)$val;
         return $this;
@@ -305,7 +379,7 @@ class Answer
      *
      * @return  integer     Votes given
      */
-    public function getVotes()
+    public function getVotes() : int
     {
         return (int)$this->votes;
     }
@@ -317,7 +391,7 @@ class Answer
      * @param   string  $txt    Value text for the answer
      * @return  object  $this
      */
-    public function setAnswer($txt)
+    public function setAnswer(string $txt) : self
     {
         $this->answer = $txt;
         return $this;
@@ -330,7 +404,7 @@ class Answer
      * @param   string  $txt    Remark text
      * @return  object  $this
      */
-    public function setRemark($txt)
+    public function setRemark(string $txt) : self
     {
         $this->remark = $txt;
         return $this;
@@ -343,7 +417,7 @@ class Answer
      * @param   boolean $esc    True to escape for saving
      * @return  string      Value of the answer
      */
-    public function getAnswer($esc = false)
+    public function getAnswer() : string
     {
         return (string)$this->answer;
     }
@@ -354,7 +428,7 @@ class Answer
      *
      * @return  text        Remark text
      */
-    public function getRemark()
+    public function getRemark() : string
     {
         return $this->remark;
     }
@@ -367,14 +441,22 @@ class Answer
      * @param   integer $qid    Question ID
      * @param   integer $aid    Answer ID
      */
-    public static function increment($pid, $qid, $aid)
+    public static function increment(string $pid, int $qid, int $aid) : void
     {
-        $sql = "UPDATE " . DB::table('answers') . "
-            SET votes = votes + 1
-            WHERE pid = '" . DB_escapeString($pid) . "'
-            AND qid = '" . (int)$qid . "'
-            AND aid = '" . (int)$aid . "'";
-        DB_query($sql, 1);
+        $db = Database::getInstance();
+        try {
+            $db->conn->executeStatement(
+                "UPDATE " . DB::table('answers') . "
+                SET votes = votes + 1
+                WHERE pid = ?
+                AND qid = ?
+                AND aid = ?",
+                array($pid, $qid, $aid),
+                array(Database::STRING, Database::INTEGER, Database::INTEGER)
+            );
+        } catch (\Throwable $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+        }
     }
 
 
@@ -389,27 +471,47 @@ class Answer
      */
     public static function decrement(string $pid, int $qid, int $aid) : void
     {
-        $sql = "UPDATE " . DB::table('answers') . "
-            SET votes = votes - 1
-            WHERE pid = '" . DB_escapeString($pid) . "'
-            AND qid = '" . (int)$qid . "'
-            AND aid = '" . (int)$aid . "'";
-        DB_query($sql, 1);
+        $db = Database::getInstance();
+        try {
+            $db->conn->executeStatement(
+                "UPDATE " . DB::table('answers') . "
+                SET votes = (case when votes < 1 then 0 else (votes - 1) end)
+                WHERE pid = ?
+                AND qid = ?
+                AND aid = ?",
+               array($pid, $qid, $aid),
+               array(Database::STRING, Database::INTEGER, Database::INTEGER)
+            );
+        } catch (\Throwable $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+        }
     }
 
 
     /**
-     * Change the Election ID for all items if it was saved with a new ID.
+     * Change the Election ID for all answers if it was saved with a new ID.
      *
      * @param   string  $old_pid    Original Election ID
      * @param   string  $new_pid    New Election ID
      */
-    public static function changePid($old_pid, $new_pid)
+    public static function changePid(string $old_pid, string $new_pid) : void
     {
-        DB_query("UPDATE " . DB::table('pollquestions') . "
-            SET pid = '" . DB_escapeString($new_pid) . "'
-            WHERE pid = '" . DB_escapeString($old_pid) . "'"
-        );
+        if ($old_pid == $new_pid) {
+            // Nothing to do
+            return;
+        }
+
+        $db = Database::getInstance();
+        try {
+            $db->conn->update(
+                DB::table('answers'),
+                array('pid' => $new_pid),
+                array('pid' => $old_pid),
+               array(Database::STRING, Database::STRING)
+            );
+        } catch (\Throwable $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+        }
     }
 
 }

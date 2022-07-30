@@ -15,6 +15,8 @@ if (!defined ('GVERSION')) {
 }
 use Elections\DB;
 use Elections\Config;
+use glFusion\Database\Database;
+use glFusion\Log\Log;
 
 /** Include the table creation strings */
 require_once __DIR__ . "/sql/mysql_install.php";
@@ -40,6 +42,12 @@ function ELECTIONS_upgrade($dvlp=false)
 
     if (!COM_checkVersion($current_ver, '0.2.0')) {
         $current_ver = '0.2.0';
+        if (!ELECTIONS_do_upgrade_sql($current_ver, $dvlp)) return false;
+        if (!ELECTIONS_do_set_version($current_ver)) return false;
+    }
+
+    if (!COM_checkVersion($current_ver, '0.3.0')) {
+        $current_ver = '0.3.0';
         if (!ELECTIONS_do_upgrade_sql($current_ver, $dvlp)) return false;
         if (!ELECTIONS_do_set_version($current_ver)) return false;
     }
@@ -90,26 +98,21 @@ function ELECTIONS_do_upgrade_sql($version, $ignore_error = false)
     }
 
     // Execute SQL now to perform the upgrade
-    COM_errorLog("--- Updating Elections to version $version");
+    Log::write('system', Log::INFO, "--- Updating Elections to version $version");
+    $db = Database::getInstance();
     foreach($ELECTION_UPGRADE[$version] as $sql) {
         if ($use_innodb) {
             $sql = str_replace('MyISAM', 'InnoDB', $sql);
         }
 
-        COM_errorLog("Elections Plugin $version update: Executing SQL => $sql");
+        Log::write('system', Log::DEBUG, "Elections Plugin $version update: Executing SQL => $sql");
         try {
-            DB_query($sql, '1');
-            if (DB_error()) {
-                // check for error here for glFusion < 2.0.0
-                COM_errorLog('SQL Error during update');
-                //if (!$ignore_error) return false;
-            }
+            $db->conn->executeStatement($sql);
         } catch (Exception $e) {
-            COM_errorLog('SQL Error ' . $e->getMessage());
-            //if (!$ignore_error) return false;
+            COM_errorLog(__FUNCTION__ . ': ' . $e->getMessage());
         }
     }
-    COM_errorLog("--- Elections plugin SQL update to version $version done");
+    Log::write('system', Log::INFO, "--- Elections plugin SQL update to version $version done");
     return true;
 }
 
@@ -126,24 +129,30 @@ function ELECTIONS_do_set_version($ver)
 {
     global $_TABLES, $_PLUGIN_INFO;
 
-    // now update the current version number.
-    $sql = "UPDATE {$_TABLES['plugins']} SET
-            pi_version = '$ver',
-            pi_gl_version = '" . Config::get('gl_version') . "',
-            pi_homepage = '" . Config::get('pi_url') . "'
-        WHERE pi_name = '" . Config::get('pi_name') . "'";
-
-    $res = DB_query($sql, 1);
-    if (DB_error()) {
-        COM_errorLog("Error updating the " . Config::get('pi_display_name') . " Plugin version");
-        return false;
-    } else {
-        COM_errorLog(Config::get('pi_display_name') . " version set to $ver");
-        // Set in-memory config vars
+    $db = Database::getInstance();
+    try {
+        $db->conn->update(
+            $_TABLES['plugins'],
+            array(
+                'pi_version' => $ver,
+                'pi_gl_version' => Config::get('gl_version'),
+                'pi_homepage' => Config::get('pi_url'),
+            ),
+            array('pi_name' => Config::get('pi_name'))
+            array(
+                Database::STRING,
+                Database::STRING,
+                Database::STRING,
+                Database::STRING,
+            )
+        );
         Config::set('pi_version', $ver);
         $_PLUGIN_INFO[Config::get('pi_name')]['pi_version'] = $ver;
-        return true;
+    } catch (\Throwable $e) {
+        Log::write('system', Log::ERROR, $e->getMessage());
+        return false;
     }
+    return true;
 }
 
 
@@ -198,7 +207,7 @@ function ELECTIONS_remove_old_files()
 
     foreach ($paths as $path=>$files) {
         foreach ($files as $file) {
-            COM_errorLog("removing $path/$file");
+            Log::write('system', Log::DEBUG, "Removing $path/$file.");
             ELECTIONS_rmdir("$path/$file");
         }
     }

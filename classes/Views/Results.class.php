@@ -3,15 +3,17 @@
  * Class to represent the results view for an election.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2020-2021 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2020-2022 Lee Garner <lee@leegarner.com>
  * @package     elections
- * @version     v0.1.2
+ * @version     v0.3.0
  * @since       v0.1.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
  */
 namespace Elections\Views;
+use glFusion\Database\Database;
+use glFusion\Log\Log;
 use Elections\Election;
 use Elections\Answer;
 use Elections\Config;
@@ -243,7 +245,8 @@ class Results
                 'lang_question_number' => $counter,
                 'question' =>$filter->filterData($Q->getQuestion())
             ) );
-            $Answers = Answer::getByScore($Q->getQid(), $this->pid);
+
+            $Answers = $Q->getAnswers();
             $nanswers = count($Answers);
             $q_totalvotes = 0;
             $winner_votes = -1;
@@ -282,7 +285,7 @@ class Results
             $poll->clear_var('votes');
         }
 
-        if ($this->Election->getCommentcode() >= 0 ) {
+        /*if ($this->Election->getCommentcode() >= 0 ) {
             USES_lib_comments();
             $num_comments = CMT_getCount(Config::PI_NAME, $this->pid);
             $poll->set_var('num_comments',COM_numberFormat($num_comments));
@@ -299,7 +302,7 @@ class Results
         } else {
             $poll->set_var('comments_url', '');
             $poll->set_var('comments', '');
-        }
+        }*/
 
         $poll->set_var('lang_topics', MO::_('Topics'));
         if ($this->isAdmin && $this->displaytype !== Modes::PRINT) {
@@ -310,7 +313,7 @@ class Results
         }
         $retval .= $poll->finish($poll->parse('output', 'result' ));
 
-        if (
+        /*if (
             $this->showComments &&
             $this->Election->getCommentcode() >= 0 &&
             $this->displaytype != Modes::AUTOTAG
@@ -336,7 +339,7 @@ class Results
                 $this->cmt_order, $this->cmt_mode, 0, $page, false,
                 $delete_option, $this->Election->getCommentcode(), $this->Election->getOwnerID()
             );
-        }
+        }*/
         return $retval;
     }
 
@@ -398,7 +401,7 @@ class Results
 
         $sql = "SELECT * FROM {$_TABLES['pollvoters']} AS voters
             LEFT JOIN {$_TABLES['users']} AS users ON voters.uid=users.uid
-            WHERE voters.pid='" . DB_escapeString($this->pid) . "'";
+            WHERE voters.pid = '" . Database::getInstance()->conn->quote($this->pid) . "'";
 
         $query_arr = array(
             'table' => 'pollvoters',
@@ -417,4 +420,3 @@ class Results
 
 }
 
-?>

@@ -13,6 +13,8 @@
  */
 namespace Elections;
 use Elections\phpGettext\phpGettext;
+use glFusion\Database\Database;
+use glFusion\Log\Log;
 
 
 /**
@@ -121,14 +123,19 @@ class MO
      * @uses    self::init()
      * @param   integer $uid    User ID
      */
-    public static function initUser($uid=0)
+    public static function initUser(?int $uid=NULL) : string
     {
-        global $_USER;
+        global $_USER, $lang;
 
-        if ($uid == 0) {
+        if (empty($uid)) {
             $uid = $_USER['uid'];
         }
-        $lang = DB_getItem($_TABLES['users'], 'language', 'uid = ' . (int)$uid);
+        $lang = Database::getInstance()->getItem(
+            $_TABLES['users'], 'language', array('uid' =>$uid)
+        );
+        if (empty($lang)) {
+            $lang = $_CONF['language'];
+        }
         self::init($lang);
     }
 

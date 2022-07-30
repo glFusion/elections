@@ -25,6 +25,7 @@ class DB
         'questions' => Config::KEY . 'questions',
         'answers' => Config::KEY . 'answers',
         'voters' => Config::KEY . 'voters',
+        'votes' => Config::KEY . 'votes',
         // For consistency, core glFusion tables:
         'comments' => 'comments',
         'users' => 'users',
