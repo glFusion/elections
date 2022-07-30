@@ -13,7 +13,7 @@
  * @author      Dirk Haun <dirk AT haun-online DOT de>
  * @author      Lee Garner <lee@leegarner.com>
  * @package     elections
- * @version     v0.1.3
+ * @version     v0.3.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -29,7 +29,7 @@ use Elections\MO;
 global $_DB_table_prefix;
 
 Config::set('pi_display_name', MO::_('Elections'));
-Config::set('pi_version', '0.2.0');
+Config::set('pi_version', '0.3.0');
 Config::set('gl_version', '1.7.8');
 Config::set('pi_url', 'https://www.glfusion.org');
 
@@ -38,3 +38,4 @@ $_TABLES[DB::key('answers')]    = $_DB_table_prefix . DB::key('answers');
 $_TABLES[DB::key('questions')]  = $_DB_table_prefix . DB::key('questions');
 $_TABLES[DB::key('topics')]     = $_DB_table_prefix . DB::key('topics');
 $_TABLES[DB::key('voters')]     = $_DB_table_prefix . DB::key('voters');
+$_TABLES[DB::key('votes')]      = $_DB_table_prefix . DB::key('votes');

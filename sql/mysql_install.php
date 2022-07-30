@@ -8,9 +8,9 @@
  * @author      Dirk Haun         - dirk AT haun-online DOT de>
  * @author      Trinity Bays      - trinity93 AT gmail DOT com>                 |
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2009-2020 The Above Authors
+ * @copyright   Copyright (c) 2009-2022 The Above Authors
  * @package     elections
- * @version     v0.1.0
+ * @version     v0.3.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -67,8 +67,7 @@ $_SQL[DB::key('topics')] = "CREATE TABLE " . DB::table('topics') . " (
   KEY `questions_display` (`display`),
   KEY `questions_commentcode` (`commentcode`),
   KEY `idx_enabled` (`status`)
-) ENGINE=MyISAM
-";
+) ENGINE=MyISAM";
 
 $_SQL[DB::key('voters')] = "CREATE TABLE " . DB::table('voters') . " (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -80,11 +79,22 @@ $_SQL[DB::key('voters')] = "CREATE TABLE " . DB::table('voters') . " (
   `pub_key` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `pollid` (`pid`)
-) ENGINE=MyISAM
-";
+) ENGINE=MyISAM";
 
 $ELECTION_UPGRADE = array(
     '0.2.0' => array(
         'ALTER TABLE ' . DB::table('topics') . ' ADD show_remarks tinyint(1) unsigned NOT NULL DEFAULT 0 AFTER decl_winner',
     ),
+    '0.3.0' => array(
+        "CREATE TABLE " . DB::table('votes') . " (
+          `vid` varchar(20) NOT NULL,
+          `pid` varchar(128) DEFAULT NULL,
+          `qid` int(11) unsigned NOT NULL,
+          `aid` int(11) unsigned NOT NULL,
+          PRIMARY KEY (`vid`)
+        } ENGINE=MyISAM",
+    )
 );
+
+$_SQL[DB::key('votes')] = $ELECTION_UPGRADE['0.3.0'][0];
+
