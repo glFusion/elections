@@ -5,7 +5,7 @@
 </a></span>
 {!endif}
 {!if edit_url}
-<span class="uk-align-right"><a href="{edit_url}" class="uk-align-right uk-icon uk-icon-edit uk-icon-medium tm-meta-icon"></a></span>
+<span class="uk-align-right"><a href="{edit_url}" class="uk-align-right uk-icon uk-icon-edit tm-meta-icon"></a></span>
 {!endif}
 {!if url}
 <a class="uk-button uk-button-primary uk-button-small uk-align-right" href="{url}">{lang_back}</a>
