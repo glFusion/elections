@@ -14,6 +14,7 @@
 require_once '../lib-common.php';
 use Elections\Election;
 use Elections\Voter;
+use Elections\Models\Vote;
 use Elections\Menu;
 use Elections\Config;
 use Elections\Views\Results;
@@ -105,6 +106,15 @@ switch ($action) {
 case 'votebutton':
     // Get the answer array and check that the number is right, and the user hasn't voted
     $aid = (isset($_POST['aid']) && is_array($_POST['aid'])) ? $_POST['aid'] : array();
+    $Votes = array();
+    foreach ($aid as $qid=>$ans_id) {
+        $Votes[] = new Vote(array(
+            'qid' => $qid,
+            'aid' => $ans_id,
+            'pid' => $_POST['pid'],
+        ) );
+    }
+
     if ($Election->alreadyVoted() && !$Election->canUpdate()) {
         COM_setMsg(MO::_('Your vote has already been recorded.'), 'error', true);
         COM_refresh(Config::get('url') . '/index.php');
@@ -125,7 +135,7 @@ case 'votebutton':
                 true,
                 'error'
             );
-            $page .= $Election->withSelections($aid)->Render();
+            $page .= $Election->withSelections($Votes)->Render();
         }
     }
     break;
