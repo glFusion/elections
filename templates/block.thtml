@@ -1,75 +1,71 @@
 {# begin {templatelocation} #}
 {!if use_ajax}
 <script>
-  $(window).load(function() {
-    $( "#electionautotag_{uniqid}" ).on( "click", "#vb_{uniqid}", function(event) {
-      event.preventDefault();
-      var data = $("#vote{id}").serialize();
-      $.ajax({
-        type: "POST",
-        dataType: "json",
-        url: "{ajax_url}",
-        data: data,
-        success: function(data) {
-          var result = $.parseJSON(data["json"]);
-          try {
-			Elections.notify(result.statusMessage, "success");
-            $('#electionautotag_{uniqid}').html(result.html);
-          }
-          catch(err) {
-            alert(result.statusMessage);
-          }
-        }
-      });
-    });
-  });
+$(window).load(function() {
+	$( "#electionautotag_{uniqid}" ).on( "click", "#vb_{uniqid}", function(event) {
+		event.preventDefault();
+		var data = $("#vote{id}").serialize();
+		$.ajax({
+			type: "POST",
+			dataType: "json",
+			url: "{ajax_url}",
+			data: data,
+			success: function(data) {
+				var result = $.parseJSON(data["json"]);
+				try {
+					Elections.notify(result.statusMessage, "success");
+					$('#electionautotag_{uniqid}').html(result.html);
+				} catch(err) {
+					alert(result.statusMessage);
+				}
+			}
+		});
+	});
+});
 </script>
 {!endif}
 <div id="electionautotag_{uniqid}">
 {!!if {disp_mode} == 0 !!}
 {!if edit_url}
-    <span class="uk-align-right"><a href="{edit_url}" class="uk-aling-right uk-icon uk-icon-edit tm-meta-icon"></a></span>
+	<span class="uk-align-right"><a href="{edit_url}" class="uk-aling-right uk-icon uk-icon-edit tm-meta-icon"></a></span>
 {!endif}
-    <a class="uk-align-right" href="{back_url}">{lang_back}</a>
+	<a class="uk-align-right" href="{back_url}">{lang_back}</a>
 {!endif}
 
 {!!if {disp_mode} == "1" !!}
 	{topic}
 {!else}
 {!if topic}
-    <h3>{topic}
+	<h3>{topic}</h3>
+{!endif}
+{!endif}
 {!if topic_msg}
 	<span class="uk-text-danger">{topic_msg}</span>
 {!endif}
-	</h3>
-{!elseif edit_icon}
-    <br />
-{!endif}
-{!endif}
 {!if description}
-    <div class="uk-panel-box">{description}</div>
+	<div class="uk-panel-box">{description}</div>
 {!endif}
-    <form class="uk-form uk-form-horizontal uk-width-1-1" action="{vote_url}" id="vote{id}" method="post">
-        <input type="hidden" name="pid" value="{id}" />
-        <input type="hidden" name="vid" value="{vote_id}" />
-        <input type="hidden" name="aftervote_url" value="{aftervote_url}" />
-        {questions}
-        <span class="uk-text-small">{notification}</span><br>
+	<form class="uk-form uk-form-horizontal uk-width-1-1" action="{vote_url}" id="vote{id}" method="post">
+		<input type="hidden" name="pid" value="{id}" />
+		<input type="hidden" name="vid" value="{vote_id}" />
+		<input type="hidden" name="aftervote_url" value="{aftervote_url}" />
+		{questions}
+		<span class="uk-text-small">{notification}</span><br>
 
 {!if login_required}
-        <div class="uk-alert uk-alert-danger">
-            {lang_login_required}
-        </div>
+		<div class="uk-alert uk-alert-danger">
+			{lang_login_required}
+		</div>
 {!elseif can_submit}
-        <button class="uk-button uk-button-primary" id="vb_{uniqid}" name="votebutton" type="submit" value="{lang_vote}">{lang_vote}</button>
-        {results}
+		<button class="uk-button uk-button-primary" id="vb_{uniqid}" name="votebutton" type="submit" value="{lang_vote}">{lang_vote}</button>
+		{results}
 {!endif}
 
-    </form>
+	</form>
 {!!if {disp_mode} == 0 !!}
-    <span class="uk-text-small">
-        <a href="{public_url}">{lang_topics}</a> | {num_votes} {lang_votes} {comments}
-    </span>
+	<span class="uk-text-small">
+		<a href="{public_url}">{lang_topics}</a> | {num_votes} {lang_votes} {comments}
+	</span>
 {!endif}
 </div>
 {# end {templatelocation} #}

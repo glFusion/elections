@@ -1564,9 +1564,10 @@ class Election
      *
      * Shows an HTML formatted election for the given topic ID
      *
+     * @param   boolean $preview    True if this is a preview, no submission
      * @return       string  HTML Formatted Election
      */
-    public function showElectionForm($preview=false)
+    public function showElectionForm(bool $preview=false) : string
     {
         global $_CONF, $LANG01, $_USER, $LANG25, $_IMAGE_TYPE;
 
