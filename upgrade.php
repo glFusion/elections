@@ -3,9 +3,9 @@
  * Upgrade routines for the Elections plugin.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2020-2021 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2020-2022 Lee Garner <lee@leegarner.com>
  * @package     shop
- * @version     v0.1.3
+ * @version     v0.3.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -54,7 +54,7 @@ function ELECTIONS_upgrade($dvlp=false)
 
     // Check and set the version if not already up to date.
     // For updates with no SQL changes
-    if (!COM_checkVersion($current_ver, $installed_ver)) {
+    if ($current_ver != $installed_ver() {
         if (!ELECTIONS_do_set_version($installed_ver)) return false;
         $current_ver = $installed_ver;
     }
@@ -138,7 +138,7 @@ function ELECTIONS_do_set_version($ver)
                 'pi_gl_version' => Config::get('gl_version'),
                 'pi_homepage' => Config::get('pi_url'),
             ),
-            array('pi_name' => Config::get('pi_name'))
+            array('pi_name' => Config::get('pi_name')),
             array(
                 Database::STRING,
                 Database::STRING,

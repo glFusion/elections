@@ -2,7 +2,7 @@
     <id>elections</id>
     <name>Elections</name>
     <description>Online Election System</description>
-    <version>0.3.0</version>
+    <version>0.2.0.1</version>
     <glfusionversion>2.0.0</glfusionversion>
     <phpversion>7.4.0</phpversion>
     <url>http://www.glfusion.org</url>
