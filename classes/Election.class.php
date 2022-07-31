@@ -407,10 +407,10 @@ class Election
         static $can_view = NULL;
 
         if ($can_view === NULL) {
-            $admin = SEC_inGroup('Root');
+            /*$admin = SEC_inGroup('Root');
             if ($admin) {
                 $can_view = true;
-            } elseif ($this->isOpen() && $this->hideresults) {
+            } else*/ if ($this->isOpen() && $this->hideresults) {
                 $can_view = false;
             } elseif (
                 $this->isNew() ||
@@ -455,7 +455,7 @@ class Election
     /**
      * Set the selected answer array to pre-select answers.
      *
-     * @param   array   Array of questionID->answerID pairs
+     * @param   array   $Votes  Array of Vote objects
      * @return  object  $this
      */
     public function withSelections(array $Votes) : self
@@ -1058,6 +1058,7 @@ class Election
 
         if (isset($A['resetresults']) && $A['resetresults'] == 1) {
             self::deleteVotes($this->pid);
+            $this->cookie_key = Token::create();
         }
 
         // If saving a new record or changing the ID of an existing one,
@@ -1632,6 +1633,7 @@ class Election
                 'disp_mode' => $this->disp_type,
                 'aftervote_url' => $aftervote_url,
                 'topic_msg' => $topic_msg,
+                'topic' => $this->topic,
             ) );
 
             if ($nquestions == 1 || $this->disp_showall) {
@@ -1639,7 +1641,7 @@ class Election
                 $T->set_var('lang_vote', MO::_('Vote'));
                 $T->set_var('showall', true);
                 if ($this->disp_type == Modes::BLOCK) {
-                    $T->set_var('use_ajax', true);
+                    //$T->set_var('use_ajax', true);
                 } else {
                     $T->unset_var('use_ajax');
                 }
@@ -1652,7 +1654,7 @@ class Election
 
             $results = '';
             if (
-                $this->status == Status::OPEN ||
+                $this->status != Status::OPEN ||
                 $this->hideresults == 0 ||
                 (
                     $this->hideresults == 1 &&
