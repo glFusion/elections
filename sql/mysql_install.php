@@ -72,7 +72,7 @@ $_SQL[DB::key('topics')] = "CREATE TABLE " . DB::table('topics') . " (
 $_SQL[DB::key('voters')] = "CREATE TABLE " . DB::table('voters') . " (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `pid` varchar(128) NOT NULL DEFAULT '',
-  `ipaddress` varchar(15) NOT NULL DEFAULT '',
+  `ipaddress` varchar(255) NOT NULL DEFAULT '',
   `uid` mediumint(8) NOT NULL DEFAULT 1,
   `date` int(10) unsigned DEFAULT NULL,
   `votedata` text DEFAULT NULL,
@@ -93,6 +93,7 @@ $ELECTION_UPGRADE = array(
           `aid` int(11) unsigned NOT NULL,
           PRIMARY KEY (`vid`)
         } ENGINE=MyISAM",
+        'ALTER TABLE ' . DB::table('voters') . "CHANGE ipaddress ipaddress varchar(255) NOT NULL default ''",
     )
 );
 

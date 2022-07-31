@@ -305,8 +305,9 @@ class Voter
      * Check if the user has already voted.
      * For anonymous, checks the IP address and the election cookie.
      *
-     * @param   string  $pid    Election ID
-     * @param   integer $voting_grp Group with access to vote
+     * @param   string  $pid            Election ID
+     * @param   string  $cookie_key     Cookie key for the election
+     * @param   integer $voting_grp     Group with access to vote
      * @return  boolean     True if the user has voted, False if not
      */
     public static function hasVoted(string $pid, string $cookie_key, int $voting_grp=2) : bool
@@ -328,6 +329,8 @@ class Voter
             ) {
                 return true;
             }
+            // Can't return false yet since the voter may have been
+            // anonymous when casting the vote.
         }
 
         if ($voting_grp != Groups::ALL_USERS) {
@@ -341,6 +344,8 @@ class Voter
             return true;
         }
 
+        // As a last resort, see if the voter's IP address is in the table.
+        // This is less accurate due to NAT and proxies.
         $ip = self::getRealIpAddress();
         if (
             $ip != '' &&
@@ -348,7 +353,7 @@ class Voter
                 DB::table('voters'),
                 array('ipaddress', 'pid'),
                 array($ip, $pid),
-                array(Database::INTEGER, Database::STRING)
+                array(Database::STRING, Database::STRING)
             ) > 0
         ) {
             return true;

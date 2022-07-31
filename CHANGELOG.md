@@ -4,6 +4,7 @@
 Release TBD
   * Required glFusion 2.0+, PHP 7.4+.
   * Save vote data in separate table to facilitate auditing.
+  * Extend voter IP address to varchar(255) for ipv6.
 
 ## v0.2.0
 Release 2022-02-21
