@@ -46,6 +46,7 @@ use Elections\Voter;
 use Elections\Answer;
 use Elections\Views\Results;
 use Elections\MO;
+use Elections\Config;
 
 $retval = array();
 
@@ -96,15 +97,21 @@ function ELECTION_saveVote_AJAX($pid, $aid)
         $retval['statusMessage'] = MO::_('Your vote has already been recorded.');
         $retval['html'] = '';
     } else {
-        if ((new Election($pid))->saveVote($aid)) {
-            $eMsg = MO::_('Your vote has been recorded.') .
+        $El = new Election($pid);
+        if ($El->saveVote($aid)) {
+            $retval['statusMessage'] = MO::_('Your vote has been recorded.') .
                 ' "' . $Election->getTopic() . '"';
+            $retval['html'] = MO::_('Your vote has been recorded.');
+            if ($El->canViewResults()) {
+                $retval['html'] .= '<br />' . COM_createLink(
+                    $El->getTopic() . ' (' . MO::_('Results') . ')',
+                    Config::get('url') . '/index.php?results=x&pid=' . $pid
+                );
+            }
         } else {
-            $eMsg = MO::_('There was an error recording your vote.');
+            $retval['statusMessage'] = MO::_('There was an error recording your vote.');
+            $retval['html'] = $retval['statusMessage'];
         }
-        $retval['statusMessage'] = $eMsg;
-        $retval['html'] = MO::_('Your vote has been recorded.');
-        //$retval['html'] = (new Results($pid))->Render();
     }
     return $retval;
 }
