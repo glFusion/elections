@@ -3,9 +3,9 @@
  * Administrative entry point for the Elections plugin.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2021 Lee Garner
+ * @copyright   Copyright (c) 2021-2022 Lee Garner
  * @package     elections
- * @version     v0.1.2
+ * @version     v0.3.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -18,9 +18,8 @@ use Elections\Config;
 use Elections\Menu;
 use Elections\Election;
 use Elections\Views\Results;
+use Elections\Models\Request;
 use Elections\MO;
-
-$display = '';
 
 if (!plugin_ismoderator_elections()) {
     COM_accessLog(sprintf(
@@ -31,33 +30,17 @@ if (!plugin_ismoderator_elections()) {
     exit;
 }
 
+$Request = Request::getInstance();
+$display = '';
 $action = '';
 $expected = array(
     'edit', 'save', 'delete', 'lv', 'resetelection',
     'results', 'presults', 'preview',
 );
-foreach($expected as $provided) {
-    if (isset($_POST[$provided])) {
-        $action = $provided;
-    } elseif (isset($_GET[$provided])) {
-	$action = $provided;
-    }
-}
+list($action, $actionval) = $Request->getAction($expected);
 
-$pid = '';
-if (isset($_POST['pid'])) {
-    $pid = COM_sanitizeID(COM_applyFilter($_POST['pid']));
-} elseif (isset($_GET['pid'])) {
-    $pid = COM_sanitizeID(COM_applyFilter($_GET['pid']));
-}
-
-$msg = 0;
-if (isset($_POST['msg'])) {
-    $msg = COM_applyFilter($_POST['msg'], true);
-} elseif (isset($_GET['msg'])) {
-    $msg = COM_applyFilter($_GET['msg'], true);
-}
-
+$pid = COM_sanitizeID($Request->getString('pid'));
+$msg = $Request->getInt('msg');
 $page = '';
 $title = MO::_('Election Administration');
 
@@ -74,7 +57,7 @@ case 'edit':
 case 'save':
     if (SEC_checktoken()) {
         if (!empty ($pid)) {
-            $msg = Election::getInstance($_POST['old_pid'])->Save($_POST);
+            $msg = Election::getInstance($Request->getString('old_pid'))->Save($Request);
             if (!empty($msg)) {
                 COM_setMsg($msg);
             }

@@ -312,34 +312,6 @@ class Results
             ) );
         }
         $retval .= $poll->finish($poll->parse('output', 'result' ));
-
-        /*if (
-            $this->showComments &&
-            $this->Election->getCommentcode() >= 0 &&
-            $this->displaytype != Modes::AUTOTAG
-        ) {
-            $delete_option = Election::hasRights('edit') ? true : false;
-            USES_lib_comment();
-
-            $page = isset($_GET['page']) ? COM_applyFilter($_GET['page'],true) : 0;
-            if (isset($_POST['order'])) {
-                $this->cmt_order  =  $_POST['order'] == 'ASC' ? 'ASC' : 'DESC';
-            } elseif (isset($_GET['order']) ) {
-                $this->cmt_order =  $_GET['order'] == 'ASC' ? 'ASC' : 'DESC';
-            } else {
-                $this->cmt_order = 'DESC';
-            }
-            if (isset($_POST['mode'])) {
-                $this->withCommentMode(COM_applyFilter($_POST['mode']));
-            } elseif (isset($_GET['mode'])) {
-                $this->withCommentMode(COM_applyFilter($_GET['mode']));
-            }
-            $retval .= CMT_userComments(
-                $this->pid, $filter->filterData($this->Election->getTopic()), Config::PI_NAME,
-                $this->cmt_order, $this->cmt_mode, 0, $page, false,
-                $delete_option, $this->Election->getCommentcode(), $this->Election->getOwnerID()
-            );
-        }*/
         return $retval;
     }
 

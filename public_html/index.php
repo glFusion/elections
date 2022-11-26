@@ -15,6 +15,7 @@ require_once '../lib-common.php';
 use Elections\Election;
 use Elections\Voter;
 use Elections\Models\Vote;
+use Elections\Models\Request;
 use Elections\Menu;
 use Elections\Config;
 use Elections\Views\Results;
@@ -39,15 +40,9 @@ $title = MO::_('Elections');
 $filter = sanitizer::getInstance();
 $filter->setPostmode('text');
 
-if (isset($_POST['pid'])) {
-    $pid = COM_applyFilter($_POST['pid']);
-} elseif (isset($_GET['pid'])) {
-    $pid = COM_applyFilter($_GET['pid']);
-} else {
-    $pid = '';
-}
-
-$type = isset($_POST['type']) ? COM_applyFilter($_POST['type']) : '';
+$Request = Request::getInstance();
+$pid = COM_applyFilter($Request->getString('pid'));
+$type = $Request->getString('type');
 if ( $type != '' && $type != 'article' ) {
     if (!in_array($type,$_PLUGINS)) {
         $type = '';
@@ -57,17 +52,7 @@ if ( $type != '' && $type != 'article' ) {
 $expected = array(
     'reply', 'votebutton', 'results', 'showvote',
 );
-$action = 'listelections';
-foreach ($expected as $provided) {
-    if (isset($_POST[$provided])) {
-        $action = $provided;
-        $actionval = $_POST[$provided];
-    } elseif (isset($_GET[$provided])) {
-        $action = $provided;
-        $actionval = $_GET[$provided];
-    }
-}
-
+list($action, $actionval) = $Request->getAction($expected, 'listelections');
 if ($action == 'reply') {
     // Handle a comment submission
     echo COM_refresh(
@@ -75,28 +60,10 @@ if ($action == 'reply') {
     );
     exit;
 }
-
-$aid = 0;
-if ($pid != '') {
-    if (isset ($_GET['aid'])) {
-        $aid = -1; // only for showing results instead of questions
-    } else if (isset ($_POST['aid'])) {
-        $aid = $_POST['aid'];
-    }
-}
-
-$order = '';
-if (isset ($_REQUEST['order'])) {
-    $order = COM_applyFilter ($_REQUEST['order']);
-}
-$mode = '';
-if (isset ($_REQUEST['mode'])) {
-    $mode = COM_applyFilter ($_REQUEST['mode']);
-}
-$msg = 0;
-if (isset($_REQUEST['msg'])) {
-    $msg = COM_applyFilter($_REQUEST['msg'], true);
-}
+//$aid = $Request->getInt('aid');
+$order = COM_applyFilter($Request->getString('order'));
+$mode = COM_applyFilter($Request->getString('mode')); 
+$msg = $Request->getInt('msg');
 
 if ($pid != '') {
     $Election = Election::getInstance($pid);
@@ -105,13 +72,13 @@ if ($pid != '') {
 switch ($action) {
 case 'votebutton':
     // Get the answer array and check that the number is right, and the user hasn't voted
-    $aid = (isset($_POST['aid']) && is_array($_POST['aid'])) ? $_POST['aid'] : array();
+    $aid = $Request->getArray('aid');
     $Votes = array();
     foreach ($aid as $qid=>$ans_id) {
         $Votes[] = new Vote(array(
             'qid' => $qid,
             'aid' => $ans_id,
-            'pid' => $_POST['pid'],
+            'pid' => $pid,
         ) );
     }
 
@@ -119,7 +86,7 @@ case 'votebutton':
         COM_setMsg(MO::_('Your vote has already been recorded.'), 'error', true);
         COM_refresh(Config::get('url') . '/index.php');
     } else {
-        $old_aid = isset($_POST['old_aid']) ? $_POST['old_aid'] : array();
+        $old_aid = $Request->getArray('old_aid');
         if (count($aid) == $Election->numQuestions()) {
             if (
                 $Election->saveVote($aid, $old_aid) &&
@@ -153,7 +120,7 @@ case 'results':
     break;
 
 case 'showvote':
-    $Voter = Voter::getInstance($_POST['votekey']);
+    $Voter = Voter::getInstance($Request->getString('votekey'));
     $data = $Voter->getVoteRecords();
     if (
         $data !== false &&
@@ -191,7 +158,7 @@ default:
         if ($msg > 0) {
             $page .= COM_showMessage($msg, Config::get('pi_name'));
         }
-        if (isset($_POST['aid'])) {
+        if (isset($Request['aid'])) {
             $eMsg = MO::_('Please answer all remaining questions.') .
                 ' "' . $filter->filterData($Election->getTopic()) . '"';
             $page .= COM_showMessageText($eMsg, MO::_('Results were not saved.'), true, 'error');

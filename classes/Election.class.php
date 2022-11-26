@@ -17,6 +17,8 @@ use Elections\Models\Groups;
 use Elections\Models\Modes;
 use Elections\Models\Status;
 use Elections\Models\Token;
+use Elections\Models\DataArray;
+use Elections\Models\Request;
 use Elections\Views\Results;
 use glFusion\Database\Database;
 use glFusion\Log\Log;
@@ -165,7 +167,7 @@ class Election
      *
      * @param   string  $pid     Election ID, empty to create a new record
      */
-    function __construct($pid = '')
+    function __construct(?string $pid=NULL)
     {
         global $_CONF;
 
@@ -181,17 +183,12 @@ class Election
             $this->Closes = clone $this->Opens;
             $this->cookie_key = Token::create();
         } else {
-            if (is_array($pid)) {
-                // Got a record from the database
-                $this->setVars($pid, true);
-            } else {
-                // Got an election ID string
-                $pid = COM_sanitizeID($pid);
-                $this->setID($pid);
-                if ($this->Read()) {
-                    $this->isNew = false;
-                    $this->old_pid = $this->pid;
-                }
+            // Got an election ID string
+            $pid = COM_sanitizeID($pid);
+            $this->setID($pid);
+            if ($this->Read()) {
+                $this->isNew = false;
+                $this->old_pid = $this->pid;
             }
             $this->_Questions = Question::getByElection($this->pid, $this->rnd_questions, $this->rnd_answers);
         }
@@ -207,27 +204,6 @@ class Election
     public static function getInstance($pid)
     {
         return new self($pid);
-    }
-
-
-    /**
-     * Get all election for operations which must cycle through each one.
-     *
-     * @return  array       Array of Election objects
-     */
-    public static function XgetAll()
-    {
-        $retval = array();
-        $sql = "SELECT * FROM " . DB::table('topics');
-        $db = Database::getInstance();
-        try {
-            $stmt = $db->conn->executeQuery($sql);
-            foreach ($stmt->fetchAllAssociative() as $A) {
-                $retval[$A['pid']] = new self($A);
-            }
-        } catch(\Throwable $e) {
-        }
-        return $retval;
     }
 
 
@@ -260,7 +236,8 @@ class Election
         try {
             $stmt = $queryBuilder->execute();
             foreach ($stmt->fetchAllAssociative() as $A) {
-                $retval[] = new self($A);
+                $retval[$A['pid']] = new self;
+                $retval[$A['pid']]->setVars(new DataArray($A));
             }
         } catch(Throwable $e) {
         }
@@ -763,7 +740,7 @@ class Election
         try {
             $stmt = $queryBuilder->execute();
             $A = $stmt->fetchAssociative();
-            $this->setVars($A, true);
+            $this->setVars(new DataArray($A), true);
             return true;
         } catch(Throwable $e) {
             return false;
@@ -776,30 +753,27 @@ class Election
      *
      * @param   array   $A          Array of values to use.
      * @param   boolean $fromdb     Indicate if $A is from the DB or a election.
+     * @return  object  $this
      */
-    function setVars($A, $fromdb=false)
+    function setVars(DataArray $A, bool $fromdb=false) : self
     {
         global $_CONF;
 
-        if (!is_array($A)) {
-            return false;
-        }
-
-        $this->setID($A['pid']);
-        $this->topic = $A['topic'];
-        $this->dscp = $A['description'];
-        $this->inblock = isset($A['display']) && $A['display'] ? 1 : 0;
-        $this->status = (int)$A['status'];
-        $this->rnd_questions = isset($A['rnd_questions']) && $A['rnd_questions'] ? 1 : 0;
-        $this->rnd_answers = isset($A['rnd_answers']) ? (int)$A['rnd_answers'] : 0;
-        $this->decl_winner = isset($A['decl_winner']) && $A['decl_winner'] ? 1 : 0;
-        $this->show_remarks = isset($A['show_remarks']) && $A['show_remarks'] ? 1 : 0;
-        $this->hideresults = isset($A['hideresults']) && $A['hideresults'] ? 1 : 0;
+        $this->setID($A->getString('pid'));
+        $this->topic = $A->getString('topic');
+        $this->dscp = $A->getString('description');
+        $this->inblock = $A->getInt('display');
+        $this->status = $A->getInt('status');
+        $this->rnd_questions = $A->getInt('rnd_questions');
+        $this->rnd_answers = $A->getInt('rnd_answers');
+        $this->decl_winner = $A->getInt('decl_winner');
+        $this->show_remarks = $A->getInt('show_remarks');
+        $this->hideresults = $A->getInt('hideresults');
         //$this->commentcode = (int)$A['commentcode'];
-        $this->setOwner($A['owner_id']);
-        $this->voting_gid = (int)$A['group_id'];
-        $this->results_gid = (int)$A['results_gid'];
-        $this->mod_allowed = (int)$A['voteaccess'];
+        $this->setOwner($A->getInt('owner_id'));
+        $this->voting_gid = $A->getInt('group_id');
+        $this->results_gid = $A->getInt('results_gid');
+        $this->mod_allowed = $A->getInt('voteaccess');
         if ($fromdb) {
             if (isset($A['vote_count'])) {
                 $this->_vote_count = (int)$A['vote_count'];
@@ -822,6 +796,7 @@ class Election
             }
             $this->setClosingDate($A['closes_date'], true);
         }
+        return $this;
     }
 
 
@@ -1035,16 +1010,14 @@ class Election
      * @param   array   $A      Array of values (e.g. $_POST)
      * @return  string      Error message, empty on success
      */
-    function Save($A = '')
+    function Save(?DataArray $A=NULL) : string
     {
         global $_CONF;
 
         $db = Database::getInstance();
 
-        if (is_array($A)) {
-            if (isset($A['old_pid'])) {
-                $this->old_pid = $A['old_pid'];
-            }
+        if ($A) {
+            $this->old_pid = $A->getString('old_pid');
             $this->setVars($A, false);
         }
         if ($this->Created === NULL) {
@@ -1744,64 +1717,7 @@ class Election
             }
             $T->set_var('lang_topics', MO::_('Topic'));
             $T->set_var('notification', $notification);
-            /*if (!$preview && $this->commentcode >= 0 ) {
-                USES_lib_comment();
-
-                $num_comments = CMT_getCount(Config::PI_NAME, $this->pid);
-                $T->set_var('num_comments',COM_numberFormat($num_comments));
-                $T->set_var('lang_comments', MO::_('Comments'));
-
-                $comment_link = CMT_getCommentLinkWithCount(
-                    Config::PI_NAME,
-                    $this->pid,
-                    Config::get('url') . '/index.php?pid=' . $this->pid,
-                    $num_comments,
-                    0
-                );
-
-                $T->set_var('comments_url', $comment_link['link_with_count']);
-                $T->parse('comments', 'comments', true);
-            } else {
-                $T->set_var('comments', '');
-                $T->set_var('comments_url', '');
-            }*/
             $retval = $T->finish($T->parse('output', 'block')) . LB;
-
-            /*if (
-                $this->disp_showall &&
-                $this->commentcode >= 0 &&
-                $this->disp_type != Modes::AUTOTAG &&
-                !$preview
-            ) {
-                $delete_option = self::hasRights('edit') ? true : false;
-
-                USES_lib_comment();
-
-                $page = isset($_GET['page']) ? COM_applyFilter($_GET['page'],true) : 0;
-                if ( isset($_POST['order']) ) {
-                    $order = $_POST['order'] == 'ASC' ? 'ASC' : 'DESC';
-                } elseif (isset($_GET['order']) ) {
-                    $order = $_GET['order'] == 'ASC' ? 'ASC' : 'DESC';
-                } else {
-                    $order = '';
-                }
-                if ( isset($_POST['mode']) ) {
-                    $mode = COM_applyFilter($_POST['mode']);
-                } elseif ( isset($_GET['mode']) ) {
-                    $mode = COM_applyFilter($_GET['mode']);
-                } else {
-                    $mode = '';
-                }
-                $valid_cmt_modes = array('flat','nested','nocomment','threaded','nobar');
-                if (!in_array($mode,$valid_cmt_modes)) {
-                    $mode = '';
-                }
-                $retval .= CMT_userComments(
-                    $this->pid, $filterS->filterData($this->topic), Config::PI_NAME,
-                    $order, $mode, 0, $page, false,
-                    $delete_option, $this->commentcode, $this->owner_id
-                );
-            }*/
         } else {
             if ($this->disp_showall) {
                 // not in a block, safe to return to the list
@@ -1835,6 +1751,8 @@ class Election
             return false;
         }
 
+        $Request = Request::getInstance();
+
         // Set a browser cookie to block multiple votes from anonymous.
         // Done here since we have access to $aid.
         SEC_setCookie(
@@ -1843,11 +1761,9 @@ class Election
             time() + Config::get('cookietime')
         );
 
-        if (isset($_POST['aftervote_url'])) {
-            $this->_aftervoteUrl = $_POST['aftervote_url'];
-        }
-        if (isset($_POST['vid']) && !empty($_POST['vid'])) {
-            $vote_id = COM_decrypt($_POST['vid']);
+        $this->_aftervoteUrl = $Request->getString('aftervote_url');
+        if (isset($Request['vid']) && !empty($Request['vid'])) {
+            $vote_id = COM_decrypt($Request->getString('vid'));
         } else {
             $vote_id = 0;
         }
@@ -1979,10 +1895,6 @@ class Election
             "((hideresults = 0 OR status = " . Status::CLOSED . " OR closes < '$sql_now_utc')" .
                 SEC_buildAccessSql('AND', 'results_gid') . ')',
         );
-        /*$filter = 'status <> ' . Status::ARCHIVED  . ' AND (' . implode(' OR ', $filter_ors) . ')';
-        $sql = "SELECT p.*,
-                (SELECT COUNT(v.id) FROM " . DB::table('voters') . " v WHERE v.pid = p.pid) AS vote_count
-                FROM " . DB::table('topics') . " AS p WHERE $filter";*/
         $db = Database::getInstance();
         $qb = $db->conn->createQueryBuilder();
         $qb->select(
@@ -1991,14 +1903,14 @@ class Election
             )
             ->from(DB::table('topics'), 'p')
             ->where('p.status <> ' . Status::ARCHIVED)
-            ->andWhere("'$sql_now_utc' BETWEEN opens AND closes")
             ->andWhere('(' . implode(' OR ' , $filter_ors) . ')')
             ->andWhere($db->getAccessSql('', 'p.results_gid'));
         try {
             $data = $qb->execute()->fetchAllAssociative();
             $count = count($data);
             foreach ($data as $A) {
-                $retval[] = new self($A);
+                $retval[$A['pid']] = new self;
+                $retval[$A['pid']]->setVars(new DataArray($A));
             }
         } catch(Throwable $e) {
             $count = 0;

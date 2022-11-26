@@ -1,37 +1,16 @@
 <?php
-// +--------------------------------------------------------------------------+
-// | Election Plugin - glFusion CMS                                              |
-// +--------------------------------------------------------------------------+
-// | install.php                                                              |
-// |                                                                          |
-// | This file installs and removes the data structures for the               |
-// | Election plugin for glFusion.                                               |
-// +--------------------------------------------------------------------------+
-// | Copyright (C) 2000-2008 by the following authors:                        |
-// |                                                                          |
-// | Authors: Tony Bibbs        - tony AT tonybibbs DOT com                   |
-// |          Tom Willett       - tom AT pigstye DOT net                      |
-// |          Blaine Lang       - blaine AT portalparts DOT com               |
-// |          Dirk Haun         - dirk AT haun-online DOT de                  |
-// |          Vincent Furia     - vinny01 AT users DOT sourceforge DOT net    |
-// +--------------------------------------------------------------------------+
-// |                                                                          |
-// | This program is free software; you can redistribute it and/or            |
-// | modify it under the terms of the GNU General Public License              |
-// | as published by the Free Software Foundation; either version 2           |
-// | of the License, or (at your option) any later version.                   |
-// |                                                                          |
-// | This program is distributed in the hope that it will be useful,          |
-// | but WITHOUT ANY WARRANTY; without even the implied warranty of           |
-// | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            |
-// | GNU General Public License for more details.                             |
-// |                                                                          |
-// | You should have received a copy of the GNU General Public License        |
-// | along with this program; if not, write to the Free Software Foundation,  |
-// | Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.          |
-// |                                                                          |
-// +--------------------------------------------------------------------------+
-
+/**
+ * Manual installation routine for the Elections plugin.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2020-2022 Lee Garner <lee@leegarner.com>
+ * @package     elections
+ * @version     v0.3.0
+ * @since       v0.1.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 require_once '../../../lib-common.php';
 require_once $_CONF['path'].'/plugins/elections/autoinstall.php';
 
@@ -79,4 +58,3 @@ if (SEC_checkToken()) {
 }
 
 echo COM_refresh($_CONF['site_admin_url'] . '/plugins.php');
-?>

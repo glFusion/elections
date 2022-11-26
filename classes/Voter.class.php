@@ -241,7 +241,7 @@ class Voter
             $db = Database::getInstance();
             try {
                 $data = $db->conn->executeQuery(
-                    "SELECT * FROM " . DB::table('votes') . "WHERE vid IN (?)",
+                    "SELECT * FROM " . DB::table('votes') . " WHERE vid IN (?)",
                     array($ids),
                     array(Database::PARAM_STR_ARRAY)
                 )->fetchAllAssociative();

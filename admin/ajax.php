@@ -32,23 +32,23 @@ if (!plugin_ismoderator_elections()) {
     exit;
 }
 use Elections\Election;
+use Elections\Models\Request;
 
-if (isset($_POST['action'])) {
-    $action = $_POST['action'];
-} elseif (isset($_GET['action'])) {
-    $action = $_GET['action'];
-} else {
-    $action = '';
-}
+$Request = Request::getInstance();
+$action = $Request->getString('action');
 
 $title = NULL;      // title attribute to be set
 switch ($action) {
 case 'toggle':
-    switch ($_POST['component']) {
+    $type = $Request->getString('type');
+    $id = $Request->getString('id');
+    $oldval = $Request->getInt('oldval');
+    $component = $Request->getString('component');
+    switch ($component) {
     case 'election':
-        switch ($_POST['type']) {
+        switch ($type) {
         case 'status':
-            $newval = Election::toggleEnabled($_POST['oldval'], $_POST['id']);
+            $newval = Election::toggleEnabled($oldval, $id);
             break;
          default:
             exit;
@@ -60,11 +60,11 @@ case 'toggle':
 
     // Common output for all toggle functions.
     $retval = array(
-        'id'    => $_POST['id'],
-        'type'  => $_POST['type'],
-        'component' => $_POST['component'],
+        'id'    => $id,
+        'type'  => $type,
+        'component' => $component,
         'newval'    => $newval,
-        'statusMessage' => $newval != $_POST['oldval'] ?
+        'statusMessage' => $newval != $oldval ?
             MO::_('Item(s) have been updated.') : MO::_('Item(s) are unchanged.'),
         'title' => $title,
     );
