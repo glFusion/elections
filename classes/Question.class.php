@@ -419,11 +419,10 @@ class Question
     {
         $db = Database::getInstance();
         try {
-            $db->conn->executeUpdate(
-                "UPDATE " . DB::table('answers') . "
-                SET pid = ?
-                WHERE pid = ?",
-                array($new_pid, $old_pid),
+            $db->conn->update(
+                DB::table('answers'),
+                array('pid' => $new_pid),
+                array('pid' => $old_pid),
                 array(Database::STRING, Database::STRING)
             );
         } catch (\Exception $e) {

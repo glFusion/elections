@@ -241,11 +241,10 @@ class Voter
             $db = Database::getInstance();
             try {
                 $data = $db->conn->executeQuery(
-                    "SELECT * FROM " . DB::table('votes') . "
-                    WHERE vid IN (?)",
+                    "SELECT * FROM " . DB::table('votes') . "WHERE vid IN (?)",
                     array($ids),
                     array(Database::PARAM_STR_ARRAY)
-                )->fetchAll(Database::ASSOCIATIVE);
+                )->fetchAllAssociative();
             } catch (\Throwable $e) {
                 Log::write('system', Log::ERROR, $e->getMessage());
                 $data = NULL;
@@ -266,7 +265,7 @@ class Voter
      * @param   string|integer  $vote_id    Record ID or record:private_key
      * @return  object      Voter object
      */
-    public static function getInstance($vote_id)
+    public static function getInstance($vote_id) : self
     {
         $prv_key = NULL;
         if (is_string($vote_id) && strpos($vote_id, ':') !== false) {
@@ -278,13 +277,12 @@ class Voter
         $db = Database::getInstance();
         $sql = "SELECT * FROM " . DB::table('voters') . " WHERE id = ?";
         try {
-            $stmt = $db->conn->executeQuery(
+            $row = $db->conn->executeQuery(
                 $sql,
                 array($vote_id),
                 array(Database::INTEGER)
-            );
-            $A = $stmt->fetch(Database::ASSOCIATIVE);
-            $Voter = new self($A);
+            )->fetchAssociative();
+            $Voter = new self($row);
             SEC_setCookie(self::KEY_COOKIE, $prv_key, time() + 1800);
             if ($prv_key !== NULL) {
                 $Voter->withPrvKey($prv_key);

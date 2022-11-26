@@ -222,7 +222,7 @@ class Election
         $db = Database::getInstance();
         try {
             $stmt = $db->conn->executeQuery($sql);
-            foreach ($stmt->fetchAll(Database::ASSOCIATIVE) as $A) {
+            foreach ($stmt->fetchAllAssociative() as $A) {
                 $retval[$A['pid']] = new self($A);
             }
         } catch(\Throwable $e) {
@@ -259,7 +259,7 @@ class Election
         //$db->qbGetPermSQL($queryBuilder,'',0,SEC_ACCESS_RO,'s');
         try {
             $stmt = $queryBuilder->execute();
-            foreach ($stmt->fetchAll(Database::ASSOCIATIVE) AS $A) {
+            foreach ($stmt->fetchAllAssociative() as $A) {
                 $retval[] = new self($A);
             }
         } catch(Throwable $e) {
@@ -280,7 +280,7 @@ class Election
         $db = Database::getInstance();
         try {
             $stmt = $db->conn->executeQuery($sql);
-            $A = $stmt->fetch(Database::ASSOCIATIVE);
+            $A = $stmt->fetchAssociative();
             return (int)$A['cnt'];
         } catch(\Throwable $e) {
             return 0;
@@ -762,7 +762,7 @@ class Election
             ->setParameter('pid', $this->pid);
         try {
             $stmt = $queryBuilder->execute();
-            $A = $stmt->fetch(Database::ASSOCIATIVE);
+            $A = $stmt->fetchAssociative();
             $this->setVars($A, true);
             return true;
         } catch(Throwable $e) {
@@ -1995,10 +1995,9 @@ class Election
             ->andWhere('(' . implode(' OR ' , $filter_ors) . ')')
             ->andWhere($db->getAccessSql('', 'p.results_gid'));
         try {
-            $stmt = $qb->execute();
-            $data = $stmt->fetchAll(Database::ASSOCIATIVE);
+            $data = $qb->execute()->fetchAllAssociative();
             $count = count($data);
-            foreach ($stmt->fetchAll(Database::ASSOCIATIVE) AS $A) {
+            foreach ($data as $A) {
                 $retval[] = new self($A);
             }
         } catch(Throwable $e) {

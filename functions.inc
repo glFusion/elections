@@ -407,7 +407,7 @@ function plugin_enablestatechange_elections($enable)
     // toggle Election block
     $db = Database::getInstance();
     try {
-        $db->conn->executeUpdate(
+        $db->conn->executeStatement(
             "UPDATE {$_TABLES['blocks']}
             SET is_enabled = $is_enabled
             WHERE (type = 'phpblock')
@@ -933,7 +933,7 @@ function plugin_runScheduledTask_elections()
     $cutoff = time() - (Config::get('archive_days', 365) * 86400);
     $db = Database::getInstance();
     try {
-        $db->conn->executeUpdate(
+        $db->conn->executeStatement(
             "UPDATE " . DB::table('topics') . " SET status = ? WHERE closes < FROM_UNIXTIME(?)",
             array(\Elections\Models\Status::ARCHIVED, $cutoff),
             array(Database::INTEGER, Database::STRING)
