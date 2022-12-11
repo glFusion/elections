@@ -393,63 +393,57 @@ class Voter
             $uid = (int)$_USER['uid'];
         }
 
-        $db = Database::getInstance();
-        $qb = $db->conn->createQueryBuilder();
-        if ($vote_id > 0) {
-            $Voter = self::getInstance($vote_id);
-            $qb->update(DB::table('voters'))
-               ->set('ipaddress', ':ipaddress')
-               ->set('uid', ':uid')
-               ->set('date', 'UNIX_TIMESTAMP()')
-               ->set('pid', ':pid')
-               ->set('votedata', ':data')
-               ->set('voterecords', ':voterecords')
-               ->set('pub_key', ':pubkey')
-               ->where('id = :id');
-            // already have the keys.
-        } else {
-            $Voter = new self;
-            $qb->insert(DB::table('voters'))
-               ->values(
-                    array(
-                        'ipaddress' => ':ipaddress',
-                        'uid' => ':uid',
-                        'date' => 'UNIX_TIMESTAMP()',
-                        'pid' => ':pid',
-                        'votedata' => ':data',
-                        'voterecords' => ':voterecords',
-                        'pub_key' => ':pubkey',
-                    )
-                );
-            $keys = self::createKeys();
-            $Voter->withPubKey($keys['pub_key'])
-                  ->withPrvKey($keys['prv_key']);
-        }
         $records = $Voter->saveVoteRecords($pid, $aid);
         $record_ids = array_keys($records);
-
         $data = $Voter->encrypt(json_encode($aid));
         $voterecords = $Voter->encrypt(json_encode($record_ids));
-        SEC_setCookie(self::KEY_COOKIE, '', time() - 1800);
-        $qb->setParameter('ipaddress', self::getRealIpAddress(), Database::STRING)
-           ->setParameter('uid', $uid, Database::INTEGER)
-           ->setParameter('pid', $pid, Database::STRING)
-           ->setParameter('data', $data, Database::STRING)
-           ->setParameter('voterecords', $voterecords, Database::STRING)
-           ->setParameter('pubkey', $Voter->getPubKey(), Database::STRING)
-           ->setParameter('id', $Voter->getID());
+
+        $db = Database::getInstance();
+        $values = array(
+            'ipaddress' => self::getRealIpAddress(),
+            'uid' => $uid,
+            'pid' => $pid,
+            'data' => $data,
+            'voterecords' => $voterecords,
+            'pubkey' => $Voter->getPubKey(),
+        );
+        $types = array(
+            Database::STRING,
+            Database::INTEGER,
+            Database::STRING,
+            Database::STRING,
+            Database::STRING,
+            Database::INTEGER,
+        );
         try {
-            $qb->execute();
-            $Voter->withUid($uid)
-                  ->withPid($pid);
-            if ($vote_id == 0) {
-                $Voter->withId($db->conn->lastInsertId());
+            if ($vote_id > 0) {
+                // already have the keys.
+                $types[] = Database::INTEGER;
+                $Voter = self::getInstance($vote_id);
+                $db->conn->update(
+                    DB::table('voters'),
+                    $values,
+                    array('id' => $Voter->getID()),
+                    $types
+                );
+            } else {
+                $Voter = new self;
+                $keys = self::createKeys();
+                $values['pub_key'] = $keys['pub_key'];
+                $types[] = Database::STRING;
+                $db->conn->insert(DB::table('voters'), $values, $types);
+                $Voter->withId($db->conn->lastInsertId())
+                      ->withPubKey($keys['pub_key'])
+                      ->withPrvKey($keys['prv_key']);
             }
-            return $Voter;
         } catch (\Throwable $e) {
             Log::write('system', Log::ERROR, $e->getMessage());
             return NULL;
         }
+        $Voter->withUid($uid)
+              ->withPid($pid);
+        SEC_setCookie(self::KEY_COOKIE, '', time() - 1800);
+        return $Voter;
     }
 
 
@@ -460,8 +454,7 @@ class Voter
         $db = Database::getInstance();
         if (!empty($this->_voteRecords)) {
             $db->conn->executeStatement(
-                "DELETE FROM " . DB::table('votes') . "
-                WHERE vid IN (?)",
+                "DELETE FROM " . DB::table('votes') . "WHERE vid IN (?)",
                 array(array_keys($this->_voteRecords)),
                 array(Database::PARAM_STR_ARRAY)
             );
