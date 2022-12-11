@@ -1,12 +1,15 @@
 <?php
 /**
  * Class to manage database table names.
+ * This is used as the plugin was originally intended as a possible
+ * replacement for the `polls` plugin, but may be deprecated in favor
+ * of using static table names.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2020 Lee Garner <lee@leegarner.com>
- * @package     polls
- * @version     v3.0.0
- * @since       v3.0.0
+ * @copyright   Copyright (c) 2020-2020 Lee Garner <lee@leegarner.com>
+ * @package     elections
+ * @version     v0.2.0
+ * @since       v0.0.1
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -15,8 +18,8 @@ namespace Elections;
 
 
 /**
- * Class for product attribute groups.
- * @package shop
+ * Abstract table names to allow easy renaming of the plugin.
+ * @package elections
  */
 class DB
 {

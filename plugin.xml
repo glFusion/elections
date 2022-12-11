@@ -1,7 +1,7 @@
 <plugin>
     <id>elections</id>
     <name>Elections</name>
-    <description>Online Election System</description>
+    <description>Online Election System offering secure, encrypted handling of results.</description>
     <version>0.2.0.1</version>
     <glfusionversion>2.0.0</glfusionversion>
     <phpversion>7.4.0</phpversion>
