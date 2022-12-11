@@ -64,6 +64,8 @@ final class Config
         $this->properties['url'] = $_CONF['site_url'] . '/' . self::PI_NAME;
         $this->properties['admin_url'] = $_CONF['site_admin_url'] . '/plugins/' . self::PI_NAME;
         $this->properties['path'] = $_CONF['path'] . 'plugins/' . self::PI_NAME . '/';
+        $this->properties['pi_display_name'] = MO::_('Elections');
+        $this->properties['pi_url'] = 'https://www.glfusion.org';
     }
 
 

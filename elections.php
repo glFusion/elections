@@ -24,16 +24,12 @@ if (!defined ('GVERSION')) {
 }
 use Elections\Config;
 use Elections\DB;
-use Elections\MO;
 
-global $_DB_table_prefix;
-
-Config::set('pi_display_name', MO::_('Elections'));
 Config::set('pi_version', '0.2.0.1');
-Config::set('gl_version', '1.7.8');
-Config::set('pi_url', 'https://www.glfusion.org');
+Config::set('gl_version', '2.0.0');
 
 // Add to $_TABLES array the tables your plugin uses
+global $_DB_table_prefix;
 $_TABLES[DB::key('answers')]    = $_DB_table_prefix . DB::key('answers');
 $_TABLES[DB::key('questions')]  = $_DB_table_prefix . DB::key('questions');
 $_TABLES[DB::key('topics')]     = $_DB_table_prefix . DB::key('topics');
