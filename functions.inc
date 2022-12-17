@@ -329,26 +329,11 @@ function plugin_user_delete_elections($uid)
     global $_TABLES;    // needed for groups and group_assignments
 
     // Anonymize pollvoters by uid / ipaddress
-    Voter::anonymize($uid);
+    Voter::moveUser($uid, 1);
     $db = Database::getInstance();
 
     if ($db->getCount(DB::table('topics'), 'owner_id', $uid, Database::INTEGER) == 0) {
         // there are no election owned by this user
-        return;
-    }
-
-    try {
-        $pids = $db->conn->executeQuery(
-            "SELECT pid FROM " . DB::table('topics') . " WHERE owner_id = ?",
-            array($uid),
-            array(Database::INTEGER)
-        )->fetchAllAssociative();
-    } catch (\Exception $e) {
-        Log::write('system', Log::ERROR, __FUNCTION__ . ': ' . $e->getMessage());
-        $data = NULL;
-    }
-
-    if (!is_array($pids) || empty($pids)) {
         return;
     }
 
@@ -375,8 +360,8 @@ function plugin_user_delete_elections($uid)
             Log::write('system', Log::ERROR, __FUNCTION__ . ': ' . $e->getMessage());
             $data = NULL;
         }
-        foreach ($pids as $A) {
-            Election::getInstance($A['pid'])->setOwner($rootuser)->Save();
+        if (is_array($data)) {
+            Election::moveUser($uid, $data['ug_uid']);
         }
     }
 }
