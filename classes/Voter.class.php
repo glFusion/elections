@@ -51,11 +51,12 @@ class Voter
      * @var string */
     private $votedata = '';
 
-    /** Public key used for encryption.
+    /** Public key used for encryption. Saved in the DB.
      * @var string */
     private $pub_key = '';
 
     /** Private key used for encryption.
+     * Shown to the voter after voting, never saved in the DB.
      * @var string */
     private $_prv_key = '';
 
@@ -67,7 +68,13 @@ class Voter
      * @var array */
     private $_voteRecords = NULL;
 
-    public function __construct($A=array())
+
+    /**
+     * Create a Voter, optionally based on a data array.
+     *
+     * @param   array   $A      Optional array, e.g. DB record
+     */
+    public function __construct(?array $A=NULL)
     {
         if (is_array($A) && !empty($A)) {
             $this->withId($A['id'])
@@ -82,50 +89,103 @@ class Voter
     }
 
 
-    public function withId($id)
+    /**
+     * Set the vote record ID.
+     *
+     * @param   integer $id     Record ID
+     * @return  object  $this
+     */
+    public function withId(int $id) : self
     {
-        $this->id = (int)$id;
+        $this->id = $id;
         return $this;
     }
 
 
-    public function getId()
+    /**
+     * Return the voting record ID.
+     *
+     * @return  integer     Record ID
+     */
+    public function getId() : int
     {
-        return (int)$this->id;
+        return $this->id;
     }
 
 
-    public function withPid($pid)
+    /**
+     * Set the election record ID.
+     *
+     * @param   string  $pid    Election ID
+     * @return  object  $this
+     */
+    public function withPid(string $pid) : self
     {
         $this->pid = $pid;
         return $this;
     }
 
-    public function getPid()
+
+    /**
+     * Get the election record ID.
+     *
+     * @return  string      Election ID
+     */
+    public function getPid() : string
     {
         return $this->pid;
     }
 
 
-    public function withUid($uid)
+    /**
+     * Set the voter's user ID.
+     *
+     * @param   integer $uid    User ID
+     * @return  object  $this
+     */
+    public function withUid(int $uid) : self
     {
-        $this->uid = (int)$uid;
+        $this->uid = $uid;
         return $this;
     }
 
-    public function withIpAddress($ip)
+
+    /**
+     * Set the voter's IP address.
+     *
+     * @param   string  $ip     IP address
+     * @return  object  $this
+     */
+    public function withIpAddress(string $ip) : self
     {
         $this->ipaddress = $ip;
         return $this;
     }
 
-    public function withDate($dt)
+
+    /**
+     * Set the timestamp when the vote was received.
+     *
+     * @param   integer $ts     Timestamp value
+     * @return  object  $this
+     */
+    public function withDate(?int $ts=NULL) : self
     {
-        $this->date = (int)$dt;
+        if (empty($ts)) {
+            $ts = time();
+        }
+        $this->date = $ts;
         return $this;
     }
 
-    public function getDate($fmt=NULL)
+
+    /**
+     * Get the date string or timestamp when the vote was received.
+     *
+     * @param   string  $fmt    Format string, NULL to return the timestamp
+     * @return  string|integer  Formatted date or integer timestamp
+     */
+    public function getDate(?string $fmt=NULL)
     {
         global $_USER, $_CONF;
 
@@ -144,7 +204,7 @@ class Voter
      * @param   string  $data   Encrypted data string
      * @return  object  $this
      */
-    public function withData($data)
+    public function withData(string $data) : self
     {
         $this->votedata = $data;
         return $this;
@@ -156,7 +216,7 @@ class Voter
      *
      * @return  string      Encrypted voting data
      */
-    public function getData()
+    public function getData() : string
     {
         return $this->votedata;
     }
@@ -168,7 +228,7 @@ class Voter
      * @param   string  $key    Public key
      * @return  object  $this
      */
-    public function withPubKey($key)
+    public function withPubKey(string $key) : self
     {
         $this->pub_key = $key;
         return $this;
@@ -180,7 +240,7 @@ class Voter
      *
      * @return  string      Public key
      */
-    public function getPubKey()
+    public function getPubKey() : string
     {
         return $this->pub_key;
     }
@@ -192,7 +252,7 @@ class Voter
      * @param   string  $key    Private key
      * @return  object  $this
      */
-    public function withPrvKey($key)
+    public function withPrvKey(string $key) : self
     {
         $this->_prv_key = $key;
         return $this;
@@ -205,7 +265,7 @@ class Voter
      *
      * @return  string      Private voting key
      */
-    public function getPrvKey()
+    public function getPrvKey() : string
     {
         return $this->_prv_key;
     }
@@ -217,7 +277,7 @@ class Voter
      * @param   string  $records    Encrypted list of record IDs
      * @return  object  $this
      */
-    private function withVoteRecords($records) : self
+    private function withVoteRecords(string $records) : self
     {
         $this->voterecords = $records;
         return $this;
@@ -246,7 +306,7 @@ class Voter
                     array(Database::PARAM_STR_ARRAY)
                 )->fetchAllAssociative();
             } catch (\Throwable $e) {
-                Log::write('system', Log::ERROR, $e->getMessage());
+                Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
                 $data = NULL;
             }
             if (is_array($data)) {
@@ -262,23 +322,22 @@ class Voter
     /**
      * Get a specific voting record.
      *
-     * @param   string|integer  $vote_id    Record ID or record:private_key
+     * @param   string  $vote_id    Record ID or record:private_key
      * @return  object      Voter object
      */
-    public static function getInstance($vote_id) : self
+    public static function getInstance(string $vote_id) : self
     {
         $prv_key = NULL;
-        if (is_string($vote_id) && strpos($vote_id, ':') !== false) {
+        if (strpos($vote_id, ':') !== false) {
             // An existing vote is being retrieved by the id:private_key string
             list($vote_id, $prv_key) = explode(':', $vote_id);
         } elseif (isset($_COOKIE[self::KEY_COOKIE])) {
             $prv_key = $_COOKIE[self::KEY_COOKIE];
         }
         $db = Database::getInstance();
-        $sql = "SELECT * FROM " . DB::table('voters') . " WHERE id = ?";
         try {
             $row = $db->conn->executeQuery(
-                $sql,
+                "SELECT * FROM " . DB::table('voters') . " WHERE id = ?",
                 array($vote_id),
                 array(Database::INTEGER)
             )->fetchAssociative();
@@ -288,13 +347,13 @@ class Voter
                 $Voter->withPrvKey($prv_key);
             }
         } catch (\Throwable $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
             $Voter = new self;
         }
         if ($Voter->getId() > 0 && $Voter->getPrvKey() != NULL) {
             // Got a valid voter, now get all the voterecords
             $Voter->getVoteRecords();
         }
-
         return $Voter;
     }
 
@@ -367,7 +426,7 @@ class Voter
      *
      * @return  string      User's IP address
      */
-    public static function getRealIpAddress()
+    public static function getRealIpAddress() : string
     {
         return $_SERVER['REAL_ADDR'];
     }
@@ -393,6 +452,19 @@ class Voter
             $uid = (int)$_USER['uid'];
         }
 
+        if ($vote_id > 0) {
+            // Editing an existing vote.
+            // Already have the keys.
+            $Voter = self::getInstance($vote_id);
+        } else {
+            // Creating a new vote, create and set keys.
+            $Voter = new self;
+            $keys = self::createKeys();
+            $Voter->withPubKey($keys['pub_key'])
+                  ->withPrvKey($keys['prv_key']);
+        }
+        $Voter->withDate();     // Always update to the current timestamp
+
         $records = $Voter->saveVoteRecords($pid, $aid);
         $record_ids = array_keys($records);
         $data = $Voter->encrypt(json_encode($aid));
@@ -403,23 +475,23 @@ class Voter
             'ipaddress' => self::getRealIpAddress(),
             'uid' => $uid,
             'pid' => $pid,
-            'data' => $data,
+            'date' => $Voter->getDate(),
+            'votedata' => $data,
             'voterecords' => $voterecords,
-            'pubkey' => $Voter->getPubKey(),
+            'pub_key' => $Voter->getPubKey(),
         );
         $types = array(
             Database::STRING,
             Database::INTEGER,
             Database::STRING,
-            Database::STRING,
-            Database::STRING,
             Database::INTEGER,
+            Database::STRING,
+            Database::STRING,
+            Database::STRING,
         );
         try {
             if ($vote_id > 0) {
-                // already have the keys.
-                $types[] = Database::INTEGER;
-                $Voter = self::getInstance($vote_id);
+                $types[] = Database::INTEGER;   // for vote_id
                 $db->conn->update(
                     DB::table('voters'),
                     $values,
@@ -427,17 +499,11 @@ class Voter
                     $types
                 );
             } else {
-                $Voter = new self;
-                $keys = self::createKeys();
-                $values['pub_key'] = $keys['pub_key'];
-                $types[] = Database::STRING;
                 $db->conn->insert(DB::table('voters'), $values, $types);
-                $Voter->withId($db->conn->lastInsertId())
-                      ->withPubKey($keys['pub_key'])
-                      ->withPrvKey($keys['prv_key']);
+                $Voter->withId($db->conn->lastInsertId());
             }
         } catch (\Throwable $e) {
-            Log::write('system', Log::ERROR, $e->getMessage());
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
             return NULL;
         }
         $Voter->withUid($uid)
@@ -447,18 +513,30 @@ class Voter
     }
 
 
+    /**
+     * Save the individual votes for a submission.
+     *
+     * @param   string  $pid    Election ID
+     * @param   array   $aid    Array of answers
+     * @return  array       Array of Vote objects
+     */
     private function saveVoteRecords(string $pid, array $aid) : array
     {
         global $_TABLES;
 
         $db = Database::getInstance();
         if (!empty($this->_voteRecords)) {
-            $db->conn->executeStatement(
-                "DELETE FROM " . DB::table('votes') . "WHERE vid IN (?)",
-                array(array_keys($this->_voteRecords)),
-                array(Database::PARAM_STR_ARRAY)
-            );
+            try {
+                $db->conn->executeStatement(
+                    'DELETE FROM ' . DB::table('votes') . ' WHERE vid IN (?)',
+                    array(array_keys($this->_voteRecords)),
+                    array(Database::PARAM_STR_ARRAY)
+                );
+            } catch (\Throwable $e) {
+                Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+            }
         }
+
         $this->_voteRecords = array();
         foreach ($aid as $q=>$a) {
             $id = Token::create();
@@ -558,13 +636,6 @@ class Voter
         } catch (\Throwable $e) {
             Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
         }
-        try {
-            $db->conn->delete(
-                DB::table('votes'), array('pid' => $pid), array(Database::STRING)
-            );
-        } catch (\Throwable $e) {
-            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
-        }
     }
 
 
@@ -573,7 +644,7 @@ class Voter
      * The private key will be shown to the voter after the vote is saved. It
      * consists of the record ID and private key as `id:prv_key`.
      *
-     * @return  array       JSON-decoded array, NULL or false on error
+     * @return  array       JSON-decoded array
      */
     public function decodeData() : array
     {
@@ -613,7 +684,7 @@ class Voter
      */
     private function encrypt(string $str) : string
     {
-        return COM_encrypt($str, $this->_prv_key . ':' . $this->getPubKey());
+        return COM_encrypt($str, $this->_prv_key . ':' . $this->pub_key);
     }
 
 
@@ -621,9 +692,9 @@ class Voter
      * Create a public and private key pair for voting data.
      * Also sets the prv_key property.
      *
-     * @return  array   Hash of public and private keys
+     * @return  array   Array of public and private keys
      */
-    public static function createKeys()
+    public static function createKeys() : array
     {
         $len = 16;      // Actual length of the token needed.
         $retval = array();
@@ -634,26 +705,6 @@ class Voter
         // Make private key and set property.
         $retval['prv_key'] = Token::create();
         return $retval;
-    }
-
-
-    /**
-     * Change the voter record to "anonymous" when a user is deleted.
-     *
-     * @param   integer $uid    ID of user being deleted
-     */
-    public static function anonymize(int $uid) : void
-    {
-        try {
-            Database::getInstance()->conn->update(
-                DB::table('voters'),
-                array('uid' => 1),
-                array('uid' => $uid),
-                array(Database::INTEGER, Database::INTEGER)
-            );
-        } catch (\Throwable $e) {
-            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
-        }
     }
 
 }
