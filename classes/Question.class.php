@@ -14,6 +14,7 @@
 namespace Elections;
 use glFusion\Database\Database;
 use glFusion\Log\Log;
+use Elections\Models\DataArray;
 
 
 /**
@@ -22,13 +23,18 @@ use glFusion\Log\Log;
  */
 class Question
 {
+    /** Maximum answers allowed.
+     * @todo: Make this a per-election setting
+     * @var integer */
+    const MAX_ANSWERS = 10;
+
+    /** Related elections's topic ID.
+     * @var integer */
+    private $tid = 0;
+
     /** Question record ID.
      * @var integer */
     private $qid = -1;
-
-    /** Related poll's record ID.
-     * @var string */
-    private $pid = '';
 
     /** Question text.
      * @var string */
@@ -49,24 +55,27 @@ class Question
 
     /** Array of answer objects.
      * @var array */
-    private $Answers = array();
+    private $Answers = NULL;
+
+    /** Flag to indicate question was written using the advanced editor.
+     * @var int */
+    protected $advanced_editor_mode = 1;
 
 
     /**
      * Constructor.
      *
-     * @param   array   $A      Optional data record
+     * @param   integer $qid    Question record ID
      */
-    public function __construct($A=NULL, $ans_sort=0)
+    public function __construct(?int $tid=NULL, ?int $qid=NULL)
     {
-        global $_USER;
-
-        if (is_array($A)) {
-            $this->setVars($A, true);
+        if (!empty($tid) && !empty($qid)) {
+            $this->setQid($qid)
+                 ->setTid($tid)
+                 ->Read();
         }
-        $this->ans_sort = (int)$ans_sort;
-        if ($this->qid > -1 && !empty($this->pid)) {
-            $this->Answers = Answer::getByQuestion($this->qid, $this->pid, $this->ans_sort);
+        if ($this->qid > -1 && !empty($this->tid)) {
+            $this->Answers = Answer::getByQuestion($this->qid, $this->tid, $this->ans_sort);
         }
     }
 
@@ -75,48 +84,59 @@ class Question
      * Read this field definition from the database and load the object.
      *
      * @see     self::setVars()
-     * @param   integer $id     Record ID of question
      * @return  array           DB record array
      */
-    public static function Read($id = 0)
+    public function Read() : self
     {
         $db = Database::getInstance();
         try {
             $data = $db->conn->executeQuery(
-                "SELECT * FROM " . DB::table('questions') . " WHERE qid = $id",
-                array($id),
+                "SELECT * FROM " . DB::table('questions') . " WHERE qid = ?",
+                array($this->qid),
                 array(Database::INTEGER)
             )->fetchAssociative();
         } catch (\Exception $e) {
             Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
-            $data = NULL;
+            $data = false;
         }
-        return $data;
+        if (!empty($data)) {
+            $this->setVars(new DataArray($data, true));
+        }
+        return $this;
+    }
+
+
+    public static function getInstance(int $tid, int $qid) : self
+    {
+        $retval = new self;
+        $retval->setTid($tid)
+               ->setQid($qid)
+               ->Read();
+        return $retval;
     }
 
 
     /**
      * Get all the questions that appear on a given poll.
      *
-     * @param   string  $pid    Election ID
+     * @param   integer $tid    Election ID
      * @param   boolean $rnd_q  True to randomize question order
-     * @param   boolean $ans_sort   Flag indicating how to sort answers
      * @return  array       Array of Question objects
      */
-    public static function getByElection($pid, $rnd_q=false, $ans_sort=0)
+    public static function getByElection(int $tid, int $rnd_q=0) : array
     {
         $retval = array();
         $db = Database::getInstance();
         if ($rnd_q) {
             $order = ' ORDER BY RAND()';
         } else {
-            $order = ' ORDER BY pid,qid ASC';
+            $order = ' ORDER BY tid,qid ASC';
         }
         try {
             $data = $db->conn->executeQuery(
-                "SELECT * FROM " . DB::table('questions') . " WHERE pid = ? $order",
-                array($pid),
-                array(Database::STRING)
+                "SELECT * FROM " . DB::table('questions') . " WHERE tid = ? $order",
+                array($tid),
+                array(Database::INTEGER)
             )->fetchAllAssociative();
         } catch (\Exception $e) {
             Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
@@ -124,7 +144,9 @@ class Question
         }
         if (is_array($data)) {
             foreach ($data as $A) {
-                $retval[] = new self($A, $ans_sort);
+                $Q = new self;
+                $Q->setVars(new DataArray($A));
+                $retval[] = $Q;
             }
         }
         return $retval;
@@ -133,32 +155,30 @@ class Question
 
     /**
      * Set all variables for this field.
-     * Data is expected to be from $_POST or a database record
+     * Data is expected to be from $_POST or a database record.
      *
-     * @param   array   $A      Array of name->value pairs
-     * @param   boolean $fromDB Indicate whether this is read from the DB
+     * @param   DataArray   $A      Array of name->value pairs
+     * @return  object      $this
      */
-    public function setVars($A, $fromDB=false)
+    public function setVars(DataArray $A) : self
     {
-        if (!is_array($A)) {
-            return false;
-        }
-        $this->qid = (int)$A['qid'];
-        $this->pid = COM_sanitizeID($A['pid']);
-        $this->question = $A['question'];
+        $this->tid = $A->getInt('tid');
+        $this->qid = $A->getInt('qid');
+        $this->ans_sort = $A->getInt('ans_sort');
+        $this->question = $A->getString('question');
         return $this;
     }
 
 
     /**
-     * Set the poll ID. Used when creating a new question.
+     * Set the election ID. Used when creating a new question.
      *
-     * @param   string  $pid    Election ID
+     * @param   integer $tid    Election ID
      * @return  object  $this
      */
-    public function setPid($pid)
+    public function setTid(int $tid) : self
     {
-        $this->pid = $pid;
+        $this->tid = $tid;
         return $this;
     }
 
@@ -172,6 +192,19 @@ class Question
     public function setQuestion($q)
     {
         $this->question = $q;
+        return $this;
+    }
+
+
+    /**
+     * Set the sorting method when displaying answers.
+     *
+     * @param   integer $ans_sort   Sorting option
+     * @return  object  $this
+     */
+    public function setAnswerSort(int $sort) : self
+    {
+        $this->ans_sort = $sort;
         return $this;
     }
 
@@ -191,7 +224,7 @@ class Question
             }
             $this->Answers[$i]->setAnswer($A['answer'][$this->qid][$i])
                 ->setQid($this->qid)
-                ->setPid($this->pid)
+                ->setTid($this->tid)
                 ->setAid($i)
                 ->setRemark($A['remark'][$this->qid][$i])
                 ->Save();
@@ -233,9 +266,20 @@ class Question
      *
      * @return  string      Question text to display
      */
-    public function getQuestion()
+    public function getQuestion() : string
     {
         return $this->question;
+    }
+
+
+    /**
+     * Get the answer sorting option.
+     *
+     * @return  integer     Answer sorting option
+     */
+    public function getAnswerSort() : int
+    {
+        return $this->ans_sort;
     }
 
 
@@ -244,8 +288,11 @@ class Question
      *
      * @return  array       Array of answer records
      */
-    public function getAnswers()
+    public function getAnswers() : array
     {
+        if ($this->Answers === NULL) {
+            $this->Answers = Answer::getByQuestion($this->qid, $this->tid, $this->ans_sort);
+        }
         return $this->Answers;
     }
 
@@ -254,16 +301,16 @@ class Question
      * Delete all the questions for a poll.
      * Called when a poll is deleted or the ID is changed.
      *
-     * @param   string  $pid    Election ID
+     * @param   integer $tid    Election ID
      */
-    public static function deleteElection(string $pid) : void
+    public static function deleteElection(int $tid) : void
     {
         $db = Database::getInstance();
         try {
             $db->conn->delete(
                 DB::table('questions'),
-                array('pid' => $pid),
-                array(Database::STRING)
+                array('tid' => $tid),
+                array(Database::INTEGER)
             );
         } catch (\Exception $e) {
             Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
@@ -323,20 +370,21 @@ class Question
             $db->conn->insert(
                 DB::table('questions'),
                 array(
-                    'pid' => $this->pid,
+                    'tid' => $this->tid,
                     'qid' => $this->getQid(),
+                    'ans_sort' => $this->getAnswerSort(),
                     'question' => $this->question,
                 ),
-                array(Database::STRING, Database::INTEGER, Database::STRING)
+                array(Database::STRING, Database::INTEGER, Database::INTEGER, Database::STRING)
             );
             return 0;
         } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException $k) {
             try {
                 $db->conn->update(
                     DB::table('questions'),
-                    array('question' => $this->question),
-                    array('qid' => $this->getQid()),
-                    array(Database::STRING, Database::INTEGER)
+                    array('question' => $this->question, 'ans_sort' => $this->getAnswerSort()),
+                    array('tid' => $this->tid, 'qid' => $this->getQid()),
+                    array(Database::STRING, Database::INTEGER, Database::INTEGER, Database::INTEGER)
                 );
             } catch (\Exception $e) {
                 Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
@@ -409,25 +457,114 @@ class Question
     }
 
 
-    /**
-     * Change the Election ID for all items if it was saved with a new ID.
-     *
-     * @param   string  $old_pid    Original Election ID
-     * @param   string  $new_pid    New Election ID
-     */
-    public static function changePid(string $old_pid, string $new_pid) : void
+    public function isNew() : bool
     {
+        return $this->qid < 0;
+    }
+
+
+    /**
+     * Edit a question definition.
+     *
+     * @return  string      HTML for editing form
+     */
+    public function edit() : string
+    {
+        global $_TABLES, $_CONF_QUIZ, $_CONF;
+
+        $retval = '';
+        $format_str = '';
+        $listinput = '';
+
         $db = Database::getInstance();
-        try {
-            $db->conn->update(
-                DB::table('answers'),
-                array('pid' => $new_pid),
-                array('pid' => $old_pid),
-                array(Database::STRING, Database::STRING)
-            );
-        } catch (\Exception $e) {
-            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+        $T = new \Template($_CONF['path'] . '/plugins/elections/templates/admin');
+        $T->set_file('editform', 'editquestion.thtml');
+
+        SEC_setCookie(
+            $_CONF['cookie_name'].'adveditor',
+            SEC_createTokenGeneral('advancededitor'),
+            time() + 1200, $_CONF['cookie_path'],
+            $_CONF['cookiedomain'],
+            $_CONF['cookiesecure'],
+            false
+        );
+
+        // Set up the wysiwyg editor, if available
+        $tpl_var = $_CONF_QUIZ['pi_name'] . '_entry';
+        switch (PLG_getEditorType()) {
+        case 'ckeditor':
+            $T->set_var('show_htmleditor', true);
+            PLG_requestEditor($_CONF_QUIZ['pi_name'], $tpl_var, 'ckeditor_quiz.thtml');
+            PLG_templateSetVars($tpl_var, $T);
+            break;
+        case 'tinymce' :
+            $T->set_var('show_htmleditor',true);
+            PLG_requestEditor($_CONF_QUIZ['pi_name'], $tpl_var, 'tinymce_quiz.thtml');
+            PLG_templateSetVars($tpl_var, $T);
+            break;
+        default :
+            // don't support others right now
+            $T->set_var('show_htmleditor', false);
+            break;
         }
+
+        // Get defaults from the form, if defined
+        /*if ($this->quizID > 0) {
+            $form = Quiz::getInstance($this->quizID);
+        }*/
+        if ($this->advanced_editor_mode) {
+            $T->set_var(array(
+                'default_visual_editor' => true,
+                'adv_edit_mode' => 1,
+            ) );
+        } else {
+            $T->set_var(array(
+                'default_visual_editor' => false,
+                'adv_edit_mode' => 0,
+            ) );
+        }
+        $T->set_var(array(
+            'topic' => $db->getItem(
+                DB::table('topics'),
+                'topic',
+                array('tid' => $this->tid),
+                array(Database::INTEGER)
+            ),
+            'tid'       => $this->tid,
+            'qid'       => $this->qid,
+            'question'      => $this->question,
+            //'ena_chk'   => $this->enabled == 1 ? 'checked="checked"' : '',
+            //'doc_url'   => QUIZ_getDocURL('question_def.html'),
+            'editing'   => $this->isNew() ? '' : 'true',
+            //'help_msg'  => $this->help_msg,
+            //'postAnswerMsg' => $this->postAnswerMsg,
+            //'can_delete' => $this->isNew() || $this->_wasAnswered() ? false : true,
+            //'random_chk' => $this->randomizeAnswers ? 'checked="checked"' : '',
+            'lang_pid' => MO::_('Election Topic'),
+            'lang_question' => MO::_('Question'),
+            'lang_answers' => MO::_('Answers'),
+        ) );
+
+        $T->set_block('editform', 'Answers', 'Ans');
+        foreach ($this->Answers as $Answer) {
+            $T->set_var(array(
+                'aid'    => $Answer->getAid(),
+                'ans_val'   => $Answer->getAnswer(),
+            ) );
+            $T->parse('Ans', 'Answers', true);
+        }
+        $count = count($this->Answers);
+        for ($i = $count + 1; $i <= self::MAX_ANSWERS; $i++) {
+            $T->set_var(array(
+                'ans_id'    => $i,
+                'ans_val'   => '',
+                'ischecked' => '',
+            ) );
+            $T->parse('Ans', 'Answers', true);
+        }
+        $T->parse('output', 'editform');
+        $retval .= $T->finish($T->get_var('output'));
+        return $retval;
     }
 
 }

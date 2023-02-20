@@ -26,9 +26,9 @@ class Answer
     const SORT_RAND = 1;
     const SORT_ALPHA = 2;
 
-    /** Election record ID. (deprecate?)
-     * @var string */
-    private $pid = '';
+    /** Election record ID.
+     * @var integer */
+    private $tid = 0;
 
     /** Question record ID.
      * @var integer */
@@ -73,23 +73,23 @@ class Answer
      * Get all the answers for a given question.
      *
      * @param   integer $q_id       Question ID
-     * @param   string  $pid        Election ID
+     * @param   integer $tid        Election ID
      * @param   boolean $rnd        True to get in random order
      * @return  array       Array of Answer objects
      */
-    public static function getByQuestion(int $q_id, string $pid, int $rnd = 0) : array
+    public static function getByQuestion(int $q_id, int $tid, int $rnd = 0) : array
     {
         $retval = array();
         $db = Database::getInstance();
         $qb = $db->conn->createQueryBuilder();
         $qb->select('a.*', 'count(v.aid) as total_votes')
            ->from(DB::table('answers'), 'a')
-           ->leftJoin('a', DB::table('votes'), 'v', 'v.pid=a.pid AND v.qid=a.qid AND v.aid=a.aid')
+           ->leftJoin('a', DB::table('votes'), 'v', 'v.tid=a.tid AND v.qid=a.qid AND v.aid=a.aid')
            ->where('a.qid = :q_id')
-           ->andWhere('a.pid = :pid')
+           ->andWhere('a.tid = :tid')
            ->groupBy('a.qid, a.aid')
            ->setParameter('q_id', $q_id, Database::INTEGER)
-           ->setParameter('pid', $pid, Database::STRING);
+           ->setParameter('tid', $tid, Database::INTEGER);
         switch ($rnd) {
         case self::SORT_NONE:
             $qb->orderBy('a.aid', 'ASC');
@@ -101,6 +101,7 @@ class Answer
             $qb->orderBy('a.answer', 'ASC');
             break;
         }
+
         try {
             $data = $qb->execute()->fetchAllAssociative();
         } catch (\Exception $e) {
@@ -120,10 +121,10 @@ class Answer
      * Get all the answers for a given question, ordered by score.
      *
      * @param   integer $q_id       Question ID
-     * @param   string  $pid        Election ID
+     * @param   integer $tid        Election ID
      * @return  array       Array of Answer objects
      */
-    public static function getByScore($q_id, $pid)
+    public static function getByScore(int $q_id, int $tid)
     {
         $q_id = (int)$q_id;
         $retval = array();
@@ -131,10 +132,10 @@ class Answer
         try {
             $data = $db->conn->executeQuery(
                 "SELECT * FROM " . DB::table('answers') . "
-                WHERE qid = ? AND pid = ?
+                WHERE qid = ? AND tid = ?
                 ORDER BY votes DESC",
-                array($q_id, $pid),
-                array(Database::INTEGER, Database::STRING)
+                array($q_id, $tid),
+                array(Database::INTEGER, Database::INTEGER)
             );
         } catch (\Excepton $e) {
             Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
@@ -162,7 +163,7 @@ class Answer
             return false;
         }
 
-        $this->pid = $A['pid'];
+        $this->tid = $A['tid'];
         $this->qid = (int)$A['qid'];
         $this->aid = (int)$A['aid'];
         $this->votes = (int)$A['total_votes'];
@@ -185,14 +186,14 @@ class Answer
             $db->conn->insert(
                 DB::table('answers'),
                 array(
-                    'pid' => $this->getPid(),
+                    'tid' => $this->getTid(),
                     'qid' => $this->getQid(),
                     'aid' => $this->getAid(),
                     'answer' => $this->answer,
                     'remark' => $this->remark,
                 ),
                 array(
-                    Database::STRING,
+                    Database::INTEGER,
                     Database::INTEGER,
                     Database::INTEGER,
                     Database::STRING,
@@ -208,14 +209,14 @@ class Answer
                     'remark' => $this->remark,
                 ),
                 array(
-                    'pid' => $this->getPid(),
+                    'tid' => $this->getTid(),
                     'qid' => $this->getQid(),
                     'aid' => $this->getAid(),
                 ),
                 array(
                     Database::STRING,
                     Database::STRING,
-                    Database::STRING,
+                    Database::INTEGER,
                     Database::INTEGER,
                     Database::INTEGER,
                 )
@@ -239,15 +240,15 @@ class Answer
         try {
             $db->conn->delete(
                 DB::table('answers'),
-                array('pid' => $this->pid, 'qid' => $this->qid, 'aid' => $this->aid),
-                array(Database::STRING, Database::INTEGER, Database::INTEGER)
+                array('tid' => $this->tid, 'qid' => $this->qid, 'aid' => $this->aid),
+                array(Database::INTEGER, Database::INTEGER, Database::INTEGER)
             );
         } catch (\Throwable $e) {
             Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
         }
         $this->aid = 0;
         $this->qid = 0;
-        $this->pid = '';
+        $this->tid = 0;
         return $this;
     }
 
@@ -256,16 +257,16 @@ class Answer
      * Delete all the answers for an election.
      * Called when an election is deleted or the ID is changed.
      *
-     * @param   string  $pid    Election ID
+     * @param   integer $tid    Election ID
      */
-    public static function deleteElection($pid)
+    public static function deleteElection(int $tid) : void
     {
         $db = Database::getInstance();
         try {
             $db->conn->delete(
                 DB::table('answers'),
-                array('pid' => $pid),
-                array(Database::STRING)
+                array('tid' => $tid),
+                array(Database::INTEGER)
             );
         } catch (\Throwable $e) {
             Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
@@ -276,17 +277,17 @@ class Answer
     /**
      * Reset all answers to zero votes for an election.
      *
-     * @param   string  $pid    Election ID
+     * @param   integer $tid    Election ID
      */
-    public static function resetElection($pid)
+    public static function resetElection(int $tid) : void
     {
         $db = Database::getInstance();
         try {
             $db->conn->update(
                 DB::table('answers'),
                 array('votes' => 0),
-                array('pid' => $pid),
-                array(Database::INTEGER, Database::STRING)
+                array('tid' => $tid),
+                array(Database::INTEGER, Database::INTEGER)
             );
         } catch (\Throwable $e) {
             Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
@@ -297,18 +298,18 @@ class Answer
     /**
      * Set the election ID.
      *
-     * @param   string  $pid    Election ID
+     * @param   integer $tid    Election ID
      * @return  object  $this
      */
-    public function setPid(string $pid) : self
+    public function setTid(int $tid) : self
     {
-        $this->pid = $pid;
+        $this->tid = $tid;
         return $this;
     }
 
-    public function getPid() : string
+    public function getTid() : int
     {
-        return $this->pid;
+        return $this->tid;
     }
 
 
@@ -437,22 +438,22 @@ class Answer
     /**
      * Increment the vote cound for an answer.
      *
-     * @param   string  $pid    Election ID
+     * @param   integer $tid    Election ID
      * @param   integer $qid    Question ID
      * @param   integer $aid    Answer ID
      */
-    public static function increment(string $pid, int $qid, int $aid) : void
+    public static function increment(int $tid, int $qid, int $aid) : void
     {
         $db = Database::getInstance();
         try {
             $db->conn->executeStatement(
                 "UPDATE " . DB::table('answers') . "
                 SET votes = votes + 1
-                WHERE pid = ?
+                WHERE tid = ?
                 AND qid = ?
                 AND aid = ?",
-                array($pid, $qid, $aid),
-                array(Database::STRING, Database::INTEGER, Database::INTEGER)
+                array($tid, $qid, $aid),
+                array(Database::INTEGER, Database::INTEGER, Database::INTEGER)
             );
         } catch (\Throwable $e) {
             Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
@@ -464,50 +465,23 @@ class Answer
      * Decrement the number of votes received for an answer.
      * Used when votes are edited.
      *
-     * @param   string  $pid    Election ID
+     * @param   integer $tid    Election ID
      * @param   integer $qid    Question ID
      * @param   integer $aid    Answer ID
      * @return  void
      */
-    public static function decrement(string $pid, int $qid, int $aid) : void
+    public static function decrement(int $tid, int $qid, int $aid) : void
     {
         $db = Database::getInstance();
         try {
             $db->conn->executeStatement(
                 "UPDATE " . DB::table('answers') . "
                 SET votes = (case when votes < 1 then 0 else (votes - 1) end)
-                WHERE pid = ?
+                WHERE tid = ?
                 AND qid = ?
                 AND aid = ?",
-               array($pid, $qid, $aid),
-               array(Database::STRING, Database::INTEGER, Database::INTEGER)
-            );
-        } catch (\Throwable $e) {
-            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
-        }
-    }
-
-
-    /**
-     * Change the Election ID for all answers if it was saved with a new ID.
-     *
-     * @param   string  $old_pid    Original Election ID
-     * @param   string  $new_pid    New Election ID
-     */
-    public static function changePid(string $old_pid, string $new_pid) : void
-    {
-        if ($old_pid == $new_pid) {
-            // Nothing to do
-            return;
-        }
-
-        $db = Database::getInstance();
-        try {
-            $db->conn->update(
-                DB::table('answers'),
-                array('pid' => $new_pid),
-                array('pid' => $old_pid),
-               array(Database::STRING, Database::STRING)
+               array($tid, $qid, $aid),
+               array(Database::INTEGER, Database::INTEGER, Database::INTEGER)
             );
         } catch (\Throwable $e) {
             Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());

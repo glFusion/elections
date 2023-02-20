@@ -46,7 +46,8 @@ $(window).load(function() {
 	<div class="uk-panel-box">{description}</div>
 {!endif}
 	<form class="uk-form uk-form-horizontal uk-width-1-1" action="{vote_url}" id="vote{id}" method="post">
-		<input type="hidden" name="pid" value="{id}" />
+		<input type="hidden" name="tid" value="{tid}" />
+		<input type="hidden" name="pid" value="{pid}" />
 		<input type="hidden" name="vid" value="{vote_id}" />
 		<input type="hidden" name="aftervote_url" value="{aftervote_url}" />
 		{questions}

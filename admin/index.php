@@ -35,6 +35,7 @@ $display = '';
 $action = '';
 $expected = array(
     'edit', 'save', 'delete', 'lv', 'resetelection',
+    'editq', 'saveq',
     'results', 'presults', 'preview',
 );
 list($action, $actionval) = $Request->getAction($expected);
@@ -47,31 +48,29 @@ $title = MO::_('Election Administration');
 switch ($action) {
 case 'lv' :
     $title = MO::_('List Votes');
-    $page .= Election::getInstance($pid)->listVotes();
+    $page .= Election::getInstance($actionval)->listVotes();
     break;
 
 case 'edit':
-    $page .= Election::getInstance($pid)->editElection();
+    $page .= Election::getInstance($actionval)->edit();
+    break;
+
+case 'editq':
+    $tid = $Request->getInt('tid');
+    $qid = $Request->getInt('qid');
+    $Question = new Elections\Question($tid, $qid);
+    $page .= $Question->edit();
     break;
 
 case 'save':
     if (SEC_checktoken()) {
-        if (!empty ($pid)) {
-            $msg = Election::getInstance($Request->getString('old_pid'))->Save($Request);
-            if (!empty($msg)) {
-                COM_setMsg($msg);
-            }
+        $Election = Election::getInstance($Request->getInt('tid'));
+        if ($Election->Save($Request)) {
             COM_refresh(Config::get('admin_url') . '/index.php');
         } else {
             $title = MO::_('Edit Election');
-            $page .= COM_startBlock(
-                MO::_('Invalid security token'),
-                '',
-                COM_getBlockTemplate('_msg_block', 'header')
-            );
-            $page .= MO::_('Please enter an Election ID.');
-            $page .= COM_endBlock(COM_getBlockTemplate('_msg_block', 'footer'));
-            $page .= ELECTION_edit ();
+            $page .= $Election->getErrors(true);
+            $page .= $Election->edit();
         }
     } else {
         COM_accessLog(sprintf(
@@ -83,7 +82,7 @@ case 'save':
     break;
 
 case 'results':
-    $page .= (new Results($pid))->withAdmin(true)->Render();
+    $page .= (new Results($actionval))->withAdmin(true)->Render();
     $title = MO::_('Results');
     break;
 
@@ -93,7 +92,7 @@ case 'presults':
     break;
 
 case 'resetelection':
-    Election::deleteVotes($pid);
+    Election::deleteVotes($actionval);
     COM_refresh(Config::get('admin_url') . '/index.php');
     break;
 
@@ -102,7 +101,7 @@ case 'delete':
         COM_errorLog(MO::_('Ignored possibly manipulated request to delete a election.'));
         $page .= COM_refresh(Config::get('admin_url') . '/index.php');
     } elseif (SEC_checktoken()) {
-        $page .= Election::deleteElection($pid);
+        $page .= Election::getInstance($actionval)->delete();
     } else {
         COM_accessLog(sprintf(
             MO::_("User %s tried to illegally delete election $pid and failed CSRF checks."),
@@ -113,7 +112,7 @@ case 'delete':
     break;
 
 case 'preview':
-    $Election = new Election($pid);
+    $Election = new Election($actionval);
     if (isset($Election) && !$Election->isNew()) {
         $page .= $Election->Render(true);
     }

@@ -31,7 +31,7 @@ class Results
     private $cmt_order = 'DESC';
     private $cmt_mode = '';
     private $displaytype = 0;
-    private $pid = '';
+    private $tid = 0;
     private $showComments = 1;
     private $Election = NULL;
     private $isAdmin = false;
@@ -40,14 +40,14 @@ class Results
     /**
      * Set the poll ID if supplied, and the comment mode to the default.
      *
-     * @param   string  $pid    Optionall Election ID
+     * @param   integer $tid    Optionall Election ID
      */
-    public function __construct($pid='')
+    public function __construct(int $tid=0)
     {
         global $_CONF;
 
-        if (!empty($pid)) {
-            $this->withElection($pid);
+        if (!empty($tid)) {
+            $this->withElection($tid);
         }
         $this->withCommentMode($_CONF['comment_mode']);
     }
@@ -56,17 +56,17 @@ class Results
     /**
      * Set the ID of the poll to show, if not set in the constructor.
      *
-     * @param   string|object  $pid    Election ID or object
+     * @param   integer|object  $tid    Election ID or object
      * @return  object  $this
      */
-    public function withElection($pid)
+    public function withElection($tid) : self
     {
-        if (is_string($pid)) {
-            $this->pid = $pid;
-            $this->Election = Election::getInstance($pid);
-        } elseif (is_object($pid) && $pid instanceof Election) {
-            $this->pid = $pid->getID();
-            $this->Election = $pid;
+        if (is_integer($tid)) {
+            $this->tid = $tid;
+            $this->Election = Election::getInstance($tid);
+        } elseif (is_object($tid) && $tid instanceof Election) {
+            $this->tid = $tid->getID();
+            $this->Election = $tid;
         }
         return $this;
     }
@@ -201,7 +201,7 @@ class Results
         $filter->setPostmode('text');
         $poll->set_var(array(
             'topic'     => $filter->filterData($this->Election->getTopic()),
-            'pid'       => $this->pid,
+            'tid'       => $this->tid,
             'num_votes' => COM_numberFormat($this->Election->numVotes()),
             'lang_votes' => MO::_('Votes'),
             'admin_url' => Config::get('admin_url') . '/index.php',
@@ -220,13 +220,13 @@ class Results
         if ($this->displaytype == Modes::NORMAL && Election::hasRights('edit')) {
             $editlink = COM_createLink(
                 MO::_('Edit'),
-                Config::get('admin_url') . '/index.php?edit=x&amp;pid=' . $this->pid);
+                Config::get('admin_url') . '/index.php?edit=' . $this->tid);
             $poll->set_var(array(
                 'edit_link' => $editlink,
-                'edit_url' => Config::get('admin_url') . '/index.php?edit=x&amp;pid=' . $this->pid,
+                'edit_url' => Config::get('admin_url') . '/index.php?edit=' . $this->tid,
                 'edit_icon' => COM_createLink(
                     '<i class="uk-icon-edit tooltip"></i>',
-                    Config::get('admin_url') . '/index.php?edit=x&amp;pid=' . $this->pid,
+                    Config::get('admin_url') . '/index.php?edit=' . $this->tid,
                     array(
                         'title' => MO::_('Edit'),
                     )
@@ -307,7 +307,7 @@ class Results
         $poll->set_var('lang_topics', MO::_('Topics'));
         if ($this->isAdmin && $this->displaytype !== Modes::PRINT) {
             $poll->set_var(array(
-                'print_url' => Config::get('admin_url') . '/index.php?presults=x&pid=' . urlencode($this->pid),
+                'print_url' => Config::get('admin_url') . '/index.php?presults=' . $this->tid,
                 'lang_print' => MO::_('Print'),
             ) );
         }
@@ -368,12 +368,12 @@ class Results
         $text_arr = array(
             'has_extras'   => true,
             'instructions' => '',
-            'form_url'     => Config::get('admin_url') . '/index.php?lv=x&amp;pid='.urlencode($this->pid),
+            'form_url'     => Config::get('admin_url') . '/index.php?lv='.$this->tid,
         );
 
         $sql = "SELECT * FROM {$_TABLES['pollvoters']} AS voters
             LEFT JOIN {$_TABLES['users']} AS users ON voters.uid=users.uid
-            WHERE voters.pid = '" . Database::getInstance()->conn->quote($this->pid) . "'";
+            WHERE voters.tid = '" . (int)$this->tid . "'";
 
         $query_arr = array(
             'table' => 'pollvoters',

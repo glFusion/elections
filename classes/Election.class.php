@@ -30,7 +30,11 @@ use glFusion\Log\Log;
  */
 class Election
 {
-    /** Election ID.
+    /** Election topic record ID.
+     * @var integer */
+    private $tid = 0;
+
+    /** Election ID string, to be used in URLs.
      * @var string */
     private $pid = '';
 
@@ -94,9 +98,9 @@ class Election
      * @var boolean */
     private $isNew = true;
 
-    /** Questions for this election.
+    /** Questions for this election. NULL to load questions on first query.
      * @var array */
-    private $_Questions = array();
+    private $_Questions = NULL;
 
     /** Selections made for this election's questions.
      * @var array */
@@ -118,11 +122,6 @@ class Election
     /** Randomize questions when displayed?
      * @var boolean */
     private $rnd_questions = 0;
-
-    /** How to sort answers when displayed.
-     * 0 = none, 1 = random, 2 = alphabetically.
-     * @var integer */
-    private $rnd_answers = 0;
 
     /** Declare a winner, or just use as a poll?
      * @var boolean */
@@ -158,6 +157,10 @@ class Election
      * @var string */
     private $_aftervoteUrl = '';
 
+    /** Collection of error messages.
+     * @var array */
+    private $_errors = array();
+
 
     /**
      * Constructor.
@@ -165,32 +168,29 @@ class Election
      * user if none specified.
      * If a key is requested, then just build the election for that key (requires a $uid).
      *
-     * @param   string  $pid     Election ID, empty to create a new record
+     * @param   integer $tid     Election ID, empty to create a new record
      */
-    function __construct(?string $pid=NULL)
+    function __construct(?int $tid=NULL)
     {
         global $_CONF;
 
-        if (empty($pid)) {
+        if (empty($tid)) {
             // Creating a new election, set the default groups based on the
             // global login-required setting.
             $this->voting_gid = Config::get('def_voting_gid');
             $this->results_gid = Config::get('def_results_gid');
-            $this->setID(COM_makeSid());
+            $this->setPid(COM_makeSid());
             $this->setOwner();
             $this->mod_allowed = (int)Config::get('allow_votemod');
             $this->Opens = new \Date('now', $_CONF['timezone']);
-            $this->Closes = clone $this->Opens;
+            $this->Closes = NULL;
             $this->cookie_key = Token::create();
         } else {
             // Got an election ID string
-            $pid = COM_sanitizeID($pid);
-            $this->setID($pid);
-            if ($this->Read()) {
-                $this->isNew = false;
-                $this->old_pid = $this->pid;
+            $this->setTid($tid);
+            if (!$this->Read()) {
+                $this->tid = 0;
             }
-            $this->_Questions = Question::getByElection($this->pid, $this->rnd_questions, $this->rnd_answers);
         }
     }
 
@@ -198,12 +198,39 @@ class Election
     /**
      * Get an instance of a election object.
      *
-     * @param   string  $pid    Election record ID
+     * @param   string  $tid    Election record ID
      * @return  object      Election object
      */
-    public static function getInstance($pid)
+    public static function getInstance(int $tid) : self
     {
-        return new self($pid);
+        return new self($tid);
+    }
+
+
+    /**
+     * Get an election by it's `pid` or descriptive ID.
+     * Used to create friendlier guest-facing URLs.
+     *
+     * @param   string  $pid    Election PID
+     * @return  object      New Election object
+     */
+    public static function getByPid(string $pid) : self
+    {
+        $retval = new self;
+        try {
+            $row = Database::getInstance()->conn->executeQuery(
+                "SELECT * FROM " . DB::table('topics') . ' WHERE pid = ?',
+                array($pid),
+                array(Database::STRING)
+            )->fetchAssociative();
+        } catch (\Throwable $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+            $row = false;
+        }
+        if (!empty($row)) {
+            $retval->setVars(new DataArray($row), true);
+        }
+        return $retval;
     }
 
 
@@ -232,7 +259,6 @@ class Election
             ->orderBy('p.pid', 'ASC')
             ->setParameter('now', $_CONF['_now']->toMYSQL(false))
             ->setParameter('status', Status::OPEN);
-        //$db->qbGetPermSQL($queryBuilder,'',0,SEC_ACCESS_RO,'s');
         try {
             $stmt = $queryBuilder->execute();
             foreach ($stmt->fetchAllAssociative() as $A) {
@@ -253,15 +279,31 @@ class Election
      */
     public static function countElections() : int
     {
-        $sql = "SELECT COUNT(*) AS cnt FROM " . DB::table('topics');
-        $db = Database::getInstance();
-        try {
-            $stmt = $db->conn->executeQuery($sql);
-            $A = $stmt->fetchAssociative();
-            return (int)$A['cnt'];
-        } catch(\Throwable $e) {
-            return 0;
-        }
+        return Database::getInstance()->getCount(DB::table('topics'));
+    }
+
+
+    /**
+     * Set the election record ID.
+     *
+     * @param   integer $tid    Record ID for election
+     * @return  object  $this
+     */
+    public function setTid(int $tid) : self
+    {
+        $this->tid = $tid;
+        return $this;
+    }
+
+
+    /**
+     * Get the election record ID.
+     *
+     * @return  integer $tid    Record ID for election
+     */
+    public function getTid() : int
+    {
+        return $this->tid;
     }
 
 
@@ -271,9 +313,9 @@ class Election
      * @param   string  $id     Record ID for election
      * @return  object  $this
      */
-    private function setID($id)
+    private function setPid(string $pid)
     {
-        $this->pid = COM_sanitizeID($id, false);
+        $this->pid = COM_sanitizeID($pid, false);
         return $this;
     }
 
@@ -283,7 +325,7 @@ class Election
      *
      * @return  string  Record ID of election
      */
-    public function getID()
+    public function getPid() : string
     {
         return $this->pid;
     }
@@ -330,7 +372,7 @@ class Election
      * @param   integer $uid    User ID of election owner
      * @return  object  $this
      */
-    public function setOwner($uid = 0)
+    public function setOwner(int $uid=0) : self
     {
         global $_USER;
 
@@ -345,11 +387,11 @@ class Election
     /**
      * Check if this is a new record.
      *
-     * @return  integer     1 if new, 0 if not
+     * @return  boolean     True if a new record, False if existing
      */
-    public function isNew()
+    public function isNew() : bool
     {
-        return $this->isNew ? 1 : 0;
+        return $this->tid == 0;
     }
 
 
@@ -358,14 +400,14 @@ class Election
      *
      * @return  integer     1 if open, 0 if closed
      */
-    public function isOpen()
+    public function isOpen() : int
     {
         global $_CONF;
 
         if (
             $this->status > 0 ||
             $this->Opens->toMySQL() > $_CONF['_now']->toMySQL() ||
-            $this->Closes->toMySQL() < $_CONF['_now']->toMySQL()
+            $this->Closes && $this->Closes->toMySQL() < $_CONF['_now']->toMySQL()
         ) {
             return 0;
         } else {
@@ -379,7 +421,7 @@ class Election
      *
      * @return  integer     1 if viewing allowed, 0 if not
      */
-    public function canViewResults()
+    public function canViewResults() : int
     {
         static $can_view = NULL;
 
@@ -528,9 +570,9 @@ class Election
      *
      * @return  integer     Number of questions asked
      */
-    public function numQuestions()
+    public function numQuestions() : int
     {
-        return count($this->_Questions);
+        return count($this->getQuestions());
     }
 
 
@@ -573,8 +615,11 @@ class Election
      *
      * @return  array       Array of Question objects
      */
-    public function getQuestions()
+    public function getQuestions() : array
     {
+        if ($this->_Questions === NULL) {
+            $this->_Questions = Question::getByElection($this->tid, $this->rnd_questions);
+        }
         return $this->_Questions;
     }
 
@@ -732,11 +777,11 @@ class Election
         $db = Database::getInstance();
         $queryBuilder = $db->conn->createQueryBuilder();
         $queryBuilder
-            ->select('p.*', 'count(v.pid) as vote_count')
-            ->from(DB::table('topics'), 'p')
-            ->leftJoin('p', DB::table('voters'), 'v', 'v.pid=p.pid')
-            ->where('p.pid = :pid')
-            ->setParameter('pid', $this->pid);
+            ->select('t.*', 'count(v.tid) as vote_count')
+            ->from(DB::table('topics'), 't')
+            ->leftJoin('t', DB::table('voters'), 'v', 'v.tid=t.tid')
+            ->where('t.tid = :tid')
+            ->setParameter('tid', $this->tid);
         try {
             $stmt = $queryBuilder->execute();
             $A = $stmt->fetchAssociative();
@@ -759,13 +804,13 @@ class Election
     {
         global $_CONF;
 
-        $this->setID($A->getString('pid'));
+        $this->setTid($A->getInt('tid'));
+        $this->setPid($A->getString('pid'));
         $this->topic = $A->getString('topic');
         $this->dscp = $A->getString('description');
         $this->inblock = $A->getInt('display');
         $this->status = $A->getInt('status');
         $this->rnd_questions = $A->getInt('rnd_questions');
-        $this->rnd_answers = $A->getInt('rnd_answers');
         $this->decl_winner = $A->getInt('decl_winner');
         $this->show_remarks = $A->getInt('show_remarks');
         $this->hideresults = $A->getInt('hideresults');
@@ -807,7 +852,7 @@ class Election
      * @param   string  $type   Type of editing- 'edit' or 'registration'
      * @return  string          HTML for edit election
      */
-    public function editElection($type = 'edit')
+    public function edit(string $type = 'edit') : string
     {
         global $_CONF, $_GROUPS, $_USER, $MESSAGE;
 
@@ -824,7 +869,7 @@ class Election
             'answer' => 'answeroptions.thtml',
         ) );
 
-        if (!empty($this->pid)) {       // if not a new record
+        if (!$this->isNew()) {       // if not a new record
             // Get permissions for election
             if (!self::hasRights('edit')) {
                 // User doesn't have write access...bail
@@ -852,7 +897,7 @@ class Election
                     'lang_delete_confirm' => $MESSAGE[76]
                 ) );
             }
-            $Questions = Question::getByElection($this->pid);
+            $Questions = Question::getByElection($this->tid);
         } else {
             $this->owner_id = (int)$_USER['uid'];
             $this->voting_gid = (int)SEC_getFeatureGroup ('election.edit');
@@ -865,8 +910,8 @@ class Election
         $T->set_var(array(
             'action_url' => Config::get('admin_url') . '/index.php',
             'lang_electionid' => MO::_('Election ID'),
-            'id' => $this->pid,
-            'old_pid' => $this->old_pid,
+            'tid' => $this->tid,
+            'pid' => $this->pid,
             'lang_donotusespaces' => MO::_('Do not use spaces.'),
             'lang_topic' => MO::_('Topic'),
             'topic' => htmlspecialchars ($this->topic),
@@ -914,8 +959,6 @@ class Election
             'lang_permissions' => MO::_('Permissions'),
             'lang_back' => MO::_('Back to Listing'),
             'rndq_chk' => $this->rnd_questions ? 'checked="checked"' : '',
-            'rnda_chk' => $this->rnd_answers ? 'checked="checked"' : '',
-            'rnda_ck_' . $this->rnd_answers => 'selected="selected"',
             'lang_rnd_q' => MO::_('Randomize question order?'),
             'lang_rnd_a' => MO::_('Sort displayed answers'),
             'lang_as_entered' => MO::_('As Entered'),
@@ -926,11 +969,11 @@ class Election
             'decl_chk' => $this->decl_winner ? 'checked="checked"' : '',
             'remarks_chk' => $this->show_remarks ? 'checked="checked"' : '',
             'timezone' => $_CONF['timezone'],
-            'lang_resetresults' => $this->old_pid != '' ? MO::_('Reset Results') : '',
+            'lang_resetresults' => $this->tid > 0 ? MO::_('Reset Results') : '',
             'lang_exp_reset' => MO::_('Reset all results for this election'),
             'lang_reset' => MO::_('Reset'),
             'opens_date' => $this->Opens->format('Y-m-d H:i', true),
-            'closes_date' => $this->Closes->format('Y-m-d H:i', true),
+            'closes_date' => $this->Closes ? $this->Closes->format('Y-m-d H:i', true) : '',
         ) );
 
         $T->set_block('editor','questiontab','qt');
@@ -946,11 +989,13 @@ class Election
 
             $T->set_var('question_tab', MO::_('Question') . " $display_id");
             $T->set_var('question_id', $j);
+
             if (isset($Questions[$j])) {
                 $T->set_var(array(
                     'question_text' => $Questions[$j]->getQuestion(),
                     'question_id' => $j,
                     'hasdata' => true,
+                    'sort_sel_' . $Questions[$j]->getAnswerSort() => 'selected="selected"',
                 ) );
                 $Answers = $Questions[$j]->getAnswers();
             } else {
@@ -958,13 +1003,15 @@ class Election
                 $T->unset_var('hasdata');
                 $T->unset_var('question_text');
             }
-            $T->set_var('lang_question', MO::_('Question') . " $display_id");
-            $T->set_var('lang_answer', MO::_('Answer'));
-            $T->set_var('lang_votes', MO::_('Votes'));
-            $T->set_var('lang_remark', MO::_('Remark'));
-            $T->set_var('lang_saveaddnew', MO::_('Save and Add'));
-
-            $T->parse('qt','questiontab',true);
+            $T->set_var(array(
+                'lang_question' => MO::_('Question') . ' ' . $display_id,
+                'lang_ans_sort' => MO::_('Sort Answers'),
+                'lang_answer' => MO::_('Answer'),
+                'lang_votes' => MO::_('Votes'),
+                'lang_remark' => MO::_('Remark'),
+                'lang_saveaddnew' => MO::_('Save and Add'),
+            ) );
+            $T->parse('qt', 'questiontab', true);
 
             $T->set_block('answer', 'AnswerRow', 'AR');
             for ($i = 0; $i < Config::get('maxanswers'); $i++) {
@@ -987,6 +1034,9 @@ class Election
             $T->parse('question_list', 'question', true);
             $T->clear_var('AR');
             $T->clear_var ('answer_option');
+            $T->clear_var('sort_sel_0');
+            $T->clear_var('sort_sel_1');
+            $T->clear_var('sort_sel_2');
         }
         $token = SEC_createToken();
         $T->set_var(array(
@@ -1008,156 +1058,125 @@ class Election
      * then the DB is checked to ensure that the ID is unique.
      *
      * @param   array   $A      Array of values (e.g. $_POST)
-     * @return  string      Error message, empty on success
+     * @return  boolean     True on success, False on error
      */
-    function Save(?DataArray $A=NULL) : string
+    function Save(?DataArray $A=NULL) : bool
     {
         global $_CONF;
 
         $db = Database::getInstance();
+        $retval = true;
 
         if ($A) {
-            $this->old_pid = $A->getString('old_pid');
             $this->setVars($A, false);
         }
         if ($this->Created === NULL) {
             $this->Created = clone $_CONF['_now'];
         }
 
-        $frm_name = $this->topic;
-        if (empty($frm_name)) {
-            return MO::_('A name is required.');
+        if (empty($this->topic)) {
+            $this->addError(MO::_('A name is required.'));
+        }
+        if (empty($this->pid)) {
+            $this->addError(MO::_('An identifier is required.'));
         }
 
         if (isset($A['resetresults']) && $A['resetresults'] == 1) {
-            self::deleteVotes($this->pid);
+            self::deleteVotes($this->tid);
             $this->cookie_key = Token::create();
         }
 
-        // If saving a new record or changing the ID of an existing one,
-        // make sure the new election ID doesn't already exist.
-        $changingID = (!$this->isNew() && $this->pid != $this->old_pid);
-        if ($this->isNew || $changingID) {
-            $x = $db->getCount(DB::table('topics'), 'pid', $this->pid, Database::STRING);
-            if ($x > 0) {
-                $this->pid = COM_makeSid();
-                $changingID = true;     // treat as a changed ID if we have to create one
-            }
-        }
-
-        if (!$this->isNew && $this->old_pid != '') {
-            $sql1 = "UPDATE " . DB::table('topics') . " SET ";
-            $sql3 = " WHERE pid = '{$this->old_pid}'";
-        } else {
-            $sql1 = "INSERT INTO " . DB::table('topics') . "  SET ";
-            $sql3 = '';
-        }
-            //commentcode = :commentcode,
-        $sql2 = "pid = :pid,
-            topic = :topic,
-            description = :dscp,
-            created = :created,
-            opens = :opens,
-            closes = :closes,
-            display = :display,
-            status = :status,
-            hideresults = :hideresults,
-            owner_id = :owner_id,
-            group_id = :group_id,
-            results_gid = :results_gid,
-            voteaccess = :voteaccess,
-            rnd_questions = :rnd_questions,
-            rnd_answers = :rnd_answers,
-            decl_winner = :decl_winner,
-            show_remarks = :show_remarks,
-            cookie_key = :cookie_key";
-        $sql = $sql1 . $sql2 . $sql3;
+        $values = array(
+            'pid' => $this->pid,
+            'topic' => $this->topic,
+            'description' => $this->dscp,
+            'created' => $this->Created->toMySQL(false),
+            'opens' => $this->Opens->toMySQL(false),
+            'closes' => $this->Closes->toMySQL(false),
+            'display' => $this->inblock,
+            'status' => $this->status,
+            'hideresults' => $this->hideresults,
+            'owner_id' => $this->owner_id,
+            'group_id' => $this->voting_gid,
+            'results_gid' => $this->results_gid,
+            'voteaccess' => $this->mod_allowed,
+            'rnd_questions' => $this->rnd_questions,
+            'decl_winner' => $this->decl_winner,
+            'show_remarks' => $this->show_remarks,
+            'cookie_key' => $this->cookie_key,
+        );
+        $types = array(
+            Database::STRING,
+            Database::STRING,
+            Database::STRING,
+            Database::STRING,
+            Database::STRING,
+            Database::STRING,
+            Database::INTEGER,
+            Database::INTEGER,
+            Database::INTEGER,
+            Database::INTEGER,
+            Database::INTEGER,
+            Database::INTEGER,
+            Database::INTEGER,
+            Database::INTEGER,
+            Database::INTEGER,
+            Database::INTEGER,
+            Database::STRING,
+        );
         $db = Database::getInstance();
         try {
-            $stmt = $db->conn->executeStatement($sql,
-                array(
-                    'pid' => $this->pid,
-                    'topic' => $this->topic,
-                    'dscp' => $this->dscp,
-                    'created' => $this->Created->toMySQL(false),
-                    'opens' => $this->Opens->toMySQL(false),
-                    'closes' => $this->Closes->toMySQL(false),
-                    'display' => $this->inblock,
-                    'status' => $this->status,
-                    'hideresults' => $this->hideresults,
-                    //'commentcode' => $this->commentcode,
-                    'owner_id' => $this->owner_id,
-                    'group_id' => $this->voting_gid,
-                    'results_gid' => $this->results_gid,
-                    'voteaccess' => $this->mod_allowed,
-                    'rnd_questions' => $this->rnd_questions,
-                    'rnd_answers' => $this->rnd_answers,
-                    'decl_winner' => $this->decl_winner,
-                    'show_remarks' => $this->show_remarks,
-                    'cookie_key' => $this->cookie_key,
-                ),
-                array(
-                    Database::INTEGER,
-                    Database::STRING,
-                    Database::STRING,
-                    Database::STRING,
-                    Database::STRING,
-                    Database::STRING,
-                    Database::STRING,
-                    Database::INTEGER,
-                    Database::INTEGER,
-                    //Database::INTEGER,
-                    Database::INTEGER,
-                    Database::INTEGER,
-                    Database::INTEGER,
-                    Database::INTEGER,
-                    Database::INTEGER,
-                    Database::INTEGER,
-                    Database::INTEGER,
-                    Database::INTEGER,
-                    Database::INTEGER,
-                    Database::STRING,
-                )
-            );
-            $Questions = Question::getByElection($this->old_pid);
-            for ($i = 0; $i < Config::get('maxquestions'); $i++) {
-                if (empty($A['question'][$i])) {
-                    break;
-                }
-                if (isset($Questions[$i])) {
-                    $Q = $Questions[$i];
-                } else {
-                    $Q = new Question();
-                }
-                $Q->setPid($this->pid)
-                    ->setQid($i)
-                    ->setQuestion($A['question'][$i])
-                    ->setAnswers($A)
-                    ->Save();
+            if ($this->isNew()) {
+                $db->conn->insert(DB::table('topics'), $values, $types);
+                $this->tid = $db->conn->lastInsertId();
+            } else {
+                $types[] = Database::INTEGER;
+                $db->conn->update(
+                    DB::table('topics'),
+                    $values,
+                    array('tid' => $this->tid),
+                    $types
+                );
             }
-
-            // Now delete any questions that were removed.
-            for (; $i < count($Questions); $i++) {
-                $Questions[$i]->Delete();
-            }
-
-            if (!$this->isNew && $changingID) {
-                // Questions and answers were already saved above,
-                // so just delete the old election IDs.
-                Answer::deleteElection($this->old_pid);
-                Question::deleteElection($this->old_pid);
-                // Still need to update the voter records.
-                Voter::changePid($this->old_pid, $this->pid);
-            }
-
-            CTL_clearCache();       // so autotags pick up changes
-            $msg = '';              // no error message if successful
-            PLG_itemSaved($this->pid, 'election', $this->old_pid);
+        } catch(\Doctrine\DBAL\Exception\UniqueConstraintViolationException $e) {
+            // Duplicate pid value
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+            $this->addError(MO::_('Duplicate key violation, Election ID must be unique'));
         } catch (\Throwable $e) {
             Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
-            $msg = "An error occurred saving the election";
+            $this->addError(MO::_("An error occurred saving the election"));
         }
-        return $msg;
+        if (!empty($this->_errors)) {
+            return false;
+        }
+
+        // Got here, must have successfully saved the election record
+        $Questions = Question::getByElection($this->tid);
+        for ($i = 0; $i < Config::get('maxquestions'); $i++) {
+            if (empty($A['question'][$i])) {
+                break;
+            }
+            if (isset($Questions[$i])) {
+                $Q = $Questions[$i];
+            } else {
+                $Q = new Question();
+            }
+            $Q->setTid($this->tid)
+              ->setQid($i)
+              ->setAnswerSort($A['ans_sort'][$i])
+              ->setQuestion($A['question'][$i])
+              ->setAnswers($A)
+              ->Save();
+        }
+
+        // Now delete any questions that were removed.
+        for (; $i < count($Questions); $i++) {
+            $Questions[$i]->Delete();
+        }
+        CTL_clearCache();       // so autotags pick up changes
+        $msg = '';              // no error message if successful
+        PLG_itemSaved($this->tid, 'election');
+        return true;
     }
 
 
@@ -1274,10 +1293,10 @@ class Election
             'sql' => "SELECT p.*, count(v.id) as vote_count
                 FROM " . DB::table('topics') . " p
                 LEFT JOIN " . DB::table('voters') . " v
-                ON v.pid = p.pid",
+                ON v.tid = p.tid",
             'query_fields' => array('topic'),
             'default_filter' => 'AND' . self::getPermSql(),
-            'group_by' => 'p.pid',
+            'group_by' => 'p.tid',
         );
         $extras = array(
             'token' => SEC_createToken(),
@@ -1315,7 +1334,7 @@ class Election
         switch($fieldname) {
         case 'edit':
             $retval = FieldList::edit(array(
-                'url' => Config::get('admin_url') . "/index.php?edit=x&amp;pid={$A['pid']}",
+                'url' => Config::get('admin_url') . "/index.php?edit={$A['tid']}",
             ) );
             break;
         case 'created':
@@ -1340,13 +1359,13 @@ class Election
         case 'topic_preview':
             $retval = COM_createLink(
                 $A['topic'],
-                Config::get('admin_url') . '/index.php?preview&pid=' . urlencode($A['pid'])
+                Config::get('admin_url') . '/index.php?preview=' . $A['tid']
             );
             break;
 
         case 'topic':
             $retval = htmlspecialchars($fieldvalue);
-            $voted = Voter::hasVoted($A['pid'], $A['cookie_key'], $A['group_id']);
+            $voted = Voter::hasVoted($A['tid'], $A['cookie_key'], $A['group_id']);
             $closed = ($A['closes'] < $extras['_now']) || $A['status'] > 0;
             if (
                 !$closed &&
@@ -1355,7 +1374,7 @@ class Election
             ) {
                 $retval = COM_createLink(
                     $retval,
-                    COM_buildUrl(Config::get('url') . "/index.php?pid={$A['pid']}")
+                    COM_buildUrl(Config::get('url') . "/index.php?tid={$A['tid']}")
                 );
             } elseif (
                 SEC_inGroup($A['results_gid']) &&
@@ -1363,7 +1382,7 @@ class Election
             ) {
                 $retval = COM_createLink(
                     $retval,
-                    Config::get('url') . "/index.php?results=x&pid={$A['pid']}"
+                    Config::get('url') . "/index.php?results={$A['pid']}"
                 );
             }
             break;
@@ -1377,7 +1396,7 @@ class Election
                 if (SEC_inGroup('results_gid')) {
                     $retval .= '&nbsp;' . FieldList::buttonLink(array(
                         'text' => MO::_('Results'),
-                        'url' => Config::get('url') . '/index.php?pid=' . urlencode($A['pid']),
+                        'url' => Config::get('url') . '/index.php?results=' . $A['pid'],
                         'style' => 'primary',
                     ) );
                 }
@@ -1385,7 +1404,7 @@ class Election
                 // Election is open. Show the voting link if the user hasn't voted,
                 // otherwise show the early results link if allowed.
                 $retval = MO::_('Open');
-                if (!Voter::hasVoted($A['pid'], $A['cookie_key'], $A['group_id'])) {
+                if (!Voter::hasVoted($A['tid'], $A['cookie_key'], $A['group_id'])) {
                     if (SEC_inGroup($A['group_id'], $_USER['uid'])) {
                         $retval .= '&nbsp;' . FieldList::buttonLink(array(
                             'text' => MO::_('Vote'),
@@ -1395,7 +1414,7 @@ class Election
                     } elseif (!$A['hideresults'] && SEC_inGroup('results_gid')) {
                         $retval .= '&nbsp;' . FieldList::buttonLink(array(
                             'text' => MO::_('Results'),
-                            'url' => Config::get('url') . '/index.php?results&pid=' . urlencode($A['pid']),
+                            'url' => Config::get('url') . '/index.php?results=' . urlencode($A['pid']),
                             'style' => 'primary',
                         ) );
                     } elseif (COM_isAnonUser()) {
@@ -1409,7 +1428,7 @@ class Election
         case 'user_extra':
             if ($message != '') {
                 $retval = $message;
-            } elseif (Voter::hasVoted($A['pid'], $A['cookie_key'], $A['group_id'])) {
+            } elseif (Voter::hasVoted($A['tid'], $A['cookie_key'], $A['group_id'])) {
                 if ($A['voteaccess']) {
                     $retval = self::getShowVoteButton($A['pid']);
                 } else {
@@ -1425,7 +1444,7 @@ class Election
                 'value' => 1,
                 'id' => 'togenabled' . $A['pid'],
                 'checked' => $fieldvalue == 0,
-                'onclick' => Config::PI_NAME . "_toggle(this,'{$A['pid']}','{$fieldname}','election');",
+                'onclick' => Config::PI_NAME . "_toggle(this,'{$A['tid']}','{$fieldname}','election');",
             ) );
             break;
         case 'display':
@@ -1442,14 +1461,14 @@ class Election
             if ($extras['is_admin'] && (int)$retval > 0) {
                 $retval = COM_createLink(
                     $retval,
-                    Config::get('admin_url') . '/index.php?lv=x&amp;pid='.urlencode($A['pid'])
+                    Config::get('admin_url') . '/index.php?lv='.$A['tid']
                 );
             }
             break;
         case 'results':
             if ($A['vote_count'] > 0) {
                 $retval = FieldList::resultsLink(array(
-                    'url' => Config::get('admin_url') . '/index.php?results=x&pid=' . urlencode($A['pid'])
+                    'url' => Config::get('admin_url') . '/index.php?results=' . $A['pid']
                 ) );
             } else {
                 $retval = 'n/a';
@@ -1462,7 +1481,7 @@ class Election
                 ) );
             } else { 
                 $retval = FieldList::refresh(array(
-                    'url' => Config::get('admin_url') . "/index.php?resetelection&pid={$A['pid']}",
+                    'url' => Config::get('admin_url') . "/index.php?resetelection={$A['tid']}",
                     'attr' => array(
                         'onclick' => "return confirm('" .
                             MO::_('Are you sure you want to delete all of the results for this election?') .
@@ -1511,17 +1530,17 @@ class Election
             if ($this->canViewResults()) {
                 if ($this->disp_type == Modes::NORMAL) {
                     // not in a block or autotag, just refresh to the results page
-                    echo COM_refresh(Config::get('url') . '/index.php?results&pid=' . $this->pid);
+                    echo COM_refresh(Config::get('url') . '/index.php?results=' . $this->pid);
                 } elseif ($this->disp_type == Modes::AUTOTAG) {
                     // In an autotag
-                    return (new Results($this->pid))
+                    return (new Results($this->tid))
                         ->withDisplayType($this->disp_type)
                         ->Render();
                 } else {
                     // in a block, just add a link for now
                     return COM_createLink(
                         $this->getTopic() . ' (' . MO::_('Results') . ')',
-                        Config::get('url') . '/index.php?results=x&pid=' . $this->getId()
+                        Config::get('url') . '/index.php?results=' . $this->pid
                     );
                 }
             } else {
@@ -1561,10 +1580,10 @@ class Election
             break;
         case Modes::NORMAL:
         default:
-            $aftervote_url = Config::get('url') . '/index.php?results&pid=' . $this->pid;
+            $aftervote_url = Config::get('url') . '/index.php?results=' . $this->pid;
             break;
         }
-        $Questions = Question::getByElection($this->pid, $this->rnd_questions, $this->rnd_answers);
+        $Questions = Question::getByElection($this->tid, $this->rnd_questions);
         $nquestions = count($Questions);
         if ($nquestions > 0) {
             $T = new \Template(Config::path_template());
@@ -1591,7 +1610,8 @@ class Election
             // create a random number to ID fields if multiple blocks showing
             $random = rand(0,100);
             $T->set_var(array(
-                'id' => $this->pid,
+                'tid' => $this->tid,
+                'pid' => $this->pid,
                 'old_pid' => $this->old_pid,
                 'uniqid' => uniqid(),
                 'num_votes' => COM_numberFormat($this->_vote_count),
@@ -1651,11 +1671,11 @@ class Election
             if (self::hasRights('edit')) {
                 $editlink = COM_createLink(
                     MO::_('Edit'),
-                    Config::get('admin_url') . '/index.php?edit=x&amp;pid=' . $this->pid
+                    Config::get('admin_url') . '/index.php?edit=' . $this->tid
                 );
                 $T->set_var('edit_link', $editlink);
                 $T->set_var('edit_icon', $editlink);
-                $T->set_var('edit_url', Config::get('admin_url').'/index.php?edit=x&amp;pid=' . $this->pid);
+                $T->set_var('edit_url', Config::get('admin_url').'/index.php?edit=' . $this->tid);
             }
 
             for ($j = 0; $j < $nquestions; $j++) {
@@ -1681,7 +1701,7 @@ class Election
                     $T->set_var('old_aid', $this->_selections[$Q->getQid()]->aid);
                 }
 
-                $answers = $Q->getAnswers($this->rnd_answers);
+                $answers = $Q->getAnswers();
                 $nanswers = count($answers);
                 $T->set_block('pquestions', 'Answers', 'panswer');
                 for ($i = 0; $i < $nanswers; $i++) {
@@ -1735,7 +1755,6 @@ class Election
      * Saves the users vote, if allowed for the election $pid.
      * NOTE: all data comes from form $_POST.
      *
-     * @param    string   $pid   election id
      * @param    array    $aid   selected answers
      * @return   string   HTML for election results
      */
@@ -1756,7 +1775,7 @@ class Election
         // Set a browser cookie to block multiple votes from anonymous.
         // Done here since we have access to $aid.
         SEC_setCookie(
-            Config::PI_NAME . '-' . $this->pid . '-' . $this->cookie_key,
+            Config::PI_NAME . '-' . $this->tid . '-' . $this->cookie_key,
             implode('-', $aid),
             time() + Config::get('cookietime')
         );
@@ -1769,15 +1788,15 @@ class Election
         }
 
         // Record that this user has voted
-        $Voter = Voter::create($this->pid, $aid, $vote_id);
+        $Voter = Voter::create($this->tid, $aid, $vote_id);
         if ($Voter !== NULL) {
             // Increment the vote count for each answer
             $answers = count($aid);
             for ($i = 0; $i < $answers; $i++) {
                 if (array_key_exists($i, $old_aid)) {
-                    Answer::decrement($this->pid, $i, (int)$old_aid[$i]);
+                    Answer::decrement($this->tid, $i, (int)$old_aid[$i]);
                 }
-                Answer::increment($this->pid, $i, (int)$aid[$i]);
+                Answer::increment($this->tid, $i, (int)$aid[$i]);
             }
 
             // Set a return message, if not called via ajax
@@ -1817,10 +1836,7 @@ class Election
      */
     public function alreadyVoted()
     {
-        /*if (Voter::hasVoted($this->pid, $this->cookie_key, $this->voting_gid)) {
-        //    var_dump($this);die;
-    }*/
-        return Voter::hasVoted($this->pid, $this->cookie_key, $this->voting_gid);
+        return Voter::hasVoted($this->tid, $this->cookie_key, $this->voting_gid);
     }
 
 
@@ -1899,7 +1915,7 @@ class Election
         $qb = $db->conn->createQueryBuilder();
         $qb->select(
                 'p.*',
-                '(SELECT COUNT(v.id) FROM ' . DB::table('voters') . ' v WHERE v.pid = p.pid) AS vote_count'
+                '(SELECT COUNT(v.id) FROM ' . DB::table('voters') . ' v WHERE v.tid = p.tid) AS vote_count'
             )
             ->from(DB::table('topics'), 'p')
             ->where('p.status <> ' . Status::ARCHIVED)
@@ -1917,7 +1933,7 @@ class Election
         }
         $data_arr = array();
         foreach ($data as $A) {
-            $A['has_voted'] = Voter::hasVoted($A['pid'], $A['cookie_key'], $A['group_id']);
+            $A['has_voted'] = Voter::hasVoted($A['tid'], $A['cookie_key'], $A['group_id']);
             $data_arr[] = $A;
         }
         $T->set_var(array(
@@ -1943,39 +1959,30 @@ class Election
     /**
      * Delete a election.
      *
-     * @param   string  $pid    ID of election to delete
      * @param   boolean $force  True to disregard access, e.g. user is deleted
      * @return  string          HTML redirect
      */
-    public static function deleteElection($pid, $force=false)
+    public function delete($force=false) : void
     {
         global $_CONF, $_USER;
 
-        $Election = self::getInstance($pid);
         if (
-            !$Election->isNew() &&
+            !$this->isNew() &&
             ($force || self::hasRights('edit'))
         ) {
             $db = Database::getInstance();
             // Delete all questions, answers and votes
-            Question::deleteElection($Election->getID());
-            Answer::deleteElection($Election->getID());
-            Voter::deleteElection($Election->getID());
+            Question::deleteElection($this->tid);
+            Answer::deleteElection($this->tid);
+            Voter::deleteElection($this->tid);
             // Now delete the election topic
             $db->conn->delete(
                 DB::table('topics'),
-                array('pid' => $pid),
+                array('tid' => $this->tid),
                 array(Database::STRING)
             );
 
-            // Finally, delete any comments and notify other plugins
-            /*$db->conn->delete(
-                DB::table('comments'),
-                array('sid' => $pid, 'type' => Config::PI_NAME),
-                array(Database::STRING, Database::STRING)
-            );*/
-
-            PLG_itemDeleted($pid, Config::PI_NAME);
+            PLG_itemDeleted($this->tid, Config::PI_NAME);
             if (!$force) {
                 // Don't redirect if this is done as part of user account deletion
                 COM_setMsg(MO::_('Your election has been successfully deleted.'));
@@ -1996,12 +2003,12 @@ class Election
      *
      * @param   string  $pid    Election ID
      */
-    public static function deleteVotes($pid)
+    public static function deleteVotes(int $tid) : void
     {
-        $Election = new self($pid);
+        $Election = new self($tid);
         if (!$Election->isNew() && $Election->getStatus() < Status::ARCHIVED) {
-            Answer::resetElection($Election->getID());
-            Voter::deleteElection($Election->getID());
+            Answer::resetElection($Election->getTid());
+            Voter::deleteElection($Election->getTid());
             try {
                 Database::getInstance()->conn->update(
                     DB::table('topics'),
@@ -2028,7 +2035,7 @@ class Election
         $db = Database::getInstance();
         $retval = '';
         $retval .= COM_startBlock(
-            'Election Votes for ' . $this->pid, '',
+            'Election Votes for ' . $this->topic, '',
             COM_getBlockTemplate('_admin_block', 'header')
         );
 
@@ -2057,13 +2064,13 @@ class Election
         $text_arr = array(
             'has_extras'   => true,
             'instructions' => '',
-            'form_url'     => Config::get('admin_url') . '/index.php?lv=x&amp;pid='.urlencode($this->pid),
+            'form_url'     => Config::get('admin_url') . '/index.php?lv='.$this->tid,
         );
 
         $sql = "SELECT voters.*, FROM_UNIXTIME(voters.date) as dt_voted, users.username
             FROM " . DB::table('voters') . " AS voters
             LEFT JOIN " . DB::table('users') . " AS users ON voters.uid=users.uid
-            WHERE voters.pid = " . $db->conn->quote($this->pid);
+            WHERE voters.tid = " . $this->tid;
 
         $query_arr = array(
             'table' => 'electionvoters',
@@ -2116,10 +2123,10 @@ class Election
      * Sets a boolean field to the opposite of the supplied value.
      *
      * @param   integer $oldvalue   Old (current) value
-     * @param   integer $id         ID of record to modify
+     * @param   integer $tid        ID of record to modify
      * @return  integer     New value, or old value upon failure
      */
-    public static function toggleEnabled(int $oldvalue, string $id) : int
+    public static function toggleEnabled(int $oldvalue, int $tid) : int
     {
         // Determing the new value (opposite the old)
         if ($oldvalue == 1) {
@@ -2134,7 +2141,7 @@ class Election
             Database::getInstance()->conn->update(
                 DB::table('topics'),
                 array('status' => $newvalue),
-                array('pid' => $id),
+                array('tid' => $tid),
                 array(Database::INTEGER, Database::STRING)
             );
             return $newvalue;
@@ -2236,6 +2243,42 @@ class Election
     public function showRemarks() : bool
     {
         return $this->show_remarks != 0;
+    }
+
+
+    /**
+     * Add an error message.
+     *
+     * @param   string  $msg    Message to return from getErrors()
+     * @return  object  $this
+     */
+    public function addError(string $msg) : self
+    {
+        $this->_errors[] = $msg;
+        return $this;
+    }
+
+
+    /**
+     * Get all the errors for display.
+     *
+     * @param   boolean $fmt    True to return a formatted list
+     * @return  array|string    Raw message array, or formatted list
+     */
+    public function getErrors(bool $fmt=false)
+    {
+        if ($fmt) {
+            if (!empty($this->_errors)) {
+                $retval = self::msgAlert(
+                    '<ul><li>' . implode('</li><li>', $this->_errors) . '</li></ul>'
+                );
+            } else {
+                $retval = '';
+            }
+        } else {
+            $retval = $this->_errors;
+        }
+        return $retval;
     }
 
 }

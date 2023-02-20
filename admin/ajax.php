@@ -40,8 +40,9 @@ $action = $Request->getString('action');
 $title = NULL;      // title attribute to be set
 switch ($action) {
 case 'toggle':
+    COM_errorLog(var_export($Request,true));
     $type = $Request->getString('type');
-    $id = $Request->getString('id');
+    $id = $Request->getInt('id');
     $oldval = $Request->getInt('oldval');
     $component = $Request->getString('component');
     switch ($component) {

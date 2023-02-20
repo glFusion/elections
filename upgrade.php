@@ -30,7 +30,7 @@ require_once __DIR__ . "/sql/mysql_install.php";
  */
 function ELECTIONS_upgrade($dvlp=false)
 {
-    global $_PLUGIN_INFO;
+    global $_PLUGIN_INFO, $ELECTION_UPGRADE;
 
     $pi_name = Config::PI_NAME;
     if (isset($_PLUGIN_INFO[$pi_name])) {
@@ -48,13 +48,81 @@ function ELECTIONS_upgrade($dvlp=false)
 
     if (!COM_checkVersion($current_ver, '0.3.0')) {
         $current_ver = '0.3.0';
+
+        // Mark if new topic ID columns are going to be added.
+        $adding_tids = array(
+            'questions' => array(
+                ' ADD PRIMARY KEY (`tid`, `qid`)',
+                ' DROP `pid`',
+            ),
+            'answers' => array(
+                ' ADD PRIMARY KEY (`tid`, `qid`, `aid`)',
+                ' DROP `pid`',
+            ),
+            'voters' => array(
+                ' DROP `pid`',
+            ),
+        );
+        foreach (array('questions', 'answers', 'voters') as $key) {
+            if (ELECTIONS_tableHasColumn($key, 'tid')) {
+                unset($adding_tids[$key]);
+            }
+        }
+
+        if (ELECTIONS_tableHasColumn('topics', 'rnd_answers')) {
+            $ELECTION_UPGRADE[$current_ver][] = 'UPDATE ' . DB::table('questions') .
+                ' q SET q.ans_sort = (SELECT rnd_answers FROM ' . DB::table('topics') .
+                ' t WHERE t.tid = q.tid)';
+        }
+        // Drop rnd_answers after updating the questions
+        $ELECTION_UPGRADE[$current_ver][] = 'ALTER TABLE ' . DB::table('topics') .
+            ' DROP rnd_answers';
+
         if (!ELECTIONS_do_upgrade_sql($current_ver, $dvlp)) return false;
+
+        // Additional SQL to update questions and answers to integer election ids.
+        $db = Database::getInstance();
+        try {
+            $data = $db->conn->executeQuery(
+                "SELECT tid, pid FROM " . DB::table('topics')
+            )->fetchAllAssociative();
+        } catch (\Throwable $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+            $data = false;
+        }
+
+        if (is_array($data) && !empty($adding_tids)) {
+            $types = array(Database::INTEGER, Database::STRING);
+            foreach ($data as $row) {
+                COM_errorLog("TXN: Starting for {$row['tid']}");
+                $values = array('tid' => $row['tid']);
+                $where = array('pid' => $row['pid']);
+                try {
+                    foreach ($adding_tids as $key=>$sqls) {
+                        $db->conn->update(DB::table($key), $values, $where, $types);
+                        COM_errorLog("Got the update for $key");
+                        foreach ($sqls as $sql) {
+                            COM_errorLog('Executing ===> ALTER TABLE ' . DB::table($key) . $sql);
+                            $db->conn->executeStatement(
+                                'ALTER TABLE ' . DB::table($key) . $sql
+                            );
+                        }
+                    }
+                    COM_errorLog("TXN: Committing");
+                } catch (\Throwable $e) {
+                    Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+                    COM_errorLog("TXN: Rolling back");
+                    return false;       // This is fatal to prevent DB inconsistency
+                }
+            }
+        }
+
         if (!ELECTIONS_do_set_version($current_ver)) return false;
     }
 
     // Check and set the version if not already up to date.
     // For updates with no SQL changes
-    if ($current_ver != $installed_ver() {
+    if ($current_ver != $installed_ver) {
         if (!ELECTIONS_do_set_version($installed_ver)) return false;
         $current_ver = $installed_ver;
     }
@@ -75,7 +143,7 @@ function ELECTIONS_upgrade($dvlp=false)
  * @param   boolean $ignore_error   True to ignore SQL errors.
  * @return  boolean     True on success, False on failure
  */
-function ELECTIONS_do_upgrade_sql($version, $ignore_error = false)
+function ELECTIONS_do_upgrade_sql(string $version, bool $ignore_error = false) : bool
 {
     global $_TABLES, $ELECTION_UPGRADE, $_DB_dbms, $_VARS;
 
@@ -86,6 +154,7 @@ function ELECTIONS_do_upgrade_sql($version, $ignore_error = false)
     ) {
         return true;
     }
+    var_dump($ELECTION_UPGRADE[$version]);
 
     if (
         $_DB_dbms == 'mysql' &&
@@ -211,4 +280,30 @@ function ELECTIONS_remove_old_files()
             ELECTIONS_rmdir("$path/$file");
         }
     }
+}
+
+
+/**
+ * Check if a column exists in a table
+ *
+ * @param   string  $table      Table Key, defined in shop.php
+ * @param   string  $col_name   Column name to check
+ * @return  boolean     True if the column exists, False if not
+ */
+function ELECTIONS_tableHasColumn(string $table, string $col_name) : bool
+{
+    global $_TABLES;
+
+    $db = Database::getInstance();
+    try {
+        $count = $db->conn->executeQuery(
+            "SHOW COLUMNS FROM " . DB::table($table) . " LIKE ?",
+            array($col_name),
+            array(Database::STRING)
+        )->rowCount();
+    } catch (\Exception $e) {
+        Log::write('system', Log::ERROR, __FUNCTION__ . ': ' . $e->getMessage());
+        $count = 0;
+    }
+    return $count > 0;
 }

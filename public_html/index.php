@@ -42,6 +42,7 @@ $filter->setPostmode('text');
 
 $Request = Request::getInstance();
 $pid = COM_applyFilter($Request->getString('pid'));
+$tid = $Request->getInt('tid');
 $type = $Request->getString('type');
 if ( $type != '' && $type != 'article' ) {
     if (!in_array($type,$_PLUGINS)) {
@@ -56,17 +57,16 @@ list($action, $actionval) = $Request->getAction($expected, 'listelections');
 if ($action == 'reply') {
     // Handle a comment submission
     echo COM_refresh(
-        $_CONF['site_url'] . '/comment.php?sid=' . $pid . '&pid=' . $pid . '&type=' . $type
+        $_CONF['site_url'] . '/comment.php?sid=' . $tid . '&pid=' . $pid . '&type=' . $type
     );
     exit;
 }
-//$aid = $Request->getInt('aid');
 $order = COM_applyFilter($Request->getString('order'));
 $mode = COM_applyFilter($Request->getString('mode')); 
 $msg = $Request->getInt('msg');
 
 if ($pid != '') {
-    $Election = Election::getInstance($pid);
+    $Election = Election::getByPid($pid);
 }
 
 switch ($action) {
@@ -78,10 +78,9 @@ case 'votebutton':
         $Votes[] = new Vote(array(
             'qid' => $qid,
             'aid' => $ans_id,
-            'pid' => $pid,
+            'tid' => $tid,
         ) );
     }
-
     if ($Election->alreadyVoted() && !$Election->canUpdate()) {
         COM_setMsg(MO::_('Your vote has already been recorded.'), 'error', true);
         COM_refresh(Config::get('url') . '/index.php');
@@ -92,7 +91,7 @@ case 'votebutton':
                 $Election->saveVote($aid, $old_aid) &&
                 !$Election->hideResults()
             ) {
-                COM_refresh(Config::get('url') . '/index.php?results=x&pid=' . $Election->getID());
+                COM_refresh(Config::get('url') . '/index.php?results=x&tid=' . $Election->getTid());
             } else {
                 COM_refresh(Config::get('url') . '/index.php');
             }
@@ -108,8 +107,9 @@ case 'votebutton':
     break;
 
 case 'results':
+    $Election = Election::getByPid($actionval);
     if ($Election->canViewResults()) {
-        $page .= (new Results($Election->getID()))
+        $page .= (new Results($Election->getTid()))
             ->withCommentMode($mode)
             ->withCommentOrder($order)
             ->Render();
@@ -121,12 +121,12 @@ case 'results':
 
 case 'showvote':
     $Voter = Voter::getInstance($Request->getString('votekey'));
+    $Election = Election::getByPid($pid);
     $data = $Voter->getVoteRecords();
     if (
-        $data !== false &&
-        $Voter->getPid() == $pid    // verify right election is selected
+        $data !== NULL &&
+        $Voter->getTid() == $Election->getTid() // verify right election is selected
     ) {
-        $Election = Election::getInstance($Voter->getPid());
         $page .= Election::msgAlert(
             sprintf(
                 MO::_('Your vote was recorded as shown at %1$s on %2$s'),

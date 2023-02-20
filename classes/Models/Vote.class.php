@@ -25,8 +25,8 @@ class Vote
     public $vid = '';
 
     /** Election topic ID.
-     * @var string */
-    public $pid = '';
+     * @var integer */
+    public $tid = 0;
 
     /** Question ID.
      * @var integer */
@@ -45,7 +45,7 @@ class Vote
     public function __construct(?array $A = NULL)
     {
         if (is_array($A)) {
-            foreach (array('vid', 'pid', 'qid', 'aid') as $key) {
+            foreach (array('vid', 'tid', 'qid', 'aid') as $key) {
                 if (isset($A[$key])) {
                     $this->$key = $A[$key];
                 }

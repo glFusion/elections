@@ -39,7 +39,7 @@ class Menu
                 'active'=> $view == 'listall' ? true : false,
             ),
             array(
-                'url' => Config::get('admin_url') . '/index.php?edit=x',
+                'url' => Config::get('admin_url') . '/index.php?edit=0',
                 'text' => MO::_('Create'),
             ),
             array(

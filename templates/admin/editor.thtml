@@ -5,6 +5,7 @@
 <form id="electioneditor" class="uk-form uk-form-horizontal" action="{action_url}" method="post">
 	<input type="hidden" name="{sectoken_name}" value="{sectoken}">
 	<input type="hidden" value="{old_pid}" name="old_pid">
+	<input type="hidden" value="{tid}" name="tid">
 
 	<ul uk-switcher="connect:#pe-form" class="uk-tab" data-uk-tab="{connect:'#pe-form',swiping:false}">
 		<li><a href="#">{lang_general}</a></li>
@@ -16,7 +17,7 @@
 		<div class="uk-form-row uk-margin">
 			<label class="uk-form-label" for="pid">{lang_electionid}</label>
 			<div class="uk-form-controls">
-				<input class="uk-input uk-form-width-medium required" type="text" id="pid" name="pid" value="{id}"> <span class="uk-text-small">{lang_donotusespaces}</span>
+				<input class="uk-input uk-form-width-medium required" type="text" id="pid" name="pid" value="{pid}"> <span class="uk-text-small">{lang_donotusespaces}</span>
 			</div>
 		</div>
 		<div class="uk-form-row uk-margin">
