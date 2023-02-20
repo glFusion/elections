@@ -32,8 +32,8 @@ class Voter
     private $id = 0;
 
     /** Related election ID.
-     * @var string */
-    private $pid = '';
+     * @var integer */
+    private $tid = 0;
 
     /** IP address of the voter.
      * @var string */
@@ -78,7 +78,7 @@ class Voter
     {
         if (is_array($A) && !empty($A)) {
             $this->withId($A['id'])
-                 ->withPid($A['pid'])
+                 ->withTid($A['tid'])
                  ->withIpAddress($A['ipaddress'])
                  ->withUid($A['uid'])
                  ->withDate($A['date'])
@@ -116,12 +116,12 @@ class Voter
     /**
      * Set the election record ID.
      *
-     * @param   string  $pid    Election ID
+     * @param   integer $tid    Election ID
      * @return  object  $this
      */
-    public function withPid(string $pid) : self
+    public function withTid(int $tid) : self
     {
-        $this->pid = $pid;
+        $this->tid = $tid;
         return $this;
     }
 
@@ -131,9 +131,9 @@ class Voter
      *
      * @return  string      Election ID
      */
-    public function getPid() : string
+    public function getTid() : string
     {
-        return $this->pid;
+        return $this->tid;
     }
 
 
@@ -289,14 +289,18 @@ class Voter
      *
      * @return  array       Array of Vote objects
      */
-    public function getVoteRecords() : array
+    public function getVoteRecords() : ?array
     {
         if ($this->_voteRecords !== NULL) {
             return $this->_voteRecords;
         }
 
         $this->_voteRecords = array();
-        $ids = $this->decrypt($this->voterecords);
+        if ($this->id > 0 && !empty($this->voterecords)) {
+            $ids = $this->decrypt($this->voterecords);
+        } else {
+            return NULL;
+        }
         if (!empty($ids)) {
             $db = Database::getInstance();
             try {
@@ -362,12 +366,12 @@ class Voter
      * Check if the user has already voted.
      * For anonymous, checks the IP address and the election cookie.
      *
-     * @param   string  $pid            Election ID
+     * @param   integer $tid            Election ID
      * @param   string  $cookie_key     Cookie key for the election
      * @param   integer $voting_grp     Group with access to vote
      * @return  boolean     True if the user has voted, False if not
      */
-    public static function hasVoted(string $pid, string $cookie_key, int $voting_grp=2) : bool
+    public static function hasVoted(int $tid, string $cookie_key, int $voting_grp=2) : bool
     {
         global $_USER;
 
@@ -379,8 +383,8 @@ class Voter
             if (
                 $db->getCount(
                     DB::table('voters'),
-                    array('uid', 'pid'),
-                    array($_USER['uid'], $pid),
+                    array('uid', 'tid'),
+                    array($_USER['uid'], $tid),
                     array(Database::INTEGER, Database::STRING)
                 ) > 0
             ) {
@@ -397,7 +401,7 @@ class Voter
         }
 
         // For Anonymous we only have the cookie and IP address.
-        if (isset($_COOKIE[Config::PI_NAME . '-' . $pid . '-' . $cookie_key])) {
+        if (isset($_COOKIE[Config::PI_NAME . '-' . $tid . '-' . $cookie_key])) {
             return true;
         }
 
@@ -408,8 +412,8 @@ class Voter
             $ip != '' &&
             $db->getCount(
                 DB::table('voters'),
-                array('ipaddress', 'pid'),
-                array($ip, $pid),
+                array('ipaddress', 'tid'),
+                array($ip, $tid),
                 array(Database::STRING, Database::STRING)
             ) > 0
         ) {
@@ -437,12 +441,12 @@ class Voter
      * This only inserts new records, no updates, so `INSERT IGNORE` is used
      * just to avoid SQL errors.
      *
-     * @param   string  $pid    Election ID
+     * @param   integer $tid    Election ID
      * @param   array   $aid    Answer data to be encrypted
      * @param   integer $vote_id    Existing vote record ID, if any
      * @return  object      Voter object
      */
-    public static function create(string $pid, array $aid, int $vote_id=0) : ?object
+    public static function create(int $tid, array $aid, int $vote_id=0) : ?object
     {
         global $_USER;
 
@@ -451,11 +455,13 @@ class Voter
         } else {
             $uid = (int)$_USER['uid'];
         }
-
         if ($vote_id > 0) {
             // Editing an existing vote.
             // Already have the keys.
             $Voter = self::getInstance($vote_id);
+            if ($Voter->getId() < 1) {
+                return NULL;
+            }
         } else {
             // Creating a new vote, create and set keys.
             $Voter = new self;
@@ -465,7 +471,7 @@ class Voter
         }
         $Voter->withDate();     // Always update to the current timestamp
 
-        $records = $Voter->saveVoteRecords($pid, $aid);
+        $records = $Voter->saveVoteRecords($tid, $aid);
         $record_ids = array_keys($records);
         $data = $Voter->encrypt(json_encode($aid));
         $voterecords = $Voter->encrypt(json_encode($record_ids));
@@ -474,7 +480,7 @@ class Voter
         $values = array(
             'ipaddress' => self::getRealIpAddress(),
             'uid' => $uid,
-            'pid' => $pid,
+            'tid' => $tid,
             'date' => $Voter->getDate(),
             'votedata' => $data,
             'voterecords' => $voterecords,
@@ -507,7 +513,7 @@ class Voter
             return NULL;
         }
         $Voter->withUid($uid)
-              ->withPid($pid);
+              ->withTid($tid);
         SEC_setCookie(self::KEY_COOKIE, '', time() - 1800);
         return $Voter;
     }
@@ -516,11 +522,11 @@ class Voter
     /**
      * Save the individual votes for a submission.
      *
-     * @param   string  $pid    Election ID
+     * @param   integer $tid    Election ID
      * @param   array   $aid    Array of answers
      * @return  array       Array of Vote objects
      */
-    private function saveVoteRecords(string $pid, array $aid) : array
+    private function saveVoteRecords(int $tid, array $aid) : array
     {
         global $_TABLES;
 
@@ -545,7 +551,7 @@ class Voter
                     DB::table('votes'),
                     array(
                         'vid' => $id,
-                        'pid' => $pid,
+                        'tid' => $tid,
                         'qid' => $q,
                         'aid' => $a,
                     ),
@@ -561,7 +567,7 @@ class Voter
             }
             $this->_voteRecords[$id] = new Vote(array(
                 'vid' => $id,
-                'pid' => $pid,
+                'tid' => $tid,
                 'qid' => $q,
                 'aid' => $a,
             ) );
@@ -571,37 +577,16 @@ class Voter
 
 
     /**
-     * Change the Election ID for all items if it was saved with a new ID.
-     *
-     * @param   string  $old_pid    Original Election ID
-     * @param   string  $new_pid    New Election ID
-     */
-    public static function changePid(string $old_pid, string $new_pid) : void
-    {
-        try {
-            Database::getInstance()->conn->update(
-                DB::table('voters'),
-                array('pid' => $new_pid),
-                array('pid' => $old_pid),
-                array(Database::STRING, Database::STRING)
-            );
-        } catch (\Throwable $e) {
-            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
-        }
-    }
-
-
-    /**
      * Delete all the voters for a election, when the election is deleted or reset.
      *
-     * @param   string  $pid    Election ID
+     * @param   integer $tid    Election ID
      */
-    public static function deleteElection(string $pid) : void
+    public static function deleteElection(int $tid) : void
     {
         $db = Database::getInstance();
         try {
             $db->conn->delete(
-                DB::table('voters'), array('pid' => $pid), array(Database::STRING)
+                DB::table('voters'), array('tid' => $tid), array(Database::STRING)
             );
         } catch (\Throwable $e) {
             Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
@@ -609,7 +594,7 @@ class Voter
 
         try {
             $db->conn->delete(
-                DB::table('votes'), array('pid' => $pid), array(Database::STRING)
+                DB::table('votes'), array('tid' => $tid), array(Database::STRING)
             );
         } catch (\Throwable $e) {
             Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
