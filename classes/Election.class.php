@@ -1374,7 +1374,7 @@ class Election
             ) {
                 $retval = COM_createLink(
                     $retval,
-                    COM_buildUrl(Config::get('url') . "/index.php?tid={$A['tid']}")
+                    COM_buildUrl(Config::get('url') . "/index.php?pid={$A['pid']}")
                 );
             } elseif (
                 SEC_inGroup($A['results_gid']) &&
