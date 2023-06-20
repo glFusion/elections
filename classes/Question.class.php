@@ -295,12 +295,16 @@ class Question
     /**
      * Get the possible answers for this question.
      *
+     * @integer $sort   Sort flag, NULL to use question config
      * @return  array       Array of answer records
      */
-    public function getAnswers() : array
+    public function getAnswers(?int $sort=NULL) : array
     {
         if ($this->Answers === NULL) {
-            $this->Answers = Answer::getByQuestion($this->qid, $this->tid, $this->ans_sort);
+            if (is_null($sort)) {
+                $sort = $this->ans_sort;
+            }
+            $this->Answers = Answer::getByQuestion($this->qid, $this->tid, $sort);
         }
         return $this->Answers;
     }
@@ -415,8 +419,8 @@ class Question
         try {
             $db->conn->delete(
                 DB::table('questions'),
-                array('qid' => $this->qid),
-                array(Database::INTEGER)
+                array('tid' => $this->tid, 'qid' => $this->qid),
+                array(Database::INTEGER, Database::INTEGER)
             );
         } catch (\Exception $e) {
             Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
@@ -424,8 +428,8 @@ class Question
         try {
             $db->conn->delete(
                 DB::table('answers'),
-                array('qid' => $this->qid),
-                array(Database::INTEGER)
+                array('tid' => $this->tid, 'qid' => $this->qid),
+                array(Database::INTEGER, Database::INTEGER)
             );
         } catch (\Exception $e) {
             Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());

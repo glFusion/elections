@@ -998,7 +998,7 @@ class Election
                     'hasdata' => true,
                     'sort_sel_' . $Questions[$j]->getAnswerSort() => 'selected="selected"',
                 ) );
-                $Answers = $Questions[$j]->getAnswers();
+                $Answers = $Questions[$j]->getAnswers(0);
             } else {
                 $Answers = array();
                 $T->unset_var('hasdata');
