@@ -9,12 +9,22 @@
 		<label class="uk-form-label" for="question"><span class="uk-text-bold">{lang_question}</span></label>
 		<div class="uk-form-controls">
 			<input class="uk-input {reqclass}" type="text" name="question[]" value="{question_text}" maxlength="255">
-    </div>
-  </div>
-  <div class="uk-form-row uk-margin">
-    <div class="uk-form-controls">
-      {answer_option}
-    </div>
-  </div>
+		</div>
+	</div>
+	<div class="uk-form-row uk-margin">
+		<label class="uk-form-label" for="question"><span class="uk-text-bold">{lang_ans_sort}</span></label>
+		<div class="uk-form-controls">
+			<select name="ans_sort[]">
+				<option value="0" {sort_sel_0}>{lang_as_entered}</option>
+				<option value="1" {sort_sel_1}>{lang_random}</option>
+				<option value="2" {sort_sel_2}>{lang_alpha}</option>
+			</select>
+		</div>
+	</div>
+	<div class="uk-form-row uk-margin">
+		<div class="uk-form-controls">
+			{answer_option}
+		</div>
+	</div>
 </li>
 {# end {templatelocation} #}
