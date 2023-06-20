@@ -89,7 +89,7 @@ $ELECTION_UPGRADE = array(
     '0.3.0' => array(
         "CREATE TABLE " . DB::table('votes') . " (
           `vid` varchar(20) NOT NULL,
-          `tid` MEDIUMINT NOT NULLNULL,
+          `tid` MEDIUMINT NOT NULL,
           `qid` int(11) unsigned NOT NULL,
           `aid` int(11) unsigned NOT NULL,
           PRIMARY KEY (`vid`),
