@@ -960,7 +960,8 @@ class Election
             'lang_back' => MO::_('Back to Listing'),
             'rndq_chk' => $this->rnd_questions ? 'checked="checked"' : '',
             'lang_rnd_q' => MO::_('Randomize question order?'),
-            'lang_rnd_a' => MO::_('Sort displayed answers'),
+            //'lang_rnd_a' => MO::_('Default Answer Sort'),
+            //'lang_default' => MO::_('Election Default'),
             'lang_as_entered' => MO::_('As Entered'),
             'lang_random' => MO::_('Randomly'),
             'lang_alpha' => MO::_('Alphabetically'),
@@ -1700,7 +1701,6 @@ class Election
                 if (isset($this->_selections[$Q->getQid()])) {
                     $T->set_var('old_aid', $this->_selections[$Q->getQid()]->aid);
                 }
-
                 $answers = $Q->getAnswers();
                 $nanswers = count($answers);
                 $T->set_block('pquestions', 'Answers', 'panswer');
