@@ -40,7 +40,7 @@ $title = MO::_('Elections');
 $filter = sanitizer::getInstance();
 $filter->setPostmode('text');
 
-$Request = Request::getInstance();
+$Request = Request::getInstance()->withArgNames(array('pid'));;
 $pid = COM_applyFilter($Request->getString('pid'));
 $tid = $Request->getInt('tid');
 $type = $Request->getString('type');
@@ -146,10 +146,6 @@ case 'showvote':
 
 default:
     if (!isset($Election)) {
-        // Didn't get an election ID in the URL, see if there's one using
-        // COM_buildUrl()
-        COM_setArgNames(array('pid'));
-        $pid = COM_getArgument('pid');
         if (!empty($pid)) {
             $Election = Election::getInstance($pid);
         }
