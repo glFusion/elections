@@ -25,7 +25,7 @@ if (!defined ('GVERSION')) {
 use Elections\Config;
 use Elections\DB;
 
-Config::set('pi_version', '0.2.0.1');
+Config::set('pi_version', '0.2.0.2');
 Config::set('gl_version', '2.0.0');
 
 // Add to $_TABLES array the tables your plugin uses

@@ -215,11 +215,13 @@ class Question
      * @param   array   $A      Array of anwer strings
      * @return  object  $this
      */
-    public function setAnswers($A)
+    public function setAnswers(DataArray $A) : self
     {
         for ($i = 0; $i < Config::get('maxanswers'); $i++) {
+            // If an empty answer is reached, quit
             if ($A['answer'][$this->qid][$i] == '') break;
             if (!isset($this->Answers[$i])) {
+                // Instantiate an additional answer object if needed
                 $this->Answers[$i] = new Answer;
             }
             $this->Answers[$i]->setAnswer($A['answer'][$this->qid][$i])
@@ -229,9 +231,16 @@ class Question
                 ->setRemark($A['remark'][$this->qid][$i])
                 ->Save();
         }
-        for (; $i < count($this->Answers); $i++) {
-            $this->Answers[$i]->Delete();
-            unset($this->Answers[$i]);
+        $db = Database::getInstance();
+        try {
+            $db->conn->executeStatement(
+                "DELETE FROM " . DB::table('answers') . "
+                WHERE tid = :tid AND qid = :qid AND aid >= :max_aid",
+                array('tid' => $this->tid, 'qid' => $this->qid, 'max_aid' => $i),
+                array(Database::INTEGER, Database::INTEGER, Database::INTEGER)
+            );
+        } catch (\Throwable $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
         }
         return $this;
     }

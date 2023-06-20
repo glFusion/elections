@@ -1158,8 +1158,10 @@ class Election
                 break;
             }
             if (isset($Questions[$i])) {
+                // The question is already in the DB
                 $Q = $Questions[$i];
             } else {
+                // Added one or more questions
                 $Q = new Question();
             }
             $Q->setTid($this->tid)
@@ -1169,7 +1171,6 @@ class Election
               ->setAnswers($A)
               ->Save();
         }
-
         // Now delete any questions that were removed.
         for (; $i < count($Questions); $i++) {
             $Questions[$i]->Delete();
@@ -2307,7 +2308,7 @@ class Election
                 if ($this->canViewResults()) {
                     $retval['html'] .= '<br />' . COM_createLink(
                         $this->getTopic() . ' (' . MO::_('Results') . ')',
-                        Config::get('url') . '/index.php?results=x&pid=' . $this->pid;$
+                        Config::get('url') . '/index.php?results=x&pid=' . $this->pid
                     );
                 }
             } else {

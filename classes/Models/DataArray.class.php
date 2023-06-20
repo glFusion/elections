@@ -18,7 +18,7 @@ namespace Elections\Models;
  * User Information class.
  * @package    elections
  */
-class DataArray implements \ArrayAccess, \Iterator
+class DataArray implements \ArrayAccess, \Iterator, \Countable
 {
     protected $position = '';
     protected $properties = array();
@@ -368,6 +368,12 @@ class DataArray implements \ArrayAccess, \Iterator
     public function valid(): bool
     {
         return key($this->properties) !== NULL;
+    }
+
+
+    public function count() : int
+    {
+        return count($this->properties);
     }
 
 }
