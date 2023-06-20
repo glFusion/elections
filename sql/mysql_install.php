@@ -77,6 +77,7 @@ $_SQL[DB::key('voters')] = "CREATE TABLE " . DB::table('voters') . " (
   `uid` mediumint(8) NOT NULL DEFAULT 1,
   `date` int(10) unsigned DEFAULT NULL,
   `votedata` text DEFAULT NULL,
+  `voterecords` text DEFAULT NULL,
   `pub_key` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `topicid` (`tid`)
@@ -112,6 +113,7 @@ $ELECTION_UPGRADE = array(
         'ALTER TABLE ' . DB::table('voters') . " ADD tid mediumint unsigned NOT NULL AFTER `id`",
         'ALTER TABLE ' . DB::table('voters') . " DROP KEY IF EXISTS `pollid`",
         'ALTER TABLE ' . DB::table('voters') . " ADD KEY `topicid` (`tid`)",
+        'ALTER TABLE ' . DB::table('voters') . " ADD voterecords text AFTER votedta",
         'ALTER TABLE ' . DB::table('questions') . " ADD ans_sort tinyint(1) unsigned NOT NULL default 0 after qid",
         // Update the ans_sort column based on questions.rnd_answers before dropping that column
     )
