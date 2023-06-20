@@ -98,6 +98,7 @@ $ELECTION_UPGRADE = array(
         'ALTER TABLE ' . DB::table('voters') . " CHANGE ipaddress ipaddress varchar(255) NOT NULL default ''",
         'ALTER TABLE ' . DB::table('topics') . " DROP PRIMARY KEY",
         'ALTER TABLE ' . DB::table('topics') . " ADD tid mediumint unsigned NOT NULL auto_increment primary key first",
+        'ALTER TABLE ' . DB::table('topics') . " ADD cookie_key varchar(24) NOT NULL",
         'ALTER TABLE ' . DB::table('topics') . " ADD UNIQUE `idx_pid` (`pid`)",
         // Drop the primary keys for questions and answers to convert to a "tid" field.
         // The "pid" field will be deleted and the key recreated in upgrade.php

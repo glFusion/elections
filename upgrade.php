@@ -15,6 +15,7 @@ if (!defined ('GVERSION')) {
 }
 use Elections\DB;
 use Elections\Config;
+use Elections\Models\Token;
 use glFusion\Database\Database;
 use glFusion\Log\Log;
 
@@ -74,6 +75,8 @@ function ELECTIONS_upgrade($dvlp=false)
                 ' q SET q.ans_sort = (SELECT rnd_answers FROM ' . DB::table('topics') .
                 ' t WHERE t.tid = q.tid)';
         }
+        $has_cookie_key = ELECTIONS_tableHasColumn('topics', 'cookie_key');
+
         // Drop rnd_answers after updating the questions
         $ELECTION_UPGRADE[$current_ver][] = 'ALTER TABLE ' . DB::table('topics') .
             ' DROP rnd_answers';
@@ -91,32 +94,47 @@ function ELECTIONS_upgrade($dvlp=false)
             $data = false;
         }
 
-        if (is_array($data) && !empty($adding_tids)) {
-            $types = array(Database::INTEGER, Database::STRING);
-            foreach ($data as $row) {
-                COM_errorLog("TXN: Starting for {$row['tid']}");
-                $values = array('tid' => $row['tid']);
-                $where = array('pid' => $row['pid']);
-                try {
-                    foreach ($adding_tids as $key=>$sqls) {
-                        $db->conn->update(DB::table($key), $values, $where, $types);
-                        COM_errorLog("Got the update for $key");
-                        foreach ($sqls as $sql) {
-                            COM_errorLog('Executing ===> ALTER TABLE ' . DB::table($key) . $sql);
-                            $db->conn->executeStatement(
-                                'ALTER TABLE ' . DB::table($key) . $sql
-                            );
+        if (is_array($data)) {
+            if (!empty($adding_tids)) {
+                $types = array(Database::INTEGER, Database::STRING);
+                foreach ($data as $row) {
+                    COM_errorLog("TXN: Starting for {$row['tid']}");
+                    $values = array('tid' => $row['tid']);
+                    $where = array('pid' => $row['pid']);
+                    try {
+                        foreach ($adding_tids as $key=>$sqls) {
+                            $db->conn->update(DB::table($key), $values, $where, $types);
+                            COM_errorLog("Got the update for $key");
+                            foreach ($sqls as $sql) {
+                                COM_errorLog('Executing ===> ALTER TABLE ' . DB::table($key) . $sql);
+                                $db->conn->executeStatement(
+                                    'ALTER TABLE ' . DB::table($key) . $sql
+                                );
+                            }
                         }
+                        COM_errorLog("TXN: Committing");
+                    } catch (\Throwable $e) {
+                        Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+                        COM_errorLog("TXN: Rolling back");
+                        return false;       // This is fatal to prevent DB inconsistency
                     }
-                    COM_errorLog("TXN: Committing");
-                } catch (\Throwable $e) {
-                    Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
-                    COM_errorLog("TXN: Rolling back");
-                    return false;       // This is fatal to prevent DB inconsistency
+                }
+            }
+            if (!$has_cookie_key) {
+                foreach ($data as $row) {
+                    try {
+                        $db->conn->update(DB::table('topics'),
+                            array('cookie_key' => Token::create()),
+                            array('pid' => $row['pid']),
+                            array(Database::STRING, Database::INTEGER)
+                        );
+                    } catch (\Throwable $e) {
+                        Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+                        COM_errorLog("Error adding cookie_key to topic");
+                    }
                 }
             }
         }
-
         if (!ELECTIONS_do_set_version($current_ver)) return false;
     }
 
@@ -154,7 +172,6 @@ function ELECTIONS_do_upgrade_sql(string $version, bool $ignore_error = false) :
     ) {
         return true;
     }
-    var_dump($ELECTION_UPGRADE[$version]);
 
     if (
         $_DB_dbms == 'mysql' &&
