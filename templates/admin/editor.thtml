@@ -23,7 +23,7 @@
 		<div class="uk-form-row uk-margin">
 			<label class="uk-form-label" for="topic">{lang_topic}</label>
 			<div class="uk-form-controls">
-				<input class="required uk-input" type="text" id="topic" name="topic" value="{topic}" />
+				<input class="required uk-input uk-form-width-large" type="text" id="topic" name="topic" value="{topic}" />
 			</div>
 		</div>
 	</div>

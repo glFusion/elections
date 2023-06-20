@@ -8,7 +8,7 @@
 	<div class="uk-form-row uk-margin">
 		<label class="uk-form-label" for="question"><span class="uk-text-bold">{lang_question}</span></label>
 		<div class="uk-form-controls">
-			<input class="uk-input {reqclass}" type="text" name="question[]" value="{question_text}" maxlength="255">
+			<input class="uk-input {reqclass} uk-form-input-large" type="text" name="question[]" value="{question_text}" maxlength="255">
 		</div>
 	</div>
 	<div class="uk-form-row uk-margin">
