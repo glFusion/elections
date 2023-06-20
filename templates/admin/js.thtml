@@ -7,8 +7,9 @@
  * @param  string  type    Field name
  * @param  string  component   Element type, e.g. "election"
  */
-var {pi_name}_toggle = function(cbox, id, type, component) {
-    oldval = cbox.checked ? 1 : 0;
+var {pi_name}_toggle = function(cbox, id, type, component)
+{
+    oldval = cbox.checked ? 0 : 1;
     var dataS = {
         "action" : "toggle",
         "id": id,
