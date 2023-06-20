@@ -1,39 +1,15 @@
 <?php
-// +--------------------------------------------------------------------------+
-// | Election Plugin - glFusion CMS                                              |
-// +--------------------------------------------------------------------------+
-// | ajax_handler.php                                                         |
-// |                                                                          |
-// | Save poll answers.                                                       |
-// +--------------------------------------------------------------------------+
-// | Copyright (C) 2009-2016 by the following authors:                        |
-// |                                                                          |
-// | Mark R. Evans          mark AT glfusion DOT org                          |
-// |                                                                          |
-// | Copyright (C) 2000-2008 by the following authors:                        |
-// |                                                                          |
-// | Authors: Tony Bibbs        - tony AT tonybibbs DOT com                   |
-// |          Mark Limburg      - mlimburg AT users DOT sourceforge DOT net   |
-// |          Jason Whittenburg - jwhitten AT securitygeeks DOT com           |
-// |          Dirk Haun         - dirk AT haun-online DOT de                  |
-// +--------------------------------------------------------------------------+
-// |                                                                          |
-// | This program is free software; you can redistribute it and/or            |
-// | modify it under the terms of the GNU General Public License              |
-// | as published by the Free Software Foundation; either version 2           |
-// | of the License, or (at your option) any later version.                   |
-// |                                                                          |
-// | This program is distributed in the hope that it will be useful,          |
-// | but WITHOUT ANY WARRANTY; without even the implied warranty of           |
-// | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            |
-// | GNU General Public License for more details.                             |
-// |                                                                          |
-// | You should have received a copy of the GNU General Public License        |
-// | along with this program; if not, write to the Free Software Foundation,  |
-// | Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.          |
-// |                                                                          |
-// +--------------------------------------------------------------------------+
-
+/**
+ * AJAX handler for the Elections plugin.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2021-2023 Lee Garner
+ * @package     elections
+ * @version     v0.3.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 require_once '../lib-common.php';
 
 if (!in_array('elections', $_PLUGINS)) {
@@ -47,31 +23,30 @@ use Elections\Answer;
 use Elections\Views\Results;
 use Elections\MO;
 use Elections\Config;
+use Elections\Models\Request;
 
 $retval = array();
 
 $pid = '';
 $aid = 0;
 
-if (isset ($_POST['pid'])) {
-    $pid = COM_sanitizeID(COM_applyFilter ($_POST['pid']));
-    if (isset ($_POST['aid'])) {
-        $aid = $_POST['aid'];
-    }
+$Request = Request::getInstance();
+$pid = COM_sanitizeID($Request->getString('pid'));
+if (!empty($pid)) {
+    $aid = $Request->getArray('aid');
 }
-
-if ( $pid == '' || $aid == 0 ) {
+if (empty($pid) || empty($aid)) {
     $retval['statusMessage'] = MO::_('There was an error recording your vote.');
     $retval['html'] = Election::getInstance($pid)->Render();
 } else {
+    // Have an election topic and answer array
     $Election = Election::getInstance($pid);
     if (!$Election->canVote()) {
         $retval['statusMessage'] = MO::_('This election is not open for voting.');
     } elseif (
-        isset($_POST['aid']) &&
-        count($_POST['aid']) == $Election->numQuestions()
+        count($aid) == $Election->numQuestions()
     ) {
-        $retval = ELECTION_saveVote_AJAX($pid,$aid);
+        $retval = $Election->saveVote_AJAX($aid);
     } else {
         $eMsg = MO::_('Please answer all remaining questions.') .
             ' "' . $Election->getTopic() . '"';
@@ -84,7 +59,7 @@ $return["json"] = json_encode($retval);
 echo json_encode($return);
 
 
-function ELECTION_saveVote_AJAX($pid, $aid)
+function XELECTION_saveVote_AJAX($pid, $aid)
 {
     global $_USER;
 

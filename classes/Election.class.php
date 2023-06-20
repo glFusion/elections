@@ -2281,4 +2281,41 @@ class Election
         return $retval;
     }
 
+
+    /**
+     * Save a vote via AJAX, from the elections block.
+     *
+     * @param   array   $aid    Array of answer IDs
+     * @return  array   Array of statusmessage and html content.
+     */
+    public function saveVote_AJAX(array $aid) : array
+    {
+        global $_USER;
+
+        $retval = array('html' => '','statusMessage' => '');
+        if (!$this->canVote()) {
+            $retval['statusMessage'] = MO::_('This election is not open for voting.');
+            $retval['html'] = self::listElections();
+        } elseif ($this->alreadyVoted()) {
+            $retval['statusMessage'] = MO::_('Your vote has already been recorded.');
+            $retval['html'] = '';
+        } else {
+            if ($this->saveVote($aid)) {
+                $retval['statusMessage'] = MO::_('Your vote has been recorded.') .
+                    ' "' . $this->getTopic() . '"';
+                $retval['html'] = MO::_('Your vote has been recorded.');
+                if ($this->canViewResults()) {
+                    $retval['html'] .= '<br />' . COM_createLink(
+                        $this->getTopic() . ' (' . MO::_('Results') . ')',
+                        Config::get('url') . '/index.php?results=x&pid=' . $this->pid;$
+                    );
+                }
+            } else {
+                $retval['statusMessage'] = MO::_('There was an error recording your vote.');
+                $retval['html'] = $retval['statusMessage'];
+            }
+        }
+        return $retval;
+    }
+
 }

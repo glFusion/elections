@@ -174,5 +174,3 @@ function plugin_autouninstall_elections()
     );
     return $out;
 }
-
-?>
