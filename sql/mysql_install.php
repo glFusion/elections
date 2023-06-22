@@ -31,8 +31,7 @@ $_SQL[DB::key('answers')] = "CREATE TABLE " . DB::table('answers') . " (
   votes mediumint(8) unsigned default NULL,
   remark varchar(255) NULL,
   PRIMARY KEY (tid, qid, aid)
-) ENGINE=MyISAM
-";
+) ENGINE=MyISAM";
 
 $_SQL[DB::key('questions')] = "CREATE TABLE " . DB::table('questions') . " (
     tid mediumint unsigned NOT NULL,
@@ -40,8 +39,7 @@ $_SQL[DB::key('questions')] = "CREATE TABLE " . DB::table('questions') . " (
     ans_sort tinyint(1) unsigned NOT NULL default 0,
     question varchar(255) NOT NULL,
     PRIMARY KEY (tid, qid)
-) ENGINE=MyISAM
-";
+) ENGINE=MyISAM";
 
 $_SQL[DB::key('topics')] = "CREATE TABLE " . DB::table('topics') . " (
   `tid` mediumint unsigned NOT NULL AUTO_INCREMENT,
@@ -62,6 +60,7 @@ $_SQL[DB::key('topics')] = "CREATE TABLE " . DB::table('topics') . " (
   `rnd_questions` tinyint(1) unsigned NOT NULL DEFAULT 0,
   `decl_winner` tinyint(1) unsigned NOT NULL DEFAULT 1,
   `show_remarks` tinyint(1) unsigned NOT NULL DEFAULT 0,
+  `cookie_key` varchar(24) DEFAULT '',
   PRIMARY KEY (`tid`),
   UNIQUE `idx_pid` (`pid`),
   KEY `questions_date` (`created`),
@@ -72,7 +71,7 @@ $_SQL[DB::key('topics')] = "CREATE TABLE " . DB::table('topics') . " (
 
 $_SQL[DB::key('voters')] = "CREATE TABLE " . DB::table('voters') . " (
   `id` mediumint unsigned NOT NULL AUTO_INCREMENT,
-  `tid` mediumint NOT NULL DEFAULT '',
+  `tid` mediumint NOT NULL,
   `ipaddress` varchar(255) NOT NULL DEFAULT '',
   `uid` mediumint(8) NOT NULL DEFAULT 1,
   `date` int(10) unsigned DEFAULT NULL,
@@ -81,6 +80,15 @@ $_SQL[DB::key('voters')] = "CREATE TABLE " . DB::table('voters') . " (
   `pub_key` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `topicid` (`tid`)
+) ENGINE=MyISAM";
+
+$_SQL[DB::table('votes')] = "CREATE TABLE " . DB::table('votes') . " (
+  `vid` varchar(20) NOT NULL,
+  `tid` MEDIUMINT NOT NULL,
+  `qid` int(11) unsigned NOT NULL,
+  `aid` int(11) unsigned NOT NULL,
+  PRIMARY KEY (`vid`),
+  KEY `idx_question` (`tid`, `qid`)
 ) ENGINE=MyISAM";
 
 $ELECTION_UPGRADE = array(
@@ -118,6 +126,3 @@ $ELECTION_UPGRADE = array(
         // Update the ans_sort column based on questions.rnd_answers before dropping that column
     )
 );
-
-$_SQL[DB::key('votes')] = $ELECTION_UPGRADE['0.3.0'][0];
-
