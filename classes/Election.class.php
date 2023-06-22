@@ -858,8 +858,7 @@ class Election
 
         $db = Database::getInstance();
         $retval = COM_startBlock(
-            MO::_('Edit Election'),
-            COM_getBlockTemplate('_admin_block', 'header')
+            MO::_('Edit Election')
         );
 
         $T = new \Template(Config::path_template() . 'admin/');
@@ -1311,7 +1310,7 @@ class Election
             array(__CLASS__, 'getListField'),
             $header_arr, $text_arr, $query_arr, $defsort_arr, '', $extras
         );
-        $retval .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
+        //$retval .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
         return $retval;
     }
 
