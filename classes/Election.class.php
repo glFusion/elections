@@ -1060,7 +1060,7 @@ class Election
      * @param   array   $A      Array of values (e.g. $_POST)
      * @return  boolean     True on success, False on error
      */
-    function Save(?DataArray $A=NULL) : bool
+    function save(?DataArray $A=NULL) : bool
     {
         global $_CONF;
 
@@ -1469,7 +1469,7 @@ class Election
         case 'results':
             if ($A['vote_count'] > 0) {
                 $retval = FieldList::resultsLink(array(
-                    'url' => Config::get('admin_url') . '/index.php?results=' . $A['pid']
+                    'url' => Config::get('admin_url') . '/index.php?results=' . $A['tid']
                 ) );
             } else {
                 $retval = 'n/a';
@@ -1495,12 +1495,12 @@ class Election
         case 'delete':
             $retval = FieldList::delete(array(
                 'delete_url' => Config::get('admin_url') . '/index.php' . 
-                    '?delete=x&amp;pid=' . $A['pid'] . '&amp;' . CSRF_TOKEN . '=' . $extras['token'],
+                    '?delete=' . $A['tid'] . '&amp;' . CSRF_TOKEN . '=' . $extras['token'],
                 'attr' => array(
                     'title' => MO::_('Delete'),
                     'onclick' => "return doubleconfirm('" .
-                        MO::_('Are you sure you want to delete this Poll?') . "','" .
-                        MO::_('Are you absolutely sure you want to delete this Poll?  All questions, answers and comments that are associated with this Poll will also be permanently deleted from the database.') .
+                        MO::_('Are you sure you want to delete this Election?') . "','" .
+                        MO::_('Are you absolutely sure you want to delete this Election?  All questions, answers and comments that are associated with this Poll will also be permanently deleted from the database.') .
                         "');",
                 )
             ) );

@@ -87,7 +87,7 @@ case 'results':
     break;
 
 case 'presults':
-    echo (new Results($pid))->Print();
+    echo (new Results($actionval))->Print();
     exit;
     break;
 
@@ -97,7 +97,7 @@ case 'resetelection':
     break;
 
 case 'delete':
-    if (empty($pid)) {
+    if (empty($actionval)) {
         COM_errorLog(MO::_('Ignored possibly manipulated request to delete a election.'));
         $page .= COM_refresh(Config::get('admin_url') . '/index.php');
     } elseif (SEC_checktoken()) {
