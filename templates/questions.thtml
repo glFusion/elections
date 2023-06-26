@@ -14,9 +14,11 @@
 	<ul class="uk-list elections_answers">
 <!-- BEGIN Answers -->
 		<li class="elections-answer">
+			<label for="q{question_id}_a{answer_id}_{rnd}" style="display:block;width: 100%;">
 			<input type="radio" {radio_disabled} id="q{question_id}_a{answer_id}_{rnd}" name="aid[{question_id}]" value="{answer_id}"{selected} /><label class="elections-answer-text" for="q{question_id}_a{answer_id}_{rnd}">{answer_text}</label>
 {!if answer_remark}
-			<br /><span class="elections-answer-remark">{answer_remark}</span>
+			<div class="elections-answer-remark">{answer_remark}</div>
+			</label>
 {!endif}
 		</li>
 <!-- END Answers -->

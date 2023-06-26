@@ -1,9 +1,15 @@
 .elections-answer-text {
 	margin-left: 10px;
 }
+li.elections-answer {
+	border-style: solid;
+	border-width: thin;
+	padding: 4px;
+}
 li.elections-answer:nth-child(n+1) {
 	margin-top: 8px;
 }
-span.elections-answer-remark {
+div.elections-answer-remark {
 	font-style: italic;
+	margin-left:10px;
 }
