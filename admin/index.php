@@ -56,6 +56,7 @@ case 'edit':
     break;
 
 case 'editq':
+    // Future use
     $tid = $Request->getInt('tid');
     $qid = $Request->getInt('qid');
     $Question = new Elections\Question($tid, $qid);
@@ -65,8 +66,9 @@ case 'editq':
 case 'save':
     if (SEC_checktoken()) {
         $Election = Election::getInstance($Request->getInt('tid'));
-        if ($Election->Save($Request)) {
-            COM_refresh(Config::get('admin_url') . '/index.php');
+        if ($Election->save($Request)) {
+            COM_setMsg($Election->getErrors(true), 'error', true);
+            echo COM_refresh(Config::get('admin_url') . '/index.php');
         } else {
             $title = MO::_('Edit Election');
             $page .= $Election->getErrors(true);
@@ -77,7 +79,7 @@ case 'save':
             MO::_("User %s tried to save election $pid and failed CSRF checks."),
             $_USER['username']
         ) );
-        $page =  COM_refresh($_CONF['site_admin_url'] . '/index.php');
+        echo COM_refresh($_CONF['site_admin_url'] . '/index.php');
     }
     break;
 
@@ -93,13 +95,13 @@ case 'presults':
 
 case 'resetelection':
     Election::deleteVotes($actionval);
-    COM_refresh(Config::get('admin_url') . '/index.php');
+    echo COM_refresh(Config::get('admin_url') . '/index.php');
     break;
 
 case 'delete':
     if (empty($actionval)) {
         COM_errorLog(MO::_('Ignored possibly manipulated request to delete a election.'));
-        $page .= COM_refresh(Config::get('admin_url') . '/index.php');
+        echo COM_refresh(Config::get('admin_url') . '/index.php');
     } elseif (SEC_checktoken()) {
         $page .= Election::getInstance($actionval)->delete();
     } else {
