@@ -3,7 +3,7 @@
  * Upgrade routines for the Elections plugin.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2020-2022 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2020-2023 Lee Garner <lee@leegarner.com>
  * @package     shop
  * @version     v0.3.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
@@ -13,7 +13,6 @@
 if (!defined ('GVERSION')) {
     die ('This file can not be used on its own.');
 }
-use Elections\DB;
 use Elections\Config;
 use Elections\Models\Token;
 use glFusion\Database\Database;
@@ -31,7 +30,7 @@ require_once __DIR__ . "/sql/mysql_install.php";
  */
 function ELECTIONS_upgrade($dvlp=false)
 {
-    global $_PLUGIN_INFO, $ELECTION_UPGRADE;
+    global $_PLUGIN_INFO, $ELECTION_UPGRADE, $_TABLES;
 
     $pi_name = Config::PI_NAME;
     if (isset($_PLUGIN_INFO[$pi_name])) {
@@ -71,14 +70,14 @@ function ELECTIONS_upgrade($dvlp=false)
         }
 
         if (ELECTIONS_tableHasColumn('topics', 'rnd_answers')) {
-            $ELECTION_UPGRADE[$current_ver][] = 'UPDATE ' . DB::table('questions') .
-                ' q SET q.ans_sort = (SELECT rnd_answers FROM ' . DB::table('topics') .
+            $ELECTION_UPGRADE[$current_ver][] = 'UPDATE ' . $_TABLES['electsions_questions'] .
+                ' q SET q.ans_sort = (SELECT rnd_answers FROM ' . $_TABLES['electsions_topics'] .
                 ' t WHERE t.tid = q.tid)';
         }
         $has_cookie_key = ELECTIONS_tableHasColumn('topics', 'cookie_key');
 
         // Drop rnd_answers after updating the questions
-        $ELECTION_UPGRADE[$current_ver][] = 'ALTER TABLE ' . DB::table('topics') .
+        $ELECTION_UPGRADE[$current_ver][] = 'ALTER TABLE ' . $_TABLES['electsions_topics'] .
             ' DROP rnd_answers';
 
         if (!ELECTIONS_do_upgrade_sql($current_ver, $dvlp)) return false;
@@ -87,7 +86,7 @@ function ELECTIONS_upgrade($dvlp=false)
         $db = Database::getInstance();
         try {
             $data = $db->conn->executeQuery(
-                "SELECT tid, pid FROM " . DB::table('topics')
+                "SELECT tid, pid FROM " . $_TABLES['electsions_topics']
             )->fetchAllAssociative();
         } catch (\Throwable $e) {
             Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
@@ -103,12 +102,13 @@ function ELECTIONS_upgrade($dvlp=false)
                     $where = array('pid' => $row['pid']);
                     try {
                         foreach ($adding_tids as $key=>$sqls) {
-                            $db->conn->update(DB::table($key), $values, $where, $types);
+                            $key = Config::PI_NAME . '_' . $key;
+                            $db->conn->update($_TABLES[$key[, $values, $where, $types);
                             COM_errorLog("Got the update for $key");
                             foreach ($sqls as $sql) {
-                                COM_errorLog('Executing ===> ALTER TABLE ' . DB::table($key) . $sql);
+                                COM_errorLog('Executing ===> ALTER TABLE ' . $_TABLES[$key] . $sql);
                                 $db->conn->executeStatement(
-                                    'ALTER TABLE ' . DB::table($key) . $sql
+                                    'ALTER TABLE ' . $_TABLES[$key] . $sql
                                 );
                             }
                         }
@@ -123,7 +123,7 @@ function ELECTIONS_upgrade($dvlp=false)
             if (!$has_cookie_key) {
                 foreach ($data as $row) {
                     try {
-                        $db->conn->update(DB::table('topics'),
+                        $db->conn->update($_TABLES['electsions_topics'],
                             array('cookie_key' => Token::create()),
                             array('pid' => $row['pid']),
                             array(Database::STRING, Database::INTEGER)
@@ -314,7 +314,7 @@ function ELECTIONS_tableHasColumn(string $table, string $col_name) : bool
     $db = Database::getInstance();
     try {
         $count = $db->conn->executeQuery(
-            "SHOW COLUMNS FROM " . DB::table($table) . " LIKE ?",
+            "SHOW COLUMNS FROM {$_TABLES[$table]} LIKE ?",
             array($col_name),
             array(Database::STRING)
         )->rowCount();

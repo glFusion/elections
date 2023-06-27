@@ -79,12 +79,14 @@ class Answer
      */
     public static function getByQuestion(int $q_id, int $tid, int $rnd = 0) : array
     {
+        global $_TABLES;
+
         $retval = array();
         $db = Database::getInstance();
         $qb = $db->conn->createQueryBuilder();
         $qb->select('a.*', 'count(v.aid) as total_votes')
-           ->from(DB::table('answers'), 'a')
-           ->leftJoin('a', DB::table('votes'), 'v', 'v.tid=a.tid AND v.qid=a.qid AND v.aid=a.aid')
+           ->from($_TABLES['elections_answers'], 'a')
+           ->leftJoin('a', $_TABLES['elections_votes'], 'v', 'v.tid=a.tid AND v.qid=a.qid AND v.aid=a.aid')
            ->where('a.qid = :q_id')
            ->andWhere('a.tid = :tid')
            ->groupBy('a.qid, a.aid')
@@ -126,14 +128,16 @@ class Answer
      */
     public static function getByScore(int $q_id, int $tid)
     {
+        global $_TABLES;
+
         $q_id = (int)$q_id;
         $retval = array();
         $db = Database::getInstance();
         try {
             $data = $db->conn->executeQuery(
                 "SELECT a.*, count(v.vid) as vote_count
-                FROM " . DB::table('answers') . " a
-                LEFT JOIN " . DB::table('votes') . " v
+                FROM {$_TABLES['elections_answers']} a
+                LEFT JOIN {$_TABLES['elections_votes']} v
                 ON a.aid = v.aid AND a.qid=v.qid
                 WHERE a.qid = ? AND a.tid = ?
                 GROUP BY a.qid,a.aid
@@ -185,10 +189,12 @@ class Answer
      */
     public function Save()
     {
+        global $_TABLES;
+
         $db = Database::getInstance();
         try {
             $db->conn->insert(
-                DB::table('answers'),
+                $_TABLES['elections_answers'],
                 array(
                     'tid' => $this->getTid(),
                     'qid' => $this->getQid(),
@@ -207,7 +213,7 @@ class Answer
             return 0;
         } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException $k) {
             $db->conn->update(
-                DB::table('answers'),
+                $_TABLES['elections_answers'],
                 array(
                     'answer' => $this->answer,
                     'remark' => $this->remark,
@@ -240,10 +246,12 @@ class Answer
      */
     public function Delete()
     {
+        global $_TABLES;
+
         $db = Database::getInstance();
         try {
             $db->conn->delete(
-                DB::table('answers'),
+                $_TABLES['elections_answers'],
                 array('tid' => $this->tid, 'qid' => $this->qid, 'aid' => $this->aid),
                 array(Database::INTEGER, Database::INTEGER, Database::INTEGER)
             );
@@ -265,10 +273,12 @@ class Answer
      */
     public static function deleteElection(int $tid) : void
     {
+        global $_TABLES;
+
         $db = Database::getInstance();
         try {
             $db->conn->delete(
-                DB::table('answers'),
+                $_TABLES['elections_answers'],
                 array('tid' => $tid),
                 array(Database::INTEGER)
             );
@@ -285,10 +295,12 @@ class Answer
      */
     public static function resetElection(int $tid) : void
     {
+        global $_TABLES;
+
         $db = Database::getInstance();
         try {
             $db->conn->update(
-                DB::table('answers'),
+                $_TABLES['elections_answers'],
                 array('votes' => 0),
                 array('tid' => $tid),
                 array(Database::INTEGER, Database::INTEGER)
@@ -446,12 +458,14 @@ class Answer
      * @param   integer $qid    Question ID
      * @param   integer $aid    Answer ID
      */
-    public static function increment(int $tid, int $qid, int $aid) : void
+    public static function Xincrement(int $tid, int $qid, int $aid) : void
     {
+        global $_TABLES;
+
         $db = Database::getInstance();
         try {
             $db->conn->executeStatement(
-                "UPDATE " . DB::table('answers') . "
+                "UPDATE {$_TABLES['elections_answers']}
                 SET votes = votes + 1
                 WHERE tid = ?
                 AND qid = ?
@@ -474,12 +488,14 @@ class Answer
      * @param   integer $aid    Answer ID
      * @return  void
      */
-    public static function decrement(int $tid, int $qid, int $aid) : void
+    public static function Xdecrement(int $tid, int $qid, int $aid) : void
     {
+        global $_TABLES;
+
         $db = Database::getInstance();
         try {
             $db->conn->executeStatement(
-                "UPDATE " . DB::table('answers') . "
+                "UPDATE {$_TABLES['elections_answers']}
                 SET votes = (case when votes < 1 then 0 else (votes - 1) end)
                 WHERE tid = ?
                 AND qid = ?

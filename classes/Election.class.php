@@ -216,10 +216,12 @@ class Election
      */
     public static function getByPid(string $pid) : self
     {
+        global $_TABLES;
+
         $retval = new self;
         try {
             $row = Database::getInstance()->conn->executeQuery(
-                "SELECT * FROM " . DB::table('topics') . ' WHERE pid = ?',
+                "SELECT * FROM {$_TABLES['elections_topics']} WHERE pid = ?",
                 array($pid),
                 array(Database::STRING)
             )->fetchAssociative();
@@ -242,7 +244,7 @@ class Election
      */
     public static function getOpen($mode=NULL) : array
     {
-        global $_CONF;
+        global $_CONF, $_TABLES;
 
         $retval = array();
         if ($mode === NULL) {
@@ -253,7 +255,7 @@ class Election
         $queryBuilder = $db->conn->createQueryBuilder();
         $queryBuilder
             ->select('p.*')
-            ->from(DB::table('topics'), 'p')
+            ->from($_TABLES['elections_topics'], 'p')
             ->where('p.status = :status')
             ->andWhere(':now BETWEEN opens AND closes')
             ->orderBy('p.pid', 'ASC')
@@ -279,7 +281,9 @@ class Election
      */
     public static function countElections() : int
     {
-        return Database::getInstance()->getCount(DB::table('topics'));
+        global $_TABLES;
+
+        return Database::getInstance()->getCount($_TABLES['elections_topics']);
     }
 
 
@@ -773,13 +777,15 @@ class Election
      */
     public function Read() : bool
     {
+        global $_TABLES;
+
         $this->Questions = array();
         $db = Database::getInstance();
         $queryBuilder = $db->conn->createQueryBuilder();
         $queryBuilder
             ->select('t.*', 'count(v.tid) as vote_count')
-            ->from(DB::table('topics'), 't')
-            ->leftJoin('t', DB::table('voters'), 'v', 'v.tid=t.tid')
+            ->from($_TABLES['elections_topics'], 't')
+            ->leftJoin('t', $_TABLES['elections_voters'], 'v', 'v.tid=t.tid')
             ->where('t.tid = :tid')
             ->setParameter('tid', $this->tid);
         try {
@@ -854,7 +860,7 @@ class Election
      */
     public function edit(string $type = 'edit') : string
     {
-        global $_CONF, $_GROUPS, $_USER, $MESSAGE;
+        global $_CONF, $_GROUPS, $_USER, $MESSAGE, $_TABLES;
 
         $db = Database::getInstance();
         $retval = COM_startBlock(
@@ -917,7 +923,7 @@ class Election
             'lang_mode' => MO::_('Comments'),
             'description' => $this->dscp,
             'lang_description' => MO::_('Description'),
-            //'comment_options' => COM_optionList(DB::table('commentcodes'),'code,name',$this->commentcode),
+            //'comment_options' => COM_optionList($_TABLES['commentcodes'],'code,name',$this->commentcode),
             'lang_appearsonhomepage' => MO::_('Appears on Election Block'),
             'lang_status' => MO::_('Voting Status'),
             'lang_open' => MO::_('Open'),
@@ -936,7 +942,7 @@ class Election
             // user access info
             'lang_accessrights' => MO::_('Access Rights'),
             'lang_owner' => MO::_('Owner'),
-            'owner_username' => $db->getItem(DB::table('users'), 'username', array('uid' => $this->owner_id)),
+            'owner_username' => $db->getItem($_TABLES['users'], 'username', array('uid' => $this->owner_id)),
             'owner_name' => $ownername,
             'owner' => $ownername,
             'owner_id' => $this->owner_id,
@@ -1062,7 +1068,7 @@ class Election
      */
     function save(?DataArray $A=NULL) : bool
     {
-        global $_CONF;
+        global $_CONF, $_TABLES;
 
         $db = Database::getInstance();
         $retval = true;
@@ -1127,12 +1133,12 @@ class Election
         $db = Database::getInstance();
         try {
             if ($this->isNew()) {
-                $db->conn->insert(DB::table('topics'), $values, $types);
+                $db->conn->insert($_TABLES['elections_topics'], $values, $types);
                 $this->tid = $db->conn->lastInsertId();
             } else {
                 $types[] = Database::INTEGER;
                 $db->conn->update(
-                    DB::table('topics'),
+                    $_TABLES['elections_topics'],
                     $values,
                     array('tid' => $this->tid),
                     $types
@@ -1208,7 +1214,7 @@ class Election
      */
     public static function adminList()
     {
-        global $_CONF;
+        global $_CONF, $_TABLES;
 
         $retval = '';
 
@@ -1292,8 +1298,8 @@ class Election
         $query_arr = array(
             'table' => 'electiontopics',
             'sql' => "SELECT p.*, count(v.id) as vote_count
-                FROM " . DB::table('topics') . " p
-                LEFT JOIN " . DB::table('voters') . " v
+                FROM {$_TABLES['elections_topics']} p
+                LEFT JOIN {$_TABLES['elections_voters']} v
                 ON v.tid = p.tid",
             'query_fields' => array('topic'),
             'default_filter' => 'AND' . self::getPermSql(),
@@ -1847,7 +1853,7 @@ class Election
      */
     public static function listElections()
     {
-        global $_CONF, $_USER;
+        global $_CONF, $_USER, $_TABLES;
 
         $T = new \Template(Config::path_template());
         $T->set_file('list', 'list.thtml');
@@ -1915,9 +1921,9 @@ class Election
         $qb = $db->conn->createQueryBuilder();
         $qb->select(
                 'p.*',
-                '(SELECT COUNT(v.id) FROM ' . DB::table('voters') . ' v WHERE v.tid = p.tid) AS vote_count'
+                "(SELECT COUNT(v.id) FROM {$_TABLES['elections_voters']} v WHERE v.tid = p.tid) AS vote_count"
             )
-            ->from(DB::table('topics'), 'p')
+            ->from($_TABLES['elections_topics'], 'p')
             ->where('p.status <> ' . Status::ARCHIVED)
             ->andWhere('(' . implode(' OR ' , $filter_ors) . ')')
             ->andWhere($db->getAccessSql('', 'p.results_gid'));
@@ -1964,7 +1970,7 @@ class Election
      */
     public function delete($force=false) : void
     {
-        global $_CONF, $_USER;
+        global $_CONF, $_USER, $_TABLES;
 
         if (
             !$this->isNew() &&
@@ -1977,9 +1983,9 @@ class Election
             Voter::deleteElection($this->tid);
             // Now delete the election topic
             $db->conn->delete(
-                DB::table('topics'),
+                $_TABLES['elections_topics'],
                 array('tid' => $this->tid),
-                array(Database::STRING)
+                array(Database::INTEGER)
             );
 
             PLG_itemDeleted($this->tid, Config::PI_NAME);
@@ -2005,13 +2011,15 @@ class Election
      */
     public static function deleteVotes(int $tid) : void
     {
+        global $_TABLES;
+
         $Election = new self($tid);
         if (!$Election->isNew() && $Election->getStatus() < Status::ARCHIVED) {
             Answer::resetElection($Election->getTid());
             Voter::deleteElection($Election->getTid());
             try {
                 Database::getInstance()->conn->update(
-                    DB::table('topics'),
+                    $_TABLES['elections_topics'],
                     array('cookie_key' => Token::create()),
                     array('pid' => $pid),
                     array(Database::STRING, Database::STRING)
@@ -2030,7 +2038,7 @@ class Election
      */
     public function listVotes()
     {
-        global $_CONF;
+        global $_CONF, $_TABLES;
 
         $db = Database::getInstance();
         $retval = '';
@@ -2068,8 +2076,8 @@ class Election
         );
 
         $sql = "SELECT voters.*, FROM_UNIXTIME(voters.date) as dt_voted, users.username
-            FROM " . DB::table('voters') . " AS voters
-            LEFT JOIN " . DB::table('users') . " AS users ON voters.uid=users.uid
+            FROM {$_TABLES['elections_voters']} AS voters
+            LEFT JOIN {$_TABLES['users']} AS users ON voters.uid=users.uid
             WHERE voters.tid = " . $this->tid;
 
         $query_arr = array(
@@ -2097,10 +2105,12 @@ class Election
      */
     public static function moveUser(int $origUID, int $destUID) : void
     {
+        global $_TABLES;
+
         $db = Database::getInstance();
         try {
             $db->conn->update(
-                DB::table('topics'),
+                $_TABLES['elections_topics'],
                 array(
                     'owner_id' => $destUID,
                 ),
@@ -2128,6 +2138,8 @@ class Election
      */
     public static function toggleEnabled(int $oldvalue, int $tid) : int
     {
+        global $_TABLES;
+
         // Determing the new value (opposite the old)
         if ($oldvalue == 1) {
             $newvalue = 0;
@@ -2139,7 +2151,7 @@ class Election
 
         try {
             Database::getInstance()->conn->update(
-                DB::table('topics'),
+                $_TABLES['elections_topics'],
                 array('status' => $newvalue),
                 array('tid' => $tid),
                 array(Database::INTEGER, Database::STRING)

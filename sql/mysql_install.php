@@ -19,11 +19,10 @@
 if (!defined ('GVERSION')) {
     die ('This file can not be used on its own.');
 }
-global $_SQL, $ELECTION_UPGRADE;
+global $_SQL, $ELECTION_UPGRADE, $_TABLES;;
 
-use Elections\DB;
 
-$_SQL[DB::key('answers')] = "CREATE TABLE " . DB::table('answers') . " (
+$_SQL['elections_answers'] = "CREATE TABLE {$_TABLES['elections_answers']} (
   tid mediumint NOT NULL,
   qid mediumint NOT NULL,
   aid tinyint(3) unsigned NOT NULL default '0',
@@ -33,7 +32,7 @@ $_SQL[DB::key('answers')] = "CREATE TABLE " . DB::table('answers') . " (
   PRIMARY KEY (tid, qid, aid)
 ) ENGINE=MyISAM";
 
-$_SQL[DB::key('questions')] = "CREATE TABLE " . DB::table('questions') . " (
+$_SQL['elections_questions'] = "CREATE TABLE {$_TABLES['electsions_questions']} (
     tid mediumint unsigned NOT NULL,
     qid mediumint unsigned NOT NULL,
     ans_sort tinyint(1) unsigned NOT NULL default 0,
@@ -41,7 +40,7 @@ $_SQL[DB::key('questions')] = "CREATE TABLE " . DB::table('questions') . " (
     PRIMARY KEY (tid, qid)
 ) ENGINE=MyISAM";
 
-$_SQL[DB::key('topics')] = "CREATE TABLE " . DB::table('topics') . " (
+$_SQL['elections_topics'] = "CREATE TABLE {$_TABLES['elections_topics']} (
   `tid` mediumint unsigned NOT NULL AUTO_INCREMENT,
   `pid` varchar(128) NOT NULL,
   `topic` varchar(255) DEFAULT NULL,
@@ -69,7 +68,7 @@ $_SQL[DB::key('topics')] = "CREATE TABLE " . DB::table('topics') . " (
   KEY `idx_enabled` (`status`)
 ) ENGINE=MyISAM";
 
-$_SQL[DB::key('voters')] = "CREATE TABLE " . DB::table('voters') . " (
+$_SQL['elections_voters'] = "CREATE TABLE {$_TABLES['elections_voters']} (
   `id` mediumint unsigned NOT NULL AUTO_INCREMENT,
   `tid` mediumint NOT NULL,
   `ipaddress` varchar(255) NOT NULL DEFAULT '',
@@ -82,7 +81,7 @@ $_SQL[DB::key('voters')] = "CREATE TABLE " . DB::table('voters') . " (
   KEY `topicid` (`tid`)
 ) ENGINE=MyISAM";
 
-$_SQL[DB::table('votes')] = "CREATE TABLE " . DB::table('votes') . " (
+$_SQL['elections_votes'] = "CREATE TABLE {$_TABLES['elections_votes']} (
   `vid` varchar(20) NOT NULL,
   `tid` MEDIUMINT NOT NULL,
   `qid` int(11) unsigned NOT NULL,
@@ -93,10 +92,10 @@ $_SQL[DB::table('votes')] = "CREATE TABLE " . DB::table('votes') . " (
 
 $ELECTION_UPGRADE = array(
     '0.2.0' => array(
-        'ALTER TABLE ' . DB::table('topics') . ' ADD show_remarks tinyint(1) unsigned NOT NULL DEFAULT 0 AFTER decl_winner',
+        "ALTER TABLE {$_TABLES['elections_topics']} ADD show_remarks tinyint(1) unsigned NOT NULL DEFAULT 0 AFTER decl_winner",
     ),
     '0.3.0' => array(
-        "CREATE TABLE " . DB::table('votes') . " (
+        "CREATE TABLE {$_TABLES['elections_votes']} (
           `vid` varchar(20) NOT NULL,
           `tid` MEDIUMINT NOT NULL,
           `qid` int(11) unsigned NOT NULL,
@@ -104,25 +103,25 @@ $ELECTION_UPGRADE = array(
           PRIMARY KEY (`vid`),
           KEY `idx_question` (`tid`, `qid`)
         ) ENGINE=MyISAM",
-        'ALTER TABLE ' . DB::table('voters') . " CHANGE ipaddress ipaddress varchar(255) NOT NULL default ''",
-        'ALTER TABLE ' . DB::table('topics') . " DROP PRIMARY KEY",
-        'ALTER TABLE ' . DB::table('topics') . " ADD tid mediumint unsigned NOT NULL auto_increment primary key first",
-        'ALTER TABLE ' . DB::table('topics') . " ADD cookie_key varchar(24) NOT NULL",
-        'ALTER TABLE ' . DB::table('topics') . " ADD UNIQUE `idx_pid` (`pid`)",
+        "ALTER TABLE {$_TABLES['elections_voters']} CHANGE ipaddress ipaddress varchar(255) NOT NULL default ''",
+        "ALTER TABLE {$_TABLES['elections_topics']} DROP PRIMARY KEY",
+        "ALTER TABLE {$_TABLES['elections_topics']} ADD tid mediumint unsigned NOT NULL auto_increment primary key first",
+        "ALTER TABLE {$_TABLES['elections_topics']} ADD cookie_key varchar(24) NOT NULL",
+        "ALTER TABLE {$_TABLES['elections_topics']} ADD UNIQUE `idx_pid` (`pid`)",
         // Drop the primary keys for questions and answers to convert to a "tid" field.
         // The "pid" field will be deleted and the key recreated in upgrade.php
-        'ALTER TABLE ' . DB::table('questions') . " DROP PRIMARY KEY",
-        'ALTER TABLE ' . DB::table('questions') . " ADD tid mediumint unsigned NOT NULL FIRST",
-        'ALTER TABLE ' . DB::table('questions') . " ADD PRIMARY KEY (`tid`, `qid`)",
-        'ALTER TABLE ' . DB::table('answers') . " DROP PRIMARY KEY",
-        'ALTER TABLE ' . DB::table('answers') . " ADD tid mediumint unsigned NOT NULL FIRST",
-        'ALTER TABLE ' . DB::table('answers') . " ADD PRIMARY KEY (`tid`, `qid`, `aid`)",
-        'ALTER TABLE ' . DB::table('voters') . " CHANGE id id mediumint unsigned NOT NULL AUTO_INCREMENT",
-        'ALTER TABLE ' . DB::table('voters') . " ADD tid mediumint unsigned NOT NULL AFTER `id`",
-        'ALTER TABLE ' . DB::table('voters') . " DROP KEY IF EXISTS `pollid`",
-        'ALTER TABLE ' . DB::table('voters') . " ADD KEY `topicid` (`tid`)",
-        'ALTER TABLE ' . DB::table('voters') . " ADD voterecords text AFTER votedta",
-        'ALTER TABLE ' . DB::table('questions') . " ADD ans_sort tinyint(1) unsigned NOT NULL default 0 after qid",
+        "ALTER TABLE {$_TABLES['elections_questions']} DROP PRIMARY KEY",
+        "ALTER TABLE {$_TABLES['elections_questions']} ADD tid mediumint unsigned NOT NULL FIRST",
+        "ALTER TABLE {$_TABLES['elections_questions']} ADD PRIMARY KEY (`tid`, `qid`)",
+        "ALTER TABLE {$_TABLES['elections_answers']} DROP PRIMARY KEY",
+        "ALTER TABLE {$_TABLES['elections_answers']} ADD tid mediumint unsigned NOT NULL FIRST",
+        "ALTER TABLE {$_TABLES['elections_answers']} ADD PRIMARY KEY (`tid`, `qid`, `aid`)",
+        "ALTER TABLE {$_TABLES['elections_voters']} CHANGE id id mediumint unsigned NOT NULL AUTO_INCREMENT",
+        "ALTER TABLE {$_TABLES['elections_voters']} ADD tid mediumint unsigned NOT NULL AFTER `id`",
+        "ALTER TABLE {$_TABLES['elections_voters']} DROP KEY IF EXISTS `pollid`",
+        "ALTER TABLE {$_TABLES['elections_voters']} ADD KEY `topicid` (`tid`)",
+        "ALTER TABLE {$_TABLES['elections_voters']} ADD voterecords text AFTER votedta",
+        "ALTER TABLE {$_TABLES['elections_questions']} ADD ans_sort tinyint(1) unsigned NOT NULL default 0 after qid",
         // Update the ans_sort column based on questions.rnd_answers before dropping that column
     )
 );

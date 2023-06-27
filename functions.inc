@@ -44,7 +44,6 @@ spl_autoload_register(function ($class)
     }
 });
 use Elections\MO;
-use Elections\DB;
 use Elections\Config;
 use Elections\Election;
 use Elections\Voter;
@@ -133,9 +132,9 @@ function plugin_savecomment_elections($title, $comment, $id, $pid, $postmode)
 
     $db = Database::getInstance();
     $commentcode = $db->getItem(
-        DB::table('topics'),
+        $_TABLES['elections_topics'],
         'commentcode',
-        array('pid', $id)
+        array('tid', $id)
     );
     if ($commentcode != 0) {
         return COM_refresh ($_CONF['site_url'] . '/index.php');
@@ -237,8 +236,8 @@ function plugin_statssummary_elections()
 
     try {
         $elections = $db->conn->executeQuery(
-            "SELECT pid FROM " . DB::table('topics') .
-            ' WHERE ' . Election::getPermSQL()
+            "SELECT tid FROM {$_TABLES['elections_topics']}
+            WHERE " . Election::getPermSQL()
         )->fetchAllAssociative();
     } catch (\Throwable $e) {
         Log::write('system', Log::ERROR, __FUNCTION__ . ': ' . $e->getMessage());
@@ -254,9 +253,9 @@ function plugin_statssummary_elections()
             }
             try {
                 $data = $db->conn->executeQuery(
-                    "SELECT SUM(votes) AS totalvotes FROM " . DB::table('answers') . " WHERE pid IN (?)",
+                    "SELECT count(*) AS totalvotes FROM {$_TABLES['elections_votes']} WHERE tid IN (?)",
                     array($topics),
-                    array(Database::PARAM_STR_ARRAY)
+                    array(Database::PARAM_INT_ARRAY)
                 )->fetchAssociative();
             } catch (\Throwable $e) {
                 Log::write('system', Log::ERROR, __FUNCTION__ . ': ' . $e->getMessage());
@@ -332,7 +331,7 @@ function plugin_user_delete_elections($uid)
     Voter::moveUser($uid, 1);
     $db = Database::getInstance();
 
-    if ($db->getCount(DB::table('topics'), 'owner_id', $uid, Database::INTEGER) == 0) {
+    if ($db->getCount($_TABLES['elections_topics'], 'owner_id', $uid, Database::INTEGER) == 0) {
         // there are no election owned by this user
         return;
     }
@@ -649,7 +648,7 @@ function plugin_autotags_elections($op, $content = '', $autotag = '')
                 $title = COM_applyFilter($autotag['parm2']);
             } else {
                 $title = $db->getItem(
-                    DB::table('topics'),
+                    $_TABLES['elections_topics'],
                     'topic',
                     array('pid' => $pid)
                 );
@@ -727,8 +726,8 @@ function plugin_getiteminfo_elections($id, $what, $uid = 0, $options = array())
                 $fields[] = 'owner_id';
                 break;
             case 'hits':
-                $fields[] = '(SELECT COUNT(v.id) FROM ' . DB::table('voters') .
-                    ' AS v WHERE v.pid = ' . DB::table('topics') . '.pid) AS voters';
+                $fields[] = "(SELECT COUNT(v.id) FROM {$_TABLES['elections_voters']}
+                    AS v WHERE v.pid = {$_TABLES['elections_topics']}.pid) AS voters";
                 break;
             case 'perms' :
                 $fields[] = 'owner_id';
@@ -754,7 +753,7 @@ function plugin_getiteminfo_elections($id, $what, $uid = 0, $options = array())
     $qb->select(
         'UNIX_TIMESTAMP(created) AS unixdate', 'pid', 'topic', 'description',
         'hideresults', 'owner_id', 'group_id'
-    )->from(DB::table('topics'))
+    )->from($_TABLES['elections_topics'])
      ->where(Election::getPermSQL($uid));
 
     if ($id !== '*') {
@@ -915,11 +914,13 @@ function plugin_getconfigelementhelp_elections($type, $option, $doclang = 'engli
  */
 function plugin_runScheduledTask_elections()
 {
+    global $_TABLES;
+
     $cutoff = time() - (Config::get('archive_days', 365) * 86400);
     $db = Database::getInstance();
     try {
         $db->conn->executeStatement(
-            "UPDATE " . DB::table('topics') . " SET status = ? WHERE closes < FROM_UNIXTIME(?)",
+            "UPDATE {$_TABLES['elections_topics']} SET status = ? WHERE closes < FROM_UNIXTIME(?)",
             array(\Elections\Models\Status::ARCHIVED, $cutoff),
             array(Database::INTEGER, Database::STRING)
         );
@@ -936,22 +937,24 @@ function plugin_runScheduledTask_elections()
  */
 function plugin_getContentTableInfo_elections()
 {
+    global $_TABLES;
+
     $contentItems = array(
-        DB::table('questions') => array(
+        $_TABLES['elections_questions'] => array(
             'plugin' => Config::PI_NAME,
             'primary_key' => 'pid',
             'columns' => array(
                 'question',
             )
         ),
-        DB::table('answers') => array(
+        $_TABLES['elections_answers'] => array(
             'plugin' => Config::PI_NAME,
             'primary_key' => 'pid,qid,aid',
             'columns' => array(
                 'answer',
             )
         ),
-        DB::table('topics') => array(
+        $_TABLES['elections_topics'] => array(
             'plugin' => Config::PI_NAME,
             'primary_key' => 'pid,qid',
             'columns' => array(
@@ -1045,8 +1048,7 @@ function ELECTION_countElectionAndVotes()
 
     try {
         $elections = $db->conn->executeQuery(
-            "SELECT pid FROM " . DB::table('topics') .
-            ' WHERE ' . Election::getPermSQL()
+            "SELECT pid FROM {$_TABLES['elections_topics']} WHERE " . Election::getPermSQL()
         )->fetchAllAssociative();
     } catch (\Throwable $e) {
         Log::write('system', Log::ERROR, __FUNCTION__ . ': ' . $e->getMessage());
@@ -1065,7 +1067,7 @@ function ELECTION_countElectionAndVotes()
             }
             try {
                 $total_answers = (int)$db->conn->executeQuery(
-                    "SELECT SUM(votes) FROM " . DB::table('answers') . " WHERE pid IN ({$topics})"
+                    "SELECT SUM(votes) FROM {$_TABLES['elections_answers']} WHERE pid IN ({$topics})"
                 );
             } catch (\Throwable $e) {
                 Log::write('system', Log::ERROR, __FUNCTION__ . ': ' . $e->getMessage());

@@ -291,6 +291,8 @@ class Voter
      */
     public function getVoteRecords() : ?array
     {
+        global $_TABLES;
+
         if ($this->_voteRecords !== NULL) {
             return $this->_voteRecords;
         }
@@ -305,7 +307,7 @@ class Voter
             $db = Database::getInstance();
             try {
                 $data = $db->conn->executeQuery(
-                    "SELECT * FROM " . DB::table('votes') . " WHERE vid IN (?)",
+                    "SELECT * FROM {$_TABLES['elections_votes']} WHERE vid IN (?)",
                     array($ids),
                     array(Database::PARAM_STR_ARRAY)
                 )->fetchAllAssociative();
@@ -331,6 +333,8 @@ class Voter
      */
     public static function getInstance(string $vote_id) : self
     {
+        global $_TABLES;
+
         $prv_key = NULL;
         if (strpos($vote_id, ':') !== false) {
             // An existing vote is being retrieved by the id:private_key string
@@ -341,7 +345,7 @@ class Voter
         $db = Database::getInstance();
         try {
             $row = $db->conn->executeQuery(
-                "SELECT * FROM " . DB::table('voters') . " WHERE id = ?",
+                "SELECT * FROM {$_TABLES['elections_voters']} WHERE id = ?",
                 array($vote_id),
                 array(Database::INTEGER)
             )->fetchAssociative();
@@ -373,7 +377,7 @@ class Voter
      */
     public static function hasVoted(int $tid, string $cookie_key, int $voting_grp=2) : bool
     {
-        global $_USER;
+        global $_USER, $_TABLES;
 
         $db = Database::getInstance();
 
@@ -382,7 +386,7 @@ class Voter
         if (!COM_isAnonUser()) {
             if (
                 $db->getCount(
-                    DB::table('voters'),
+                    $_TABLES['elections_voters'],
                     array('uid', 'tid'),
                     array($_USER['uid'], $tid),
                     array(Database::INTEGER, Database::STRING)
@@ -411,7 +415,7 @@ class Voter
         if (
             $ip != '' &&
             $db->getCount(
-                DB::table('voters'),
+                $_TABLES['elections_voters'],
                 array('ipaddress', 'tid'),
                 array($ip, $tid),
                 array(Database::STRING, Database::STRING)
@@ -448,7 +452,7 @@ class Voter
      */
     public static function create(int $tid, array $aid, int $vote_id=0) : ?object
     {
-        global $_USER;
+        global $_USER, $_TABLES;
 
         if ( COM_isAnonUser() ) {
             $uid = 1;
@@ -499,13 +503,13 @@ class Voter
             if ($vote_id > 0) {
                 $types[] = Database::INTEGER;   // for vote_id
                 $db->conn->update(
-                    DB::table('voters'),
+                    $_TABLES['elections_voters'],
                     $values,
                     array('id' => $Voter->getID()),
                     $types
                 );
             } else {
-                $db->conn->insert(DB::table('voters'), $values, $types);
+                $db->conn->insert($_TABLES['elections_voters'], $values, $types);
                 $Voter->withId($db->conn->lastInsertId());
             }
         } catch (\Throwable $e) {
@@ -534,7 +538,7 @@ class Voter
         if (!empty($this->_voteRecords)) {
             try {
                 $db->conn->executeStatement(
-                    'DELETE FROM ' . DB::table('votes') . ' WHERE vid IN (?)',
+                    "DELETE FROM {$_TABLES['elections_votes']} WHERE vid IN (?)",
                     array(array_keys($this->_voteRecords)),
                     array(Database::PARAM_STR_ARRAY)
                 );
@@ -548,7 +552,7 @@ class Voter
             $id = Token::create();
             try {
                 $db->conn->insert(
-                    DB::table('votes'),
+                    $_TABLES['elections_votes'],
                     array(
                         'vid' => $id,
                         'tid' => $tid,
@@ -583,10 +587,12 @@ class Voter
      */
     public static function deleteElection(int $tid) : void
     {
+        global $_TABLES;
+
         $db = Database::getInstance();
         try {
             $db->conn->delete(
-                DB::table('voters'), array('tid' => $tid), array(Database::STRING)
+                $_TABLES['elections_voters'], array('tid' => $tid), array(Database::INTEGER)
             );
         } catch (\Throwable $e) {
             Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
@@ -594,7 +600,7 @@ class Voter
 
         try {
             $db->conn->delete(
-                DB::table('votes'), array('tid' => $tid), array(Database::STRING)
+                $_TABLES['elections_votes'], array('tid' => $tid), array(Database::INTEGER)
             );
         } catch (\Throwable $e) {
             Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
@@ -610,10 +616,12 @@ class Voter
      */
     public static function moveUser(int $origUID, int $destUID) : void
     {
+        global $_TABLES;
+
         $db = Database::getInstance();
         try {
             $db->conn->update(
-                DB::table('voters'),
+                $_TABLES['elections_voters'],
                 array('uid' => $destUID),
                 array('uid' => $origUID),
                 array(Database::INTEGER, Database::INTEGER)

@@ -88,10 +88,12 @@ class Question
      */
     public function Read() : self
     {
+        global $_TABLES;
+
         $db = Database::getInstance();
         try {
             $data = $db->conn->executeQuery(
-                "SELECT * FROM " . DB::table('questions') . " WHERE qid = ?",
+                "SELECT * FROM {$_TABLES['elections_questions']} WHERE qid = ?",
                 array($this->qid),
                 array(Database::INTEGER)
             )->fetchAssociative();
@@ -125,6 +127,8 @@ class Question
      */
     public static function getByElection(int $tid, int $rnd_q=0) : array
     {
+        global $_TABLES;
+
         $retval = array();
         $db = Database::getInstance();
         if ($rnd_q) {
@@ -134,7 +138,7 @@ class Question
         }
         try {
             $data = $db->conn->executeQuery(
-                "SELECT * FROM " . DB::table('questions') . " WHERE tid = ? $order",
+                "SELECT * FROM {$_TABLES['elections_questions']} WHERE tid = ? $order",
                 array($tid),
                 array(Database::INTEGER)
             )->fetchAllAssociative();
@@ -217,6 +221,8 @@ class Question
      */
     public function setAnswers(DataArray $A) : self
     {
+        global $_TABLES;
+
         for ($i = 0; $i < Config::get('maxanswers'); $i++) {
             // If an empty answer is reached, quit
             if ($A['answer'][$this->qid][$i] == '') break;
@@ -234,7 +240,7 @@ class Question
         $db = Database::getInstance();
         try {
             $db->conn->executeStatement(
-                "DELETE FROM " . DB::table('answers') . "
+                "DELETE FROM {$_TABLES['elections_answers']}
                 WHERE tid = :tid AND qid = :qid AND aid >= :max_aid",
                 array('tid' => $this->tid, 'qid' => $this->qid, 'max_aid' => $i),
                 array(Database::INTEGER, Database::INTEGER, Database::INTEGER)
@@ -318,10 +324,12 @@ class Question
      */
     public static function deleteElection(int $tid) : void
     {
+        global $_TABLES;
+
         $db = Database::getInstance();
         try {
             $db->conn->delete(
-                DB::table('questions'),
+                $_TABLES['elections_questions'],
                 array('tid' => $tid),
                 array(Database::INTEGER)
             );
@@ -378,10 +386,12 @@ class Question
      */
     public function Save()
     {
+        global $_TABLES;
+
         $db = Database::getInstance();
         try {
             $db->conn->insert(
-                DB::table('questions'),
+                $_TABLES['elections_questions'],
                 array(
                     'tid' => $this->tid,
                     'qid' => $this->getQid(),
@@ -394,7 +404,7 @@ class Question
         } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException $k) {
             try {
                 $db->conn->update(
-                    DB::table('questions'),
+                    $_TABLES['elections_questions'],
                     array('question' => $this->question, 'ans_sort' => $this->getAnswerSort()),
                     array('tid' => $this->tid, 'qid' => $this->getQid()),
                     array(Database::STRING, Database::INTEGER, Database::INTEGER, Database::INTEGER)
@@ -415,10 +425,12 @@ class Question
      */
     public function Delete() : void
     {
+        global $_TABLES;
+
         $db = Database::getInstance();
         try {
             $db->conn->delete(
-                DB::table('questions'),
+                $_TABLES['elections_questions'],
                 array('tid' => $this->tid, 'qid' => $this->qid),
                 array(Database::INTEGER, Database::INTEGER)
             );
@@ -427,7 +439,7 @@ class Question
         }
         try {
             $db->conn->delete(
-                DB::table('answers'),
+                $_TABLES['elections_answers'],
                 array('tid' => $this->tid, 'qid' => $this->qid),
                 array(Database::INTEGER, Database::INTEGER)
             );
@@ -538,7 +550,7 @@ class Question
         }
         $T->set_var(array(
             'topic' => $db->getItem(
-                DB::table('topics'),
+                $_TABLES['elections_topics'],
                 'topic',
                 array('tid' => $this->tid),
                 array(Database::INTEGER)

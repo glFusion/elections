@@ -3,9 +3,9 @@
  * Automatic installation functions for the Elections plugin.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2021 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2022 Lee Garner <lee@leegarner.com>
  * @package     elections
- * @version     v0.1.2
+ * @version     v0.3.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -15,11 +15,10 @@ if (!defined ('GVERSION')) {
     die ('This file can not be used on its own.');
 }
 
-global $_DB_dbms;
+global $_DB_dbms, $_TABLES;
 
 require_once __DIR__ . '/functions.inc';
 require_once __DIR__ . '/sql/mysql_install.php';
-use Elections\DB;
 use Elections\Config;
 
 $ucPI_NAME = ucfirst(Config::PI_NAME);
@@ -44,23 +43,28 @@ $INSTALL_plugin[Config::PI_NAME] = array(
     ),
     array(
         'type' => 'table',
-        'table' => DB::table('answers'),
-        'sql' => $_SQL[DB::key('answers')],
+        'table' => $_TABLES['elections_answers'],
+        'sql' => $_SQL['elections_answers'],
     ),
     array(
         'type' => 'table',
-        'table' => DB::table('questions'),
-        'sql' => $_SQL[DB::key('questions')],
+        'table' => $_TABLES['elections_questions'],
+        'sql' => $_SQL['electsions_questions'],
     ),
     array(
         'type' => 'table',
-        'table' => DB::table('topics'),
-        'sql' => $_SQL[DB::key('topics')],
+        'table' => $_TABLES['elections_topics'],
+        'sql' => $_SQL['electsions_topics'],
     ),
     array(
         'type' => 'table',
-        'table' => DB::table('voters'),
-        'sql' => $_SQL[DB::key('voters')],
+        'table' => $_TABLES['elections_voters'],
+        'sql' => $_SQL['electsions_voters'],
+    ),
+    array(
+        'type' => 'table',
+        'table' => $_TABLES['elections_votes'],
+        'sql' => $_SQL['electsions_votes'],
     ),
     array(
         'type' => 'feature',
@@ -152,10 +156,10 @@ function plugin_autouninstall_elections()
     $out = array (
         /* give the name of the tables, without $_TABLES[] */
         'tables' => array(
-            DB::key('answers'),
-            DB::key('topics'),
-            DB::key('voters'),
-            DB::key('questions'),
+            'elections_answers',
+            'elections_topics',
+            'elections_voters',
+            'elections_questions',
         ),
         /* give the full name of the group, as in the db */
         'groups' => array(
