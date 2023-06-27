@@ -91,9 +91,9 @@ case 'votebutton':
                 $Election->saveVote($aid, $old_aid) &&
                 !$Election->hideResults()
             ) {
-                COM_refresh(Config::get('url') . '/index.php?results=x&tid=' . $Election->getTid());
+                echo COM_refresh(Config::get('url') . '/index.php?results=' . $Election->getTid());
             } else {
-                COM_refresh(Config::get('url') . '/index.php');
+                echo COM_refresh(Config::get('url') . '/index.php');
             }
         } else {
             $page .= COM_showMessageText(MO::_('Please answer all remaining questions.'),
@@ -107,9 +107,9 @@ case 'votebutton':
     break;
 
 case 'results':
-    $Election = Election::getByPid($actionval);
+    $Election = Election::getInstance($actionval);
     if ($Election->canViewResults()) {
-        $page .= (new Results($Election->getTid()))
+        $page .= (new Results($actionval))
             ->withCommentMode($mode)
             ->withCommentOrder($order)
             ->Render();

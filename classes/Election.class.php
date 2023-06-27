@@ -186,7 +186,7 @@ class Election
             $this->Closes = NULL;
             $this->cookie_key = Token::create();
         } else {
-            // Got an election ID string
+            // Got an election record ID.
             $this->setTid($tid);
             if (!$this->Read()) {
                 $this->tid = 0;
@@ -1138,7 +1138,7 @@ class Election
                     $types
                 );
             }
-        } catch(\Doctrine\DBAL\Exception\UniqueConstraintViolationException $e) {
+        } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException $e) {
             // Duplicate pid value
             Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
             $this->addError(MO::_('Duplicate key violation, Election ID must be unique'));
@@ -1176,7 +1176,7 @@ class Election
         }
         CTL_clearCache();       // so autotags pick up changes
         $msg = '';              // no error message if successful
-        PLG_itemSaved($this->tid, 'election');
+        PLG_itemSaved($this->tid, Config::PI_NAME);
         return true;
     }
 
@@ -1383,7 +1383,7 @@ class Election
             ) {
                 $retval = COM_createLink(
                     $retval,
-                    Config::get('url') . "/index.php?results={$A['pid']}"
+                    Config::get('url') . "/index.php?results={$A['tid']}"
                 );
             }
             break;
@@ -1397,7 +1397,7 @@ class Election
                 if (SEC_inGroup('results_gid')) {
                     $retval .= '&nbsp;' . FieldList::buttonLink(array(
                         'text' => MO::_('Results'),
-                        'url' => Config::get('url') . '/index.php?results=' . $A['pid'],
+                        'url' => Config::get('url') . '/index.php?results=' . $A['tid'],
                         'style' => 'primary',
                     ) );
                 }
@@ -1415,7 +1415,7 @@ class Election
                     } elseif (!$A['hideresults'] && SEC_inGroup('results_gid')) {
                         $retval .= '&nbsp;' . FieldList::buttonLink(array(
                             'text' => MO::_('Results'),
-                            'url' => Config::get('url') . '/index.php?results=' . urlencode($A['pid']),
+                            'url' => Config::get('url') . '/index.php?results=' . $A['tid'],
                             'style' => 'primary',
                         ) );
                     } elseif (COM_isAnonUser()) {
@@ -1531,7 +1531,7 @@ class Election
             if ($this->canViewResults()) {
                 if ($this->disp_type == Modes::NORMAL) {
                     // not in a block or autotag, just refresh to the results page
-                    echo COM_refresh(Config::get('url') . '/index.php?results=' . $this->pid);
+                    echo COM_refresh(Config::get('url') . '/index.php?results=' . $this->tid);
                 } elseif ($this->disp_type == Modes::AUTOTAG) {
                     // In an autotag
                     return (new Results($this->tid))
@@ -1541,7 +1541,7 @@ class Election
                     // in a block, just add a link for now
                     return COM_createLink(
                         $this->getTopic() . ' (' . MO::_('Results') . ')',
-                        Config::get('url') . '/index.php?results=' . $this->pid
+                        Config::get('url') . '/index.php?results=' . $this->tid
                     );
                 }
             } else {
@@ -1581,7 +1581,7 @@ class Election
             break;
         case Modes::NORMAL:
         default:
-            $aftervote_url = Config::get('url') . '/index.php?results=' . $this->pid;
+            $aftervote_url = Config::get('url') . '/index.php?results=' . $this->tid;
             break;
         }
         $Questions = Question::getByElection($this->tid, $this->rnd_questions);
@@ -1791,8 +1791,8 @@ class Election
         $Voter = Voter::create($this->tid, $aid, $vote_id);
         if ($Voter !== NULL) {
             // Increment the vote count for each answer
-            $answers = count($aid);
-            for ($i = 0; $i < $answers; $i++) {
+            $num_answers = count($aid);
+            for ($i = 0; $i < $num_answers; $i++) {
                 if (array_key_exists($i, $old_aid)) {
                     Answer::decrement($this->tid, $i, (int)$old_aid[$i]);
                 }
@@ -1928,7 +1928,7 @@ class Election
                 $retval[$A['pid']] = new self;
                 $retval[$A['pid']]->setVars(new DataArray($A));
             }
-        } catch(Throwable $e) {
+        } catch (\Throwable $e) {
             $count = 0;
         }
         $data_arr = array();
@@ -2307,7 +2307,7 @@ class Election
                 if ($this->canViewResults()) {
                     $retval['html'] .= '<br />' . COM_createLink(
                         $this->getTopic() . ' (' . MO::_('Results') . ')',
-                        Config::get('url') . '/index.php?results=x&pid=' . $this->pid
+                        Config::get('url') . '/index.php?results=' . $this->tid
                     );
                 }
             } else {
