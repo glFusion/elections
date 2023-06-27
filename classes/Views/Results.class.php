@@ -95,7 +95,7 @@ class Results
      * @param   integer $type   Display type flag.
      * @return  object  $this
      */
-    public function withDisplayType($type)
+    public function withDisplayType(int $type) : self
     {
         $this->displaytype = (int)$type;
         return $this;
@@ -108,7 +108,7 @@ class Results
      * @param   string  $mode   Comment display mode
      * @return  object  $this
      */
-    public function withCommentMode($mode)
+    public function withCommentMode(string $mode) : self
     {
         $this->cmt_mode = $mode;
         return $this;
@@ -121,7 +121,7 @@ class Results
      * @param   boolean $flag   True to show comments, False to suppress
      * @return  object  $this
      */
-    public function withComments($flag)
+    public function withComments(bool $flag) : self
     {
         $this->showComments = $flag ? 1 : 0;
         return $this;
@@ -246,7 +246,7 @@ class Results
                 'question' =>$filter->filterData($Q->getQuestion())
             ) );
 
-            $Answers = $Q->getAnswers();
+            $Answers = $Q->getAnswers(Answer::SORT_VOTES);
             $nanswers = count($Answers);
             $q_totalvotes = 0;
             $winner_votes = -1;

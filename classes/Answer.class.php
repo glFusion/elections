@@ -25,6 +25,7 @@ class Answer
     const SORT_NONE = 0;
     const SORT_RAND = 1;
     const SORT_ALPHA = 2;
+    const SORT_VOTES = 3;
 
     /** Election record ID.
      * @var integer */
@@ -72,12 +73,12 @@ class Answer
     /**
      * Get all the answers for a given question.
      *
-     * @param   integer $q_id       Question ID
-     * @param   integer $tid        Election ID
-     * @param   boolean $rnd        True to get in random order
+     * @param   integer $q_id   Question ID
+     * @param   integer $tid    Election ID
+     * @param   integer $sort   Sorting order
      * @return  array       Array of Answer objects
      */
-    public static function getByQuestion(int $q_id, int $tid, int $rnd = 0) : array
+    public static function getByQuestion(int $q_id, int $tid, int $sort = 0) : array
     {
         global $_TABLES;
 
@@ -92,7 +93,7 @@ class Answer
            ->groupBy('a.qid, a.aid')
            ->setParameter('q_id', $q_id, Database::INTEGER)
            ->setParameter('tid', $tid, Database::INTEGER);
-        switch ($rnd) {
+        switch ($sort) {
         case self::SORT_NONE:
             $qb->orderBy('a.aid', 'ASC');
             break;
@@ -101,6 +102,9 @@ class Answer
             break;
         case self::SORT_ALPHA:
             $qb->orderBy('a.answer', 'ASC');
+            break;
+        case self::SORT_VOTES:
+            $qb->orderBy('total_votes', 'DESC');
             break;
         }
 
