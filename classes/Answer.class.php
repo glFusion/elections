@@ -3,7 +3,7 @@
  * Class to describe question answers.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2021-2022 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2021-2023 Lee Garner <lee@leegarner.com>
  * @package     elections
  * @version     v0.3.0
  * @since       v0.1.0
@@ -131,9 +131,13 @@ class Answer
         $db = Database::getInstance();
         try {
             $data = $db->conn->executeQuery(
-                "SELECT * FROM " . DB::table('answers') . "
-                WHERE qid = ? AND tid = ?
-                ORDER BY votes DESC",
+                "SELECT a.*, count(v.vid) as vote_count
+                FROM " . DB::table('answers') . " a
+                LEFT JOIN " . DB::table('votes') . " v
+                ON a.aid = v.aid AND a.qid=v.qid
+                WHERE a.qid = ? AND a.tid = ?
+                GROUP BY a.qid,a.aid
+                ORDER BY vote_count DESC",
                 array($q_id, $tid),
                 array(Database::INTEGER, Database::INTEGER)
             );
