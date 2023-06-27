@@ -9,7 +9,7 @@
  */
 var {pi_name}_toggle = function(cbox, id, type, component)
 {
-    oldval = cbox.checked ? 0 : 1;
+    oldval = cbox.checked ? 1 : 0;	// zero indicates "open"
     var dataS = {
         "action" : "toggle",
         "id": id,
@@ -25,7 +25,7 @@ var {pi_name}_toggle = function(cbox, id, type, component)
         data: data,
         success: function(result) {
             try {
-                cbox.checked = result.newval == 0 ? true : false;
+                cbox.checked = result.newval == 0;
                 if (result.title != null) {
                     cbox.title = result.title;
                 }

@@ -1449,8 +1449,8 @@ class Election
             $retval = FieldList::checkbox(array(
                 'name' => 'ena_check',
                 'value' => 1,
-                'id' => 'togenabled' . $A['pid'],
-                'checked' => $fieldvalue == 0,
+                'id' => 'togenabled' . $A['tid'],
+                'checked' => $fieldvalue == Status::OPEN,
                 'onclick' => Config::PI_NAME . "_toggle(this,'{$A['tid']}','{$fieldname}','election');",
             ) );
             break;
@@ -2141,20 +2141,14 @@ class Election
         global $_TABLES;
 
         // Determing the new value (opposite the old)
-        if ($oldvalue == 1) {
-            $newvalue = 0;
-        } elseif ($oldvalue == 0) {
-            $newvalue = 1;
-        } else {
-            return $oldvalue;
-        }
+        $newvalue = $oldvalue == 1 ? 0 : 1;
 
         try {
             Database::getInstance()->conn->update(
                 $_TABLES['elections_topics'],
                 array('status' => $newvalue),
                 array('tid' => $tid),
-                array(Database::INTEGER, Database::STRING)
+                array(Database::INTEGER, Database::INTEGER)
             );
             return $newvalue;
         } catch (\Throwable $e) {
